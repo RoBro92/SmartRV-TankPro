@@ -1,0 +1,92 @@
+esphome:
+  name: smartrv-water-tank-v3
+  friendly_name: SmartRV Water Tank v3
+  name_add_mac_suffix: true
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+
+logger:
+api:
+ota:
+  password: ""
+
+wifi:
+  ssid: "<YOUR_SSID>"
+  password: "<YOUR_PASSWORD>"
+  ap:
+    ssid: "SmartRV-Tank-Setup"
+    password: "changeme"
+
+captive_portal:
+
+# Adjust ADC pin assignments if your PCB uses different mappings.
+# Sensor 1: 0–190 Ω range, GPIO0
+# Sensor 2: 33–240 Ω range, GPIO1
+sensor:
+  - platform: adc
+    pin: GPIO0
+    name: "Tank Level Sensor 1"
+    update_interval: 2s
+    attenuation: 11db
+    filters:
+      # Replace calibration points with values measured on your hardware
+      - calibrate_linear:
+          - 0.5 -> 0   # example empty voltage
+          - 2.5 -> 100 # example full voltage
+      - lambda: |-
+          if (x < 0) return 0; // clamp low
+          if (x > 100) return 100; // clamp high
+          return x;
+    unit_of_measurement: "%"
+    icon: "mdi:water"
+
+  - platform: adc
+    pin: GPIO1
+    name: "Tank Level Sensor 2"
+    update_interval: 2s
+    attenuation: 11db
+    filters:
+      - calibrate_linear:
+          - 0.5 -> 0
+          - 2.5 -> 100
+      - lambda: |-
+          if (x < 0) return 0;
+          if (x > 100) return 100;
+          return x;
+    unit_of_measurement: "%"
+    icon: "mdi:water-percent"
+
+switch:
+  - platform: gpio
+    pin: GPIO10
+    name: "Tank Pump/Valve Relay"
+    icon: "mdi:valve"
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    pin: GPIO9
+    name: "Tank Buzzer"
+    icon: "mdi:volume-high"
+    restore_mode: ALWAYS_OFF
+    inverted: false
+
+light:
+  - platform: neopixelbus
+    type: GRB
+    variant: WS2812
+    pin: GPIO8
+    num_leds: 4
+    name: "Status LEDs"
+    effects:
+      - addressable_scan:
+      - addressable_rainbow:
+      - addressable_twinkle:
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "Module IP"
+    ssid:
+      name: "Connected SSID"
