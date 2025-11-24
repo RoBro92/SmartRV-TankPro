@@ -3,7 +3,8 @@
 This directory contains ESPHome-based firmware for SmartRV TankPro v3.0. The goal is to expose tank level, relay control, LEDs, buzzer, leak input, and temperature to Home Assistant or the ESPHome dashboard.
 
 ## Files
-- [`tankpro.yaml`](tankpro.yaml): Production ESPHome configuration (factory AP provisioning).
+- [`tankpro.yaml`](tankpro.yaml): Production ESPHome configuration (factory AP provisioning) for ESP32-C3 board.
+- [`tankpro-esp32c6.yaml`](tankpro-esp32c6.yaml): Test build for Waveshare ESP32-C6-DevKit N8 using the same pin map (verify hardware availability).
 
 ## Building and flashing
 1. Install [ESPHome](https://esphome.io/).
