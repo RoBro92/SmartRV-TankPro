@@ -5,13 +5,15 @@ SmartRV TankPro v3.0 is an ESP32-C3-based controller for monitoring and controll
 ## System at a glance
 - **Inputs:**
   - 12–24 V DC supply (primary) and USB-C (secondary/programming).
-  - Two resistive level senders: Sensor 1 (~0–190 Ω) and Sensor 2 (~33–240 Ω).
+  - Support for two resistive level senders: Sensor 1 (~0–190 Ω) and Sensor 2 (~33–240 Ω).
+  - Leak Sensor
+  - Temperature sensor via DS18B20
 - **MCU:** ESP32-C3 with USB programming and Wi‑Fi connectivity.
 - **Outputs / interfaces:**
   - 5 V relay output for pump/valve control.
   - WS2812C addressable status/level LEDs.
-  - Optional passive buzzer for alarms/feedback.
-  - UART/USB for debugging and future external display integration.
+  - Passive buzzer for alarms/feedback.
+  - UART/USB for debugging.
 
 ## Intended use
 - Provide reliable tank level monitoring with tailored analog front-ends per sender range for better resolution.

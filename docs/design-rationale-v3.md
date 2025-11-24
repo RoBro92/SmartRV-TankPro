@@ -6,7 +6,7 @@ v3.0 is a ground-up redesign focused on robust power handling, cleaner ADC front
 ## Power design decisions
 - **Separate 5 V and 3.3 V rails:** The buck-derived 5 V rail powers the relay, LEDs, and accessories, while a 3.3 V LDO feeds the ESP32-C3 and ADC front-ends for stable measurements.
 - **Dual input (RV DC and USB-C):** RV DC is the primary operating supply; USB-C allows firmware flashing and bench validation without the vehicle harness.
-- **LM66200 vs Schottky OR-ing:** The PCB allows either an LM66200 ideal-diode mux (minimal drop/heat, higher cost) or a simpler dual-Schottky OR-ing (SS34/SS54) when voltage headroom allows. Builders can choose per BOM and availability.
+
 
 ## Sensor front-end
 - **Range-tailored dividers:** Separate resistor dividers are used for the 0–190 Ω and 33–240 Ω ranges so each channel maximises ADC dynamic range.
