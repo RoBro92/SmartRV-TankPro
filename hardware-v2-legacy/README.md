@@ -11,3 +11,4 @@ This directory archives the previous hardware generations of SmartRV TankPro (fo
 - Files are provided as-is for historical reference, validation, or comparison with v3.0.
 - Manufacturing data may be outdated; check component availability and safety requirements before use.
 - New contributors should focus on v3.0 unless specifically working on regression fixes for legacy hardware.
+- Licensing: v1/v2 content in this folder remains under GNU GPLv3; see [`LICENSE`](LICENSE) for details. The newer v3 content in the root of the repo is licensed under CC BY-NC 4.0.

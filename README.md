@@ -2,6 +2,8 @@
 
 SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for caravans, RVs, and boats. Designed for 12–24 V DC systems, it supports industry-standard resistive level senders (0–190 Ω and 33–240 Ω), offers Wi‑Fi connectivity, and can be paired with an optional companion display. Formerly known as the SmartRV Water Tank Module.
 
+Archived history: Earlier GPL-licensed history will live in an archived repository for provenance. Update the link here once the archive is published.
+
 ## Project status
 - **v3.0 is the current recommended hardware.**
 - **v2.x hardware is now legacy** and retained only for reference in [`/hardware-v2-legacy`](hardware-v2-legacy/).
@@ -66,3 +68,5 @@ Commercial restriction:
 Licensing notes: This license restricts commercial use and is not an OSI-approved open source license. No patent protection is claimed; enforcement of the non-commercial requirement relies on copyright/trademark rights. Contact the maintainer for commercial licensing requests.
 
 Third-party components: ESPHome and other upstream dependencies are licensed separately under their respective licenses and are not covered by the SmartRV TankPro CC BY-NC 4.0 terms. See the ESPHome project for its license details.
+
+Legacy licensing: The v1/v2 hardware and documentation in `hardware-v2-legacy/` remain under GNU GPLv3 for transparency and reuse; see `hardware-v2-legacy/LICENSE`.

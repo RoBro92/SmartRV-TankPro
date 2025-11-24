@@ -2,6 +2,7 @@
 
 # SmartRV Water Tank Module
 > Project renamed to SmartRV TankPro; the content below is preserved from the original README for legacy reference.
+> Legacy v1/v2 content remains under GNU GPLv3; see the `LICENSE` file in this folder.
 **A ESP based water tank module for a Camper/RV**
 
 All feature requests are tracked in the GitHub issue tracker. 
