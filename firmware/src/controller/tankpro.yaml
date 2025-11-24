@@ -18,7 +18,8 @@ api:
   reboot_timeout: 0s
 
 ota:
-  password: ""
+  - platform: esphome
+    password: 'weymouth'
 
 wifi:
   reboot_timeout: 0s
