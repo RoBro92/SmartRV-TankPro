@@ -33,3 +33,6 @@ After flashing, the device will appear in Home Assistant via ESPHome discovery. 
 - Tank level sensor for each channel (percentage).
 - Relay switch entity for pump/valve control.
 - Status LEDs and optional buzzer controls (exposed as lights/switches depending on configuration).
+
+## Licensing
+SmartRV TankPro design files and original firmware content are licensed under CC BY-NC 4.0. ESPHome itself remains under its own license; see the ESPHome project for details.
