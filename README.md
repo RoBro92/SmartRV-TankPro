@@ -31,7 +31,7 @@ SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for car
 
 ## Licensing
 - **Hardware:** Licensed under **CERN OHL-W v2**. See `LICENSE-HARDWARE`. Hardware files live primarily in `hardware/`. At present, only fabrication outputs (Gerbers, etc.) are included. Editable design source files (schematics and PCB layouts) will be added in a future open source hardware (OSHW) release.
-- **Software/Firmware:** Licensed under the **MIT License**. See `LICENSE-SOFTWARE`. Firmware lives in `firmware/`.
+- **Software/Firmware:** Licensed under the **MIT License**. See `LICENSE`. Firmware lives in `firmware/`.
 
 ## How to support the project
 - Build it yourself with the open-source files provided.
