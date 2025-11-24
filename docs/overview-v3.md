@@ -19,10 +19,10 @@ SmartRV TankPro v3.0 is an ESP32-C3-based controller for monitoring and controll
 - Fit common RV/caravan/boat wiring practices, including protection against reverse polarity, ESD, and wiring mistakes.
 
 ## Hardware folder map
-- [`hardware-v3/pcb`](../hardware-v3/pcb/): EDA source files (EasyEDA Pro preferred; export KiCad if available).
-- [`hardware-v3/manufacturing`](../hardware-v3/manufacturing/): Gerbers, drill files, pick-and-place, BOM for fabrication/assembly houses.
-- [`hardware-v3/3d`](../hardware-v3/3d/): Enclosure and mechanical models.
+- [`hardware/design`](../hardware/design/): EDA source files (EasyEDA Pro preferred; export KiCad if available).
+- [`hardware/fabrication`](../hardware/fabrication/): Gerbers, drill files, pick-and-place, BOM for fabrication/assembly houses.
+- [`hardware/mechanical`](../hardware/mechanical/): Enclosure and mechanical models.
 
 ## Firmware map
-- [`firmware-controller`](../firmware-controller/): ESPHome configuration for the controller PCB.
-- [`firmware-display`](../firmware-display/): Reserved for a future external display unit that will consume data from the controller over Wi‑Fi or serial.
+- [`firmware/src/controller`](../firmware/src/controller/): ESPHome configuration for the controller PCB.
+- [`firmware/src/display`](../firmware/src/display/): Reserved for a future external display unit that will consume data from the controller over Wi‑Fi or serial.

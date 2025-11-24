@@ -1,72 +1,43 @@
 # SmartRV TankPro (v3.0)
+[![Hardware Licence: CERN OHL-W v2](https://img.shields.io/badge/Hardware%20Licence-CERN%20OHL--W%20v2-blue)](#licensing) [![Software Licence: MIT](https://img.shields.io/badge/Software%20Licence-MIT-green)](#licensing)
 
-SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for caravans, RVs, and boats. Designed for 12–24 V DC systems, it supports industry-standard resistive level senders (0–190 Ω and 33–240 Ω), offers Wi‑Fi connectivity, and can be paired with an optional companion display. Formerly known as the SmartRV Water Tank Module.
+SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for caravans, RVs, and boats. Designed for 12–24 V DC systems, it supports industry-standard resistive level senders (0–190 Ω and 33–240 Ω), offers Wi‑Fi connectivity via ESPHome, and can be paired with an optional companion display.
 
-Archived history: Earlier GPL-licensed history will live in an archived repository for provenance. Update the link here once the archive is published.
-
-## Project status
-- **v3.0 is the current recommended hardware.**
-- **v2.x hardware is now legacy** and retained only for reference in [`/hardware-v2-legacy`](hardware-v2-legacy/).
-- The **`main` branch is the canonical source** for v3.0 hardware, firmware, and documentation updates.
-
-## Feature summary (v3.0)
-- **ESP32-C3 module** with integrated USB programming.
-- **Dual supply input:**
-  - Primary: 12–24 V DC RV supply.
-  - Secondary: USB-C for programming and bench testing.
-- **Power path options:**
-  - Input fuse and polarity protection on RV input.
-  - Buck regulator to 5 V rail and 3.3 V LDO for ESP32 and logic.
-  - Either an ideal-diode power mux IC (e.g., LM66200) or dual Schottky OR-ing (SS34/SS54) between USB and DC.
-- **Sensor inputs:**
-  - Two resistive tank channels: Sensor 1 (≈0–190 Ω) and Sensor 2 (≈33–240 Ω).
-  - Dedicated resistor dividers per range, series input resistors (~1 kΩ), local 100 nF ADC decoupling, and ESD/transient protection at the connector/ADC node.
-- **Outputs / user interface:**
-  - 5 V relay output for pump/valve control with transistor driver and flyback diode.
-  - WS2812C addressable LEDs for status/level display and debug.
-  - Optional passive buzzer driven via transistor with optional pull-down on the ESP32 pin.
-- **Debug and programming:**
-  - Exposed USB-C for flashing and serial monitor.
-  - Access to RX/TX and D+/D− as required by ESP32-C3 programming.
-  - Silkscreened labels and optional PCB QR code linking back to this repo.
-
-## Quick start
-1. Order PCBs/assembled boards using files in [`/hardware-v3/manufacturing`](hardware-v3/manufacturing/).
-2. Wire tank sensors and RV power following the pin-outs in [`docs/wiring-and-installation.md`](docs/wiring-and-installation.md).
-3. Flash the controller firmware from [`/firmware-controller`](firmware-controller/) (ESPHome YAML provided) and set Wi‑Fi credentials.
-4. Power up, connect to Wi‑Fi, and verify tank level readings.
+**Status:** v3.0 hardware is the current recommended design. v1/v2 hardware is archived under `hardware/legacy/v1-v2/` for reference only.
 
 ## Repository structure
-- [`hardware-v3/`](hardware-v3/): Primary v3.0 hardware design files (EDA sources in `pcb/`, fabrication data in `manufacturing/`, and mechanical models in `3d/`).
-- [`hardware-v2-legacy/`](hardware-v2-legacy/): Archived v1/v2 hardware, including the original README and design folders.
-- [`firmware-controller/`](firmware-controller/): ESP32-C3 firmware for the tank module (ESPHome configuration provided).
-- [`firmware-display/`](firmware-display/): Placeholder for future external display firmware.
-- [`docs/`](docs/): v3.0 documentation set (overview, getting started, wiring/install, design rationale, changelog).
+- `hardware/`: Hardware design assets (design sources, fabrication outputs, mechanical models) plus legacy archives.
+- `firmware/`: ESP32-C3 firmware/configuration sources and placeholders for future clients.
+- `docs/`: User guides, wiring, design rationale, and changelog.
+
+## Key features (v3.0)
+- ESP32-C3 module with integrated USB programming.
+- Dual supply input: 12–24 V DC primary plus USB-C for programming/bench.
+- Flexible power path: fused RV input, buck to 5 V, 3.3 V LDO, and diode/ideal-diode mux between USB and DC.
+- Two resistive tank channels (≈0–190 Ω and ≈33–240 Ω) with tailored dividers, series resistors, ADC decoupling, and ESD/transient protection.
+- 5 V relay driver, WS2812C addressable LEDs, and optional buzzer.
+- UART/USB for debugging and future external display integration.
+
+## How to build / fabricate
+- **Hardware:** Use the outputs in `hardware/fabrication/` to order PCBs/assembly from your board house (e.g., JLCPCB). Mechanical models live in `hardware/mechanical/`. Editable schematic/PCB sources will be published in `hardware/design/` in a future OSHW release.
+- **Firmware:** Install ESPHome, add Wi‑Fi credentials to `firmware/src/controller/water-tank-module-v3.yaml`, connect the ESP32-C3 over USB-C, and run `esphome run firmware/src/controller/water-tank-module-v3.yaml` to compile and flash. Wiring guidance is in `docs/wiring-and-installation.md`.
 
 ## Documentation
-- [`docs/overview-v3.md`](docs/overview-v3.md)
-- [`docs/getting-started.md`](docs/getting-started.md)
-- [`docs/wiring-and-installation.md`](docs/wiring-and-installation.md)
-- [`docs/design-rationale-v3.md`](docs/design-rationale-v3.md)
-- [`docs/changelog.md`](docs/changelog.md)
+- `docs/overview-v3.md`
+- `docs/getting-started.md`
+- `docs/wiring-and-installation.md`
+- `docs/design-rationale-v3.md`
+- `docs/changelog.md`
 
-## Firmware
-- [`/firmware-controller`](firmware-controller/): ESP32-C3 firmware for the water tank module (ESPHome configuration provided).
-- [`/firmware-display`](firmware-display/): Placeholder for future external display firmware.
+## Licensing
+- **Hardware:** Licensed under **CERN OHL-W v2**. See `LICENSE-HARDWARE`. Hardware files live primarily in `hardware/`. At present, only fabrication outputs (Gerbers, etc.) are included. Editable design source files (schematics and PCB layouts) will be added in a future open source hardware (OSHW) release.
+- **Software/Firmware:** Licensed under the **MIT License**. See `LICENSE-SOFTWARE`. Firmware lives in `firmware/`.
+
+## How to support the project
+- Build it yourself with the open-source files provided.
+- Prefer to buy? Support development by purchasing assembled boards or kits from the project website (link to be added).
+- Donations or contributions (issues/PRs) are welcome and help fund ongoing work.
 
 ## Contributing
 Pull requests and issues are welcome. Please open an issue to discuss significant changes or new features.
 
-## License
-SmartRV TankPro is licensed under Creative Commons Attribution–NonCommercial 4.0 International ([CC BY-NC 4.0](LICENSE)).
-
-Commercial restriction:
-- The SmartRV-TankPro project is licensed under CC BY-NC 4.0.
-- Personal use, modification, and sharing are permitted.
-- Commercial sale of the hardware, firmware, or any derivative works is reserved exclusively to the copyright holder.
-
-Licensing notes: This license restricts commercial use and is not an OSI-approved open source license. No patent protection is claimed; enforcement of the non-commercial requirement relies on copyright/trademark rights. Contact the maintainer for commercial licensing requests.
-
-Third-party components: ESPHome and other upstream dependencies are licensed separately under their respective licenses and are not covered by the SmartRV TankPro CC BY-NC 4.0 terms. See the ESPHome project for its license details.
-
-Legacy licensing: The v1/v2 hardware and documentation in `hardware-v2-legacy/` remain under GNU GPLv3 for transparency and reuse; see `hardware-v2-legacy/LICENSE`.

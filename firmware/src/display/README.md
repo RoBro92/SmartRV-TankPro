@@ -4,10 +4,13 @@ This directory is reserved for a future external display that will show tank lev
 
 ## Planned approach
 - **Hardware:** Likely an ESP32-based board with a small color LCD/TFT or e-paper panel and rotary/button input.
-- **Connectivity:** Wi‑Fi connection to the controller’s ESPHome API or a wired UART link (TX=GPIO21, RX=GPIO20 on the controller header).
+- **Connectivity:** Wi‑Fi connection to the controller’s ESPHome API
 - **Features (planned):**
   - Live tank percentage display for one or two tanks.
   - Pump/valve control via on-screen button or hardware controls.
   - Alarm indication for low/high tank thresholds.
 
 No firmware is provided yet; this folder acts as a placeholder for future development.
+
+## Licensing
+This firmware will be released under the MIT License; see `LICENSE-SOFTWARE` at the repo root.
