@@ -1,6 +1,6 @@
 # Wiring and Installation
 
-Follow these guidelines to safely wire the SmartRV Water Tank Module v3.0 into a 12–24 V RV/boat system.
+Follow these guidelines to safely wire SmartRV TankPro v3.0 into a 12–24 V RV/boat system.
 
 ## Power connections
 - **VIN (12–24 V DC):** Primary supply input from the RV electrical system. Add an inline fuse (1–3 A typical) close to the battery/distribution point.

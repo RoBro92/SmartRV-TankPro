@@ -1,6 +1,6 @@
-# SmartRV Water Tank Module (v3.0)
+# SmartRV TankPro (v3.0)
 
-Open-source, ESP32-C3-based water tank monitoring module for caravans, RVs, and boats. Designed for 12–24 V DC systems, it supports industry-standard resistive level senders (0–190 Ω and 33–240 Ω), offers Wi‑Fi connectivity, and can be paired with an optional companion display.
+SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for caravans, RVs, and boats. Designed for 12–24 V DC systems, it supports industry-standard resistive level senders (0–190 Ω and 33–240 Ω), offers Wi‑Fi connectivity, and can be paired with an optional companion display. Formerly known as the SmartRV Water Tank Module.
 
 ## Project status
 - **v3.0 is the current recommended hardware.**

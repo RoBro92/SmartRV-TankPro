@@ -1,7 +1,7 @@
-# Getting Started – SmartRV Water Tank Module v3.0
+# Getting Started – SmartRV TankPro v3.0
 
 ## Hardware required
-- SmartRV Water Tank Module v3.0 PCB/assembly (order files in [`hardware-v3/manufacturing`](../hardware-v3/manufacturing/)).
+- SmartRV TankPro v3.0 PCB/assembly (order files in [`hardware-v3/manufacturing`](../hardware-v3/manufacturing/)).
 - 12–24 V DC supply from the RV/van/boat (with inline fuse per wiring guidance).
 - One or two resistive tank senders:
   - Sensor 1: ~0–190 Ω range.

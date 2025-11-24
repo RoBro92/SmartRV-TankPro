@@ -1,6 +1,6 @@
 # Firmware – Controller (ESP32-C3)
 
-This directory contains ESPHome-based firmware for the SmartRV Water Tank Module v3.0. The goal is to expose tank levels, relay control, LEDs, and optional buzzer to Home Assistant or the ESPHome dashboard.
+This directory contains ESPHome-based firmware for SmartRV TankPro v3.0. The goal is to expose tank levels, relay control, LEDs, and optional buzzer to Home Assistant or the ESPHome dashboard.
 
 ## Files
 - [`water-tank-module-v3.yaml`](water-tank-module-v3.yaml): Primary ESPHome configuration.

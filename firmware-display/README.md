@@ -1,6 +1,6 @@
 # Firmware – Display (Placeholder)
 
-This directory is reserved for a future external display that will show tank levels and relay status from the SmartRV Water Tank Module v3.0.
+This directory is reserved for a future external display that will show tank levels and relay status from SmartRV TankPro v3.0.
 
 ## Planned approach
 - **Hardware:** Likely an ESP32-based board with a small color LCD/TFT or e-paper panel and rotary/button input.

@@ -1,6 +1,6 @@
-# SmartRV Water Tank Module v3.0 – Overview
+# SmartRV TankPro v3.0 – Overview
 
-The v3.0 SmartRV Water Tank Module is an ESP32-C3-based controller for monitoring and controlling fresh/grey/black water tanks in caravans, RVs, and boats. It is designed for 12–24 V automotive-style systems and supports industry-standard resistive tank level sensors.
+SmartRV TankPro v3.0 is an ESP32-C3-based controller for monitoring and controlling fresh/grey/black water tanks in caravans, RVs, and boats. It is designed for 12–24 V automotive-style systems and supports industry-standard resistive tank level sensors.
 
 ## System at a glance
 - **Inputs:**

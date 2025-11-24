@@ -1,6 +1,7 @@
  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/O5O4AKQ37)
 
 # SmartRV Water Tank Module
+> Project renamed to SmartRV TankPro; the content below is preserved from the original README for legacy reference.
 **A ESP based water tank module for a Camper/RV**
 
 All feature requests are tracked in the GitHub issue tracker. 
@@ -162,4 +163,3 @@ It will also feature an ESP32 Module for several reasons;
 
 # **WARNING**
 This board does not have any fuse protection as such this must be provided externally.
-

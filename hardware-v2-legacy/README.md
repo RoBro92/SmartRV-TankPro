@@ -1,6 +1,6 @@
-# SmartRV Water Tank Module – Legacy (v1.x/v2.x)
+# SmartRV TankPro – Legacy (v1.x/v2.x)
 
-This directory archives the previous hardware generations of the SmartRV Water Tank Module. These designs are **not recommended for new builds**. For the latest hardware and documentation, use [`../hardware-v3`](../hardware-v3/) and the root [`README`](../README.md).
+This directory archives the previous hardware generations of SmartRV TankPro (formerly the SmartRV Water Tank Module). These designs are **not recommended for new builds**. For the latest hardware and documentation, use [`../hardware-v3`](../hardware-v3/) and the root [`README`](../README.md).
 
 ## Contents
 - `V1 THT/`: Through-hole friendly v1.x design.
