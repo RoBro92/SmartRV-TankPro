@@ -20,7 +20,7 @@ SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for car
 
 ## How to build / fabricate
 - **Hardware:** Use the outputs in `hardware/fabrication/` to order PCBs/assembly from your board house (e.g., JLCPCB). Mechanical models live in `hardware/mechanical/`. Editable schematic/PCB sources will be published in `hardware/design/` in a future OSHW release.
-- **Firmware:** Install ESPHome, add Wi‑Fi credentials to `firmware/src/controller/water-tank-module-v3.yaml`, connect the ESP32-C3 over USB-C, and run `esphome run firmware/src/controller/water-tank-module-v3.yaml` to compile and flash. Wiring guidance is in `docs/wiring-and-installation.md`.
+- **Firmware (ESPHome):** Install ESPHome, connect the ESP32-C3 over USB-C, and run `esphome run firmware/src/controller/tankpro.yaml` to compile and flash. On first boot the device exposes `SmartRV-TankPro-Setup` (password `changeme`) for captive-portal provisioning; then adopt in ESPHome/Home Assistant. Wiring guidance is in `docs/wiring-and-installation.md`.
 
 ## Documentation
 - `docs/overview-v3.md`
@@ -40,4 +40,3 @@ SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for car
 
 ## Contributing
 Pull requests and issues are welcome. Please open an issue to discuss significant changes or new features.
-

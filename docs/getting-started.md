@@ -14,8 +14,8 @@
 2. **Wire power and sensors:** Follow the connector pin-outs in [`docs/wiring-and-installation.md`](wiring-and-installation.md).
 3. **Flash firmware:**
    - Install ESPHome.
-   - Flash the provided [`water-tank-module-v3.yaml`](../firmware/src/controller/water-tank-module-v3.yaml) to an ESP32-C3 module on the board over USB-C.
-   - Set Wi‑Fi credentials via ESPHome or `secrets.yaml` before flashing.
+   - Flash the provided [`tankpro.yaml`](../firmware/src/controller/tankpro.yaml) to an ESP32-C3 module on the board over USB-C using ESPHome.
+   - On first boot, connect to the factory AP `SmartRV-TankPro-Setup` (password `changeme`) and use the captive portal at `192.168.4.1` to set Wi‑Fi.
 4. **Connect and verify:**
    - Power the board from RV supply or USB-C.
    - Connect to the ESPHome dashboard or directly to the device IP to confirm sensor readings and relay control.

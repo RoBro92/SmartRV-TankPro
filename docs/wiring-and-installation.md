@@ -9,15 +9,20 @@ Follow these guidelines to safely wire SmartRV TankPro v3.0 into a 12–24 V RV/
 
 ## Connector pin-outs (ESP32-C3 mapping)
 - **Tank Level:** Sense line → GPIO0 (ADC). Other sensor leg to GND.
-- **Relay output:** Relay control transistor → GPIO10. Relay contacts (NO/COM) switch the external pump/valve on the 5 V rail.
-- **WS2812C LED chain:** Data in → GPIO8.
-- **Buzzer (optional):** Drive → GPIO9.
+- **Temperature (DS18B20):** Data → GPIO1 with 4.7 kΩ pull-up to 3V3.
+- **Leak sensor:** Digital input → GPIO3 (use internal pull-up).
+- **Buzzer:** Drive → GPIO4.
+- **Relay output:** Relay control transistor → GPIO5. Relay contacts (NO/COM) switch the external pump/valve on the 5 V rail.
+- **WS2812C LED 1:** Data in → GPIO6.
+- **WS2812C LED 2:** Data in → GPIO7.
+- **Pairing button:** Momentary → GPIO10 (active-low) to trigger provisioning/restart.
 - **UART header (future display/debug):** TX → GPIO21, RX → GPIO20 (3.3 V logic), plus 3V3 and GND.
 
 ## Example wiring scenarios
 - **Single tank (0–190 Ω):**
   - Connect sensor wiper to Sensor 1 input (GPIO0), sensor return to GND.
-- 
+- **Leak sensor:**
+  - Wire leak probe between GPIO3 and GND (internal pull-up enabled).
 - **Relay control:**
   - Wire VIN (5–24 V) to relay COM, pump/valve lead to relay NO, and the other lead of the pump/valve to GND. Verify relay contact voltage/current limits.
 
