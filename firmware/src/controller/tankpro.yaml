@@ -9,7 +9,7 @@ esp32:
   variant: esp32c3
 
 logger:
-  baud_rate: 0
+  baud_rate: 115200
   level: DEBUG
 
 debug:
@@ -22,7 +22,6 @@ ota:
     password: 'weymouth'
 
 wifi:
-  reboot_timeout: 0s
   ap:
     ssid: "SmartRV-TankPro-Setup"
     password: "changeme"
@@ -34,10 +33,10 @@ improv_serial:
 web_server:
   port: 80
 
-dallas:
-  - id: tank_temp_bus
+one_wire:
+  - platform: gpio
     pin: GPIO1
-    update_interval: 30s
+    id: tank_temp_bus
 
 binary_sensor:
   - platform: gpio
@@ -46,7 +45,6 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: true
     name: "Pairing Button"
-    device_class: restart
     on_press:
       - logger.log: "Pairing button pressed - restart to provisioning mode"
       - button.press: restart_device
@@ -66,7 +64,7 @@ sensor:
     pin: GPIO0
     name: "Tank Level"
     update_interval: 2s
-    attenuation: 11db
+    attenuation: 0db
     filters:
       - calibrate_linear:
           - 0.5 -> 0   # replace with measured empty voltage
@@ -78,9 +76,8 @@ sensor:
     unit_of_measurement: "%"
     icon: "mdi:water"
 
-  - platform: dallas
-    dallas_id: tank_temp_bus
-    index: 0
+  - platform: dallas_temp
+    one_wire_id: tank_temp_bus
     name: "Tank Temperature"
     filters:
       - median:
@@ -129,26 +126,3 @@ button:
   - platform: restart
     id: restart_device
     name: "Restart Device"
-
-light:
-  - platform: neopixelbus
-    type: GRB
-    variant: WS2812
-    pin: GPIO6
-    num_leds: 1
-    name: "Status LED 1"
-    effects:
-      - addressable_scan:
-      - addressable_rainbow:
-      - addressable_twinkle:
-
-  - platform: neopixelbus
-    type: GRB
-    variant: WS2812
-    pin: GPIO7
-    num_leds: 1
-    name: "Status LED 2"
-    effects:
-      - addressable_scan:
-      - addressable_rainbow:
-      - addressable_twinkle:

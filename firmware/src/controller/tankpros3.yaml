@@ -1,0 +1,732 @@
+esphome:
+  name: smartrv-tankpro-v3
+  friendly_name: SmartRV TankPro v3
+  name_add_mac_suffix: true
+  comment: "ESPHome production firmware for SmartRV TankPro (factory AP provisioning)."
+  # Ensure safe relay state on boot
+  on_boot:
+    priority: -10
+    then:
+      - switch.turn_off: tank_valve_relay
+      - globals.set:
+          id: fill_in_progress
+          value: 'false'
+      - globals.set:
+          id: drain_in_progress
+          value: 'false'
+      - globals.set:
+          id: fill_above_stop_seen
+          value: 'false'
+      - globals.set:
+          id: guard_over_stop_counter
+          value: '0'
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 8MB
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+debug:
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+    password: 'weymouth'
+
+wifi:
+  ap:
+    ssid: "SmartRV-TankPro-Setup"
+    password: "changeme"
+
+captive_portal:
+
+improv_serial:
+
+web_server:
+  port: 80
+
+# Globals for on-device fill automation parameters and state
+globals:
+  - id: fill_stop_level
+    type: float
+    restore_value: true
+    initial_value: '90.0'
+  - id: fill_in_progress
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: drain_in_progress
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: fill_mode_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: drain_mode_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: drain_stop_level
+    type: float
+    restore_value: true
+    initial_value: '10.0'
+  - id: drain_start_level
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: drain_last_level
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: drain_start_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: drain_last_change_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: drain_timeout_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '45000'  # default 45s timeout for draining when level is stagnant
+  - id: fault_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: fault_code_int
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: safety_override
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+  - id: last_level_percent
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: last_level_change_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: fill_start_level
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: fill_start_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: no_change_timeout_fill_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '90000'
+  - id: no_change_timeout_drain_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '90000'
+  - id: max_fill_time_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '1800000'
+  - id: max_drain_time_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '1800000'
+  - id: empty_threshold_pct
+    type: float
+    restore_value: true
+    initial_value: '3.0'
+  - id: overfill_threshold_pct
+    type: float
+    restore_value: true
+    initial_value: '98.0'
+  - id: level_step_loss_threshold_pct
+    type: float
+    restore_value: true
+    initial_value: '20.0'
+  - id: temp_timeout_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '300000'
+  - id: overfill_counter
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: zero_counter
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: step_loss_counter
+    type: int
+    restore_value: false
+    initial_value: '0'
+  # Commented fault codes:
+  # 1: Leak detected
+  # 2: Overfill outside fill
+  # 3: Temperature signal lost
+  # 4: Level signal lost (zero)
+  # 5: Level step loss
+  # 6: No level increase during fill
+  # 7: No level decrease during drain
+  - id: fill_above_stop_seen
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: guard_over_stop_counter
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+light:
+  # Status LED on WS2812 (GPIO48)
+  - platform: neopixelbus
+    id: status_led
+    name: "Status LED"
+    pin: GPIO48
+    variant: WS2812
+    num_leds: 1
+    type: GRB
+    method: esp32_rmt_1
+    default_transition_length: 0s
+    restore_mode: ALWAYS_OFF
+
+script:
+  # Pairing flash sequence for button press
+  - id: pairing_flash_script
+    mode: restart
+    then:
+      - light.turn_on:
+          id: status_led
+          red: 100%
+          green: 0%
+          blue: 0%
+      - delay: 1.7s
+      - light.turn_on:
+          id: status_led
+          red: 0%
+          green: 100%
+          blue: 0%
+      - delay: 1.7s
+      - light.turn_on:
+          id: status_led
+          red: 0%
+          green: 0%
+          blue: 100%
+      - delay: 1.6s
+      - light.turn_off: status_led
+
+  # Visual feedback helpers for fill automation
+  - id: status_led_flash_green
+    then:
+      - repeat:
+          count: 3
+          then:
+            - light.turn_on:
+                id: status_led
+                brightness: 60%
+                red: 0%
+                green: 100%
+                blue: 0%
+            - delay: 300ms
+            - light.turn_off: status_led
+            - delay: 200ms
+
+  - id: status_led_flash_red
+    then:
+      - repeat:
+          count: 3
+          then:
+            - light.turn_on:
+                id: status_led
+                brightness: 60%
+                red: 100%
+                green: 0%
+                blue: 0%
+            - delay: 300ms
+            - light.turn_off: status_led
+            - delay: 200ms
+
+  - id: status_led_flash_amber
+    then:
+      - repeat:
+          count: 2
+          then:
+            - light.turn_on:
+                id: status_led
+                brightness: 60%
+                red: 100%
+                green: 50%
+                blue: 0%
+            - delay: 250ms
+            - light.turn_off: status_led
+            - delay: 200ms
+
+  # Main fill automation (self-contained on device)
+  - id: fill_tank_script
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return id(safety_override) || id(fault_active);'
+          then:
+            - logger.log: "Fill start ignored: safety override or fault active."
+          else:
+            - globals.set:
+                id: fill_in_progress
+                value: 'true'
+            - globals.set:
+                id: fill_above_stop_seen
+                value: 'false'
+            - switch.turn_on: tank_valve_relay
+            - while:
+                condition:
+                  lambda: |-
+                    const float level = id(tank_level).state;
+                    const float stop_level = id(fill_stop_level);
+                    if (!id(fill_in_progress)) return false;
+                    if (isnan(level)) return true;
+                    if (level >= stop_level) {
+                      if (id(fill_above_stop_seen)) {
+                        return false;  // two consecutive readings above stop
+                      } else {
+                        id(fill_above_stop_seen) = true;
+                        return true;
+                      }
+                    }
+                    id(fill_above_stop_seen) = false;
+                    return true;
+                then:
+                  - delay: 3s
+            - switch.turn_off: tank_valve_relay
+            - globals.set:
+                id: fill_in_progress
+                value: 'false'
+            - globals.set:
+                id: fill_above_stop_seen
+                value: 'false'
+            - script.execute: status_led_flash_green
+
+  # Drain automation
+  - id: drain_tank_script
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return id(safety_override) || id(fault_active);'
+          then:
+            - logger.log: "Drain start ignored: safety override or fault active."
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(fill_in_progress);'
+                then:
+                  - logger.log: "Drain start requested but fill is active; aborting drain."
+                  - script.execute: status_led_flash_amber
+                else:
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'true'
+                  - lambda: |-
+                      id(drain_start_level) = id(tank_level).state;
+                      id(drain_last_level) = id(tank_level).state;
+                      id(drain_start_ms) = millis();
+                      id(drain_last_change_ms) = millis();
+                  - switch.turn_on: tank_valve_relay
+                  - while:
+                      condition:
+                        lambda: |-
+                          if (!id(drain_in_progress)) return false;
+                          const float level = id(tank_level).state;
+                          const float stop_level = id(drain_stop_level);
+                          const unsigned long now = millis();
+                          // update change timer if level moved meaningfully (>0.5%)
+                          if (!isnan(level) && !isnan(id(drain_last_level)) && fabs(level - id(drain_last_level)) > 0.5f) {
+                            id(drain_last_change_ms) = now;
+                            id(drain_last_level) = level;
+                          }
+                          // stop if below/equal target
+                          if (!isnan(level) && level <= stop_level) return false;
+                          // stop if stagnant for configured timeout
+                          if (now - id(drain_last_change_ms) >= id(drain_timeout_ms)) return false;
+                          return true;
+                      then:
+                        - delay: 3s
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - script.execute: status_led_flash_green
+
+interval:
+  # Safety guard: close valve if level meets/exceeds stop level regardless of state
+  - interval: 2s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              const float level = id(tank_level).state;
+              const bool above = !isnan(level) && level >= id(fill_stop_level);
+              if (above) {
+                id(guard_over_stop_counter) += 1;
+              } else {
+                id(guard_over_stop_counter) = 0;
+              }
+              return !id(safety_override) && id(tank_valve_relay).state && above && id(guard_over_stop_counter) >= 2;
+          then:
+            - if:
+                condition:
+                  lambda: 'return id(fill_in_progress);'
+                then:
+                  - logger.log: "Safety guard: level at/above stop threshold during fill; closing valve (normal stop)."
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: guard_over_stop_counter
+                      value: '0'
+                else:
+                  - logger.log: "Safety guard: valve open without fill_in_progress and level at/above stop; closing valve and flagging fault."
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: fault_active
+                      value: 'true'
+                  - globals.set:
+                      id: fault_code_int
+                      value: '2'
+                  - globals.set:
+                      id: guard_over_stop_counter
+                      value: '0'
+                  - text_sensor.template.publish:
+                      id: fault_description
+                      state: "Valve open without active fill"
+                  - text_sensor.template.publish:
+                      id: fault_code
+                      state: "2"
+                  - script.execute: status_led_flash_red
+  # Fault annunciation: pulse buzzer and LED while in fault state
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(fault_active) && !id(safety_override);'
+          then:
+            - light.turn_on:
+                id: status_led
+                brightness: 60%
+                red: 100%
+                green: 0%
+                blue: 0%
+            - switch.turn_on: tank_buzzer
+            - delay: 300ms
+            - switch.turn_off: tank_buzzer
+            - light.turn_off: status_led
+
+one_wire:
+  - platform: gpio
+    pin: GPIO47
+    id: tank_temp_bus
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO16
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Pairing Button"
+    on_press:
+      - logger.log: "Pairing button pressed - flash status LED"
+      - script.execute: pairing_flash_script
+
+  - platform: status
+    name: "Status"
+
+  - platform: gpio
+    pin:
+      number: GPIO8
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Leak Sensor"
+    device_class: moisture
+
+  # Expose fill automation state
+
+sensor:
+  - platform: adc
+    id: tank_level
+    pin: GPIO1
+    name: "Tank Level"
+    update_interval: 2s
+    attenuation: 0db
+    filters:
+      - calibrate_linear:
+          - 0.5 -> 0    # replace with measured empty voltage
+          - 2.5 -> 100  # replace with measured full voltage
+      - lambda: |-
+          if (x < 0) return 0;
+          if (x > 100) return 100;
+          return x;
+    unit_of_measurement: "%"
+    icon: "mdi:water"
+
+  - platform: dallas_temp
+    one_wire_id: tank_temp_bus
+    name: "Tank Temperature"
+    filters:
+      - median:
+          window_size: 5
+          send_every: 2
+          send_first_at: 1
+    on_value:
+      then:
+        - logger.log:
+            format: "Tank temperature: %.2f°C"
+            args: ["x"]
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "Module IP"
+    ssid:
+      name: "Connected SSID"
+    bssid:
+      name: "Connected BSSID"
+    mac_address:
+      name: "Module MAC"
+  - platform: template
+    id: fault_description
+    name: "Fault Description"
+    update_interval: never
+    icon: "mdi:alert-circle-outline"
+    entity_category: diagnostic
+    internal: false
+  - platform: template
+    id: fault_code
+    name: "Fault Code"
+    entity_category: diagnostic
+    lambda: |-
+      char buf[8];
+      snprintf(buf, sizeof(buf), "%d", id(fault_code_int));
+      return std::string(buf);
+    update_interval: 3s
+  - platform: template
+    id: system_status
+    name: "Status"
+    icon: "mdi:information"
+    lambda: |-
+      if (id(fault_active)) return std::string("Fault");
+      if (id(fill_in_progress)) return std::string("Filling");
+      if (id(drain_in_progress)) return std::string("Draining");
+      if (id(tank_valve_relay).state) return std::string("Valve Open");
+      return std::string("Idle");
+    update_interval: 3s
+
+number:
+  # User-tunable fill stop threshold exposed to Home Assistant
+  - platform: template
+    id: fill_stop_level_number
+    name: "Fill Stop Level"
+    entity_category: config
+    unit_of_measurement: "%"
+    icon: "mdi:water-check"
+    min_value: 0
+    max_value: 100
+    step: 1
+    lambda: 'return id(fill_stop_level);'
+    set_action:
+      - globals.set:
+          id: fill_stop_level
+          value: !lambda |-
+            return (float) x;
+  - platform: template
+    id: drain_stop_level_number
+    name: "Drain Stop Level"
+    entity_category: config
+    unit_of_measurement: "%"
+    icon: "mdi:water-remove"
+    min_value: 0
+    max_value: 100
+    step: 1
+    lambda: 'return id(drain_stop_level);'
+    set_action:
+      - globals.set:
+          id: drain_stop_level
+          value: !lambda |-
+            return (float) x;
+  - platform: template
+    id: drain_timeout_seconds
+    name: "Drain Timeout"
+    entity_category: config
+    unit_of_measurement: "s"
+    icon: "mdi:timer-off"
+    min_value: 5
+    max_value: 300
+    step: 5
+    lambda: 'return (float) id(drain_timeout_ms) / 1000.0f;'
+    set_action:
+      - globals.set:
+          id: drain_timeout_ms
+          value: !lambda |-
+            return (uint32_t)(x * 1000.0f);
+
+switch:
+  - platform: gpio
+    id: tank_valve_relay
+    pin: GPIO5
+    name: "Tank Valve Relay"
+    icon: "mdi:valve"
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: tank_buzzer
+    pin: GPIO4
+    name: "Tank Buzzer"
+    icon: "mdi:volume-high"
+    restore_mode: ALWAYS_OFF
+
+button:
+  - platform: restart
+    id: restart_device
+    name: "Restart Device"
+  - platform: template
+    name: "Enable Safety Override"
+    icon: "mdi:shield-off"
+    on_press:
+      - logger.log: "Safety override enabled: fault triggers and automations disabled."
+      - globals.set:
+          id: safety_override
+          value: 'true'
+      - globals.set:
+          id: fault_active
+          value: 'false'
+      - globals.set:
+          id: fault_code_int
+          value: '0'
+      - text_sensor.template.publish:
+          id: fault_description
+          state: "Override active"
+      - text_sensor.template.publish:
+          id: fault_code
+          state: "0"
+  - platform: template
+    name: "Disable Safety Override"
+    icon: "mdi:shield-check"
+    on_press:
+      - logger.log: "Safety override disabled: normal monitoring resumed."
+      - globals.set:
+          id: safety_override
+          value: 'false'
+  - platform: template
+    name: "Fill Tank"
+    icon: "mdi:water-plus"
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(fault_active) || id(safety_override);'
+          then:
+            - logger.log: "Fill request ignored: fault or safety override active."
+            - script.execute: status_led_flash_amber
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(fill_in_progress);'
+                then:
+                  - logger.log: "Fill button pressed while running: stopping fill."
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - switch.turn_off: tank_valve_relay
+                  - script.execute: status_led_flash_amber
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return !isnan(id(tank_level).state) && id(tank_level).state >= id(fill_stop_level);'
+                      then:
+                        - logger.log: "Fill button pressed: tank already at/above stop level."
+                        - script.execute: status_led_flash_amber
+                      else:
+                        - logger.log: "Fill button pressed: starting fill."
+                        - script.execute: fill_tank_script
+  - platform: template
+    name: "Drain Tank"
+    icon: "mdi:water-remove"
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(fault_active) || id(safety_override);'
+          then:
+            - logger.log: "Drain request ignored: fault or safety override active."
+            - script.execute: status_led_flash_amber
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(drain_in_progress);'
+                then:
+                  - logger.log: "Drain button pressed while draining: stopping drain."
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - switch.turn_off: tank_valve_relay
+                  - script.execute: status_led_flash_amber
+                else:
+                  - logger.log: "Drain button pressed: starting drain."
+                  - script.execute: drain_tank_script
+  - platform: template
+    name: "Clear Faults"
+    icon: "mdi:alert-circle-check"
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(fault_code_int) == 0;'
+          then:
+            - logger.log: "Clear Faults pressed with no active fault; ignoring."
+          else:
+            - logger.log: "Clearing faults and resetting state."
+            - globals.set:
+                id: fault_active
+                value: 'false'
+            - globals.set:
+                id: fault_code_int
+                value: '0'
+            - globals.set:
+                id: fill_in_progress
+                value: 'false'
+            - globals.set:
+                id: drain_in_progress
+                value: 'false'
+            - switch.turn_off: tank_valve_relay
+            - switch.turn_off: tank_buzzer
+            - light.turn_off: status_led
+            - text_sensor.template.publish:
+                id: fault_description
+                state: "None"
+            - text_sensor.template.publish:
+                id: fault_code
+                state: "0"
+            - script.execute: status_led_flash_green
