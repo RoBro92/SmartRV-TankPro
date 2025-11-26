@@ -1,3 +1,13 @@
+substitutions:
+  default_fill_stop_level: "90.0"
+  default_drain_stop_level: "10.0"
+  default_drain_timeout_ms: "45000"
+  default_freeze_threshold_c: "2.0"
+  default_freeze_protection_enabled: "false"
+  default_level_empty_volts: "0.5"
+  default_level_full_volts: "2.5"
+  default_safety_override: "false"
+
 esphome:
   name: smartrv-tankpro-v3
   friendly_name: SmartRV TankPro v3
@@ -64,7 +74,7 @@ globals:
   - id: fill_stop_level
     type: float
     restore_value: true
-    initial_value: '90.0'
+    initial_value: '${default_fill_stop_level}'
   - id: fill_in_progress
     type: bool
     restore_value: false
@@ -77,7 +87,7 @@ globals:
   - id: drain_stop_level
     type: float
     restore_value: true
-    initial_value: '10.0'
+    initial_value: '${default_drain_stop_level}'
   - id: drain_start_level
     type: float
     restore_value: false
@@ -97,7 +107,7 @@ globals:
   - id: drain_timeout_ms
     type: uint32_t
     restore_value: true
-    initial_value: '45000'  
+    initial_value: '${default_drain_timeout_ms}'
   - id: fault_active
     type: bool
     restore_value: false
@@ -109,16 +119,16 @@ globals:
   - id: safety_override
     type: bool
     restore_value: true
-    initial_value: 'false'
+    initial_value: '${default_safety_override}'
   - id: freeze_protection_enabled
     type: bool
     restore_value: true
-    initial_value: 'false'
+    initial_value: '${default_freeze_protection_enabled}'
   # Minimum temperature before freeze protection triggers (C)
   - id: freeze_protection_threshold_c
     type: float
     restore_value: true
-    initial_value: '2.0'
+    initial_value: '${default_freeze_threshold_c}'
   - id: last_temp_update_ms
     type: uint32_t
     restore_value: false
@@ -139,11 +149,11 @@ globals:
   - id: level_empty_volts
     type: float
     restore_value: true
-    initial_value: '0.5'    # default empty calibration point
+    initial_value: '${default_level_empty_volts}'    # default empty calibration point
   - id: level_full_volts
     type: float
     restore_value: true
-    initial_value: '2.5'    # default full calibration point
+    initial_value: '${default_level_full_volts}'    # default full calibration point
 
 light:
   - platform: neopixelbus
@@ -703,23 +713,29 @@ button:
       # Restore calibration defaults
       - globals.set:
           id: level_empty_volts
-          value: '0.5'
+          value: '${default_level_empty_volts}'
       - globals.set:
           id: level_full_volts
-          value: '2.5'
+          value: '${default_level_full_volts}'
       # Restore thresholds and protections
       - globals.set:
           id: fill_stop_level
-          value: '90.0'
+          value: '${default_fill_stop_level}'
       - globals.set:
           id: drain_stop_level
-          value: '10.0'
+          value: '${default_drain_stop_level}'
+      - globals.set:
+          id: drain_timeout_ms
+          value: '${default_drain_timeout_ms}'
       - globals.set:
           id: freeze_protection_threshold_c
-          value: '2.0'
+          value: '${default_freeze_threshold_c}'
       - globals.set:
           id: freeze_protection_enabled
-          value: 'false'
+          value: '${default_freeze_protection_enabled}'
+      - globals.set:
+          id: safety_override
+          value: '${default_safety_override}'
       # Clear state and faults
       - globals.set:
           id: fill_in_progress
