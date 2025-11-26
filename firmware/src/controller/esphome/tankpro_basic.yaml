@@ -1,0 +1,142 @@
+esphome:
+  name: smartrv-tankpro-basic
+  friendly_name: SmartRV TankPro (Basic)
+  name_add_mac_suffix: true
+  comment: "Barebones ESPHome firmware exposing core I/O only (no automations or safety logic)."
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 8MB
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+
+debug:
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+    password: 'smartrv'
+
+wifi:
+  ap:
+    ssid: "SmartRV-TankPro-Setup"
+    password: "changeme"
+
+captive_portal:
+
+improv_serial:
+
+web_server:
+  port: 80
+
+one_wire:
+  - platform: gpio
+    pin: GPIO47
+    id: tank_temp_bus
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO16
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Pair Button"
+    on_press:
+      - logger.log: "Pairing button pressed"
+
+  - platform: status
+    name: "Status"
+
+  - platform: gpio
+    pin:
+      number: GPIO8
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Leak Sensor"
+    device_class: moisture
+    on_press:
+      - logger.log: "Leak sensor triggered"
+
+sensor:
+  - platform: adc
+    id: tank_level_voltage
+    pin: GPIO1
+    name: "Tank Level Voltage"
+    update_interval: 2s
+    attenuation: 0db
+    filters:
+      - multiply: 3.3
+    unit_of_measurement: "V"
+    icon: "mdi:water"
+
+  - platform: dallas_temp
+    one_wire_id: tank_temp_bus
+    id: tank_temperature
+    name: "Tank Temperature"
+    filters:
+      - median:
+          window_size: 5
+          send_every: 2
+          send_first_at: 1
+    on_value:
+      then:
+        - logger.log:
+            format: "Tank temperature: %.2f°C"
+            args: ["x"]
+
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 60s
+
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "Module IP"
+    ssid:
+      name: "Connected SSID"
+    bssid:
+      name: "Connected BSSID"
+    mac_address:
+      name: "Module MAC"
+
+# Controls
+switch:
+  - platform: gpio
+    id: tank_valve_relay
+    pin: GPIO5
+    name: "Valve Relay"
+    icon: "mdi:valve"
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: tank_buzzer
+    pin: GPIO4
+    name: "Tank Buzzer"
+    icon: "mdi:volume-high"
+    restore_mode: ALWAYS_OFF
+
+light:
+  - platform: neopixelbus
+    id: status_led
+    name: "Status LED"
+    pin: GPIO48
+    variant: WS2812
+    num_leds: 1
+    type: GRB
+    method: esp32_rmt_1
+    default_transition_length: 0s
+    restore_mode: ALWAYS_OFF
+
+button:
+  - platform: restart
+    id: restart_device
+    name: "Restart Device"

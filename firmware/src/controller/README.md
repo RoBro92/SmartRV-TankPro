@@ -1,46 +1,41 @@
-# Firmware – Controller (ESP32-C3)
+# Firmware – Controller (ESPHome)
 
-This directory contains ESPHome-based firmware for SmartRV TankPro v3.0. The goal is to expose tank level, relay control, LEDs, buzzer, leak input, and temperature to Home Assistant or the ESPHome dashboard.
+This directory contains ESPHome-based firmware for SmartRV TankPro v3.0 (ESP32-C3 and ESP32-S3 variants).
 
 ## Files
-- [`tankpro.yaml`](tankpro.yaml): Production ESPHome configuration (factory AP provisioning) for ESP32-C3 board.
-- [`tankpro-esp32c6.yaml`](tankpro-esp32c6.yaml): Test build for Waveshare ESP32-C6-DevKit N8 using the same pin map (verify hardware availability).
+- `esphome/tankpro.yaml`: Production ESPHome configuration for the ESP32-C3 board (factory AP provisioning).
+- `esphome/tankpros3.yaml`: Production ESPHome configuration for the ESP32-S3 board with on-device automations and safety logic.
+- `esphome/tankpro_basic.yaml`: Barebones ESP32-S3 build that exposes only core I/O (no automations/safety) for users who prefer to create their own Home Assistant automations.
 
-## Building and flashing
-1. Install [ESPHome](https://esphome.io/).
-2. Connect the board over USB-C. ESPHome will use the USB CDC serial device exposed by the ESP32-C3.
-3. Run `esphome run tankpro.yaml` to compile and flash.
-4. On first boot the device exposes an AP `SmartRV-TankPro-Setup` (password `changeme`). Connect to the captive portal at `192.168.4.1` or use Improv Serial to provide Wi‑Fi credentials.
+## Flashing (home use)
+1) Install [ESPHome](https://esphome.io/).  
+2) Connect the controller over USB-C.  
+3) From this directory run `esphome run esphome/<file>.yaml` (choose the variant you want).  
+4) On first boot the device exposes an AP `SmartRV-TankPro-Setup` (password `changeme`). Connect to the captive portal at `192.168.4.1` or use Improv Serial to provide Wi‑Fi credentials.  
+5) The device will appear in Home Assistant via ESPHome discovery.
 
-## Pin mapping
-- Tank level sensor via divider: GPIO0 (ADC)
-- Temperature sensor (DS18B20): GPIO1 (Dallas 1-Wire)
-- Leak sensor input: GPIO3 (digital)
-- Buzzer: GPIO4
-- Relay/valve: GPIO5
-- WS2812 LED 1: GPIO6
-- WS2812 LED 2: GPIO7
-- Pairing button: GPIO10 (momentary, triggers restart/provisioning)
-- UART header for display/debug: TX=GPIO21, RX=GPIO20 (board-specific)
+## TankPro ESP32-S3 (tankpros3.yaml)
+- **Hardware pins**: Level ADC GPIO1; DS18B20 temp GPIO47; Leak GPIO8; Relay GPIO5; Buzzer GPIO4; Status WS2812 LED GPIO48; Button GPIO16.
+- **Core features**: Fill/drain automations with stop thresholds, leak fault handling, freeze protection, OTA, web server, and persistent level calibration.
+- **Status/diagnostics**: Fault code/description, system status, Wi‑Fi signal, uptime, freeze protection state.
+- **Controls & config in Home Assistant**:
+  - Buttons: Fill Tank, Drain Tank, Clear Faults, Restart Device.
+  - Calibration buttons (Configuration section): Set Level Empty, Set Level Full.
+  - Thresholds (Configuration): Fill Stop Level (%), Drain Stop Level (%), Freeze Protection Threshold (0.1–5.0 °C).
+  - Switches (Configuration): Freeze Protection, Safety Override, Valve Override, Tank Buzzer.
+  - Reset: **Reset Configuration** (Configuration) restores defaults, clears calibrations, freezes settings, and clears latched faults/state.
+- **Calibration**:
+  - Empty: With tank empty, press **Set Level Empty** to store the current voltage.
+  - Full: With tank full, press **Set Level Full** to store the full voltage.
+  - These points are saved to flash and used to compute percent.
+- **Fault indication**: Status LED flashes red and buzzer pulses on fault; clears when the fault condition is resolved and you press **Clear Faults** or **Reset Configuration** (also turns off relay/buzzer/LED).
 
-## Calibration guidance
-1. With the tank empty, note the ADC reading for the tank level input in the ESPHome logs; set this as the 0% reference in the `calibrate_linear` block.
-2. Fill the tank (or use a resistor that matches the “full” level for the sender) and note the ADC reading; set this as the 100% reference.
-3. Save and re-flash to apply new calibration points. Additional points can be added for non-linear senders.
+## TankPro Basic ESP32-S3 (tankpro_basic.yaml)
+- Core I/O only: Button, leak sensor, valve relay, buzzer, WS2812 status LED, tank level voltage, temperature, Wi‑Fi signal, uptime, device info.
+- No automations, safety, or on-device logic; intended for DIY automations in Home Assistant.
 
-## Wi‑Fi and API
-- Boots into a factory AP (`SmartRV-TankPro-Setup` / `changeme`) with captive portal and web UI; use this to provision Wi‑Fi.
-- Native API is enabled with no reboot timeout to support long provisioning sessions.
-- OTA is enabled; set an OTA password in `tankpro.yaml` before production.
-
-## Home Assistant integration
-After flashing, the device will appear in Home Assistant via ESPHome discovery. Entities include:
-- Tank level percentage.
-- DS18B20 tank temperature.
-- Leak sensor binary input.
-- Relay switch entity for pump/valve control.
-- Buzzer control.
-- Two WS2812 LED channels with effects.
+## TankPro ESP32-C3 (tankpro.yaml)
+- Original C3 build with basic entities (level %, temp, leak, relay, buzzer, LEDs, restart button) and factory AP provisioning.
 
 ## Licensing
 SmartRV TankPro firmware is released under the MIT License; see `LICENSE-SOFTWARE` at the repo root. ESPHome itself remains under its own license; see the ESPHome project for details.
