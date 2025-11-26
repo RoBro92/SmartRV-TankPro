@@ -1,0 +1,30 @@
+.pio/build/cyd-esp32/libe24/lvgl/draw/sw/lv_draw_sw_dither.c.o: \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/lv_draw_sw_dither.c \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/lv_draw_sw_dither.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../core/lv_obj_pos.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../core/../misc/lv_area.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../core/../misc/../lv_conf_internal.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../core/../misc/../lv_conf_kconfig.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include/sdkconfig.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_common/include/esp_attr.h \
+ /Users/robinbrown/Github/SmartRV-TankPro/firmware/lv_conf.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/lv_draw_sw_gradient.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_color.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/../lv_conf_internal.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_assert.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_log.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_types.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_mem.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_math.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_style.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/../font/lv_font.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/../font/../lv_conf_internal.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/../font/lv_symbol_def.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/../font/../misc/lv_area.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_color.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_area.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_anim.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_txt.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_printf.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_bidi.h \
+ .pio/libdeps/cyd-esp32/lvgl/src/draw/sw/../../misc/lv_style_gen.h
