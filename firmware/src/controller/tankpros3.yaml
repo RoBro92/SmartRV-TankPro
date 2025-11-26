@@ -20,6 +20,12 @@ esphome:
       - globals.set:
           id: guard_over_stop_counter
           value: '0'
+      - text_sensor.template.publish:
+          id: fault_description
+          state: "None"
+      - text_sensor.template.publish:
+          id: fault_code
+          state: "0"
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -109,6 +115,14 @@ globals:
     type: bool
     restore_value: true
     initial_value: 'false'
+  - id: freeze_protection_enabled
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+  - id: freeze_protection_threshold_c
+    type: float
+    restore_value: true
+    initial_value: '2.0'
   - id: last_level_percent
     type: float
     restore_value: false
@@ -141,6 +155,10 @@ globals:
     type: uint32_t
     restore_value: true
     initial_value: '1800000'
+  - id: last_temp_update_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
   - id: empty_threshold_pct
     type: float
     restore_value: true
@@ -171,12 +189,9 @@ globals:
     initial_value: '0'
   # Commented fault codes:
   # 1: Leak detected
-  # 2: Overfill outside fill
-  # 3: Temperature signal lost
-  # 4: Level signal lost (zero)
-  # 5: Level step loss
-  # 6: No level increase during fill
-  # 7: No level decrease during drain
+  # 2: Valve open without active fill
+  # 3: Freeze protection (temp below threshold)
+  # 4: Temp sensor failure (unknown)
   - id: fill_above_stop_seen
     type: bool
     restore_value: false
@@ -191,6 +206,7 @@ light:
   - platform: neopixelbus
     id: status_led
     name: "Status LED"
+    entity_category: config
     pin: GPIO48
     variant: WS2812
     num_leds: 1
@@ -439,6 +455,48 @@ interval:
             - delay: 300ms
             - switch.turn_off: tank_buzzer
             - light.turn_off: status_led
+  # Freeze protection / temp sensor health check
+  - interval: 5s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(freeze_protection_enabled) && !id(safety_override);'
+          then:
+            - lambda: |-
+                const float t = id(tank_temperature).state;
+                const bool timed_out = id(last_temp_update_ms) > 0 && (millis() - id(last_temp_update_ms) > id(temp_timeout_ms));
+                if (id(fault_active) && id(fault_code_int) != 3 && id(fault_code_int) != 4) {
+                  // Another fault is active; do not override with freeze protection logic.
+                  return;
+                }
+                if (isnan(t) || timed_out) {
+                  if (id(fault_code_int) != 4 || !id(fault_active)) {
+                    ESP_LOGI("freeze_protect", "Temp sensor failure while freeze protection enabled; setting fault code 4 (nan=%d timed_out=%d).", isnan(t), timed_out);
+                    id(fault_active) = true;
+                    id(fault_code_int) = 4;
+                    id(fill_in_progress) = false;
+                    id(drain_in_progress) = false;
+                    id(tank_valve_relay).turn_off();
+                    id(fault_description).publish_state("Temp Sensor Failure");
+                    id(fault_code).publish_state("4");
+                    id(status_led_flash_red).execute();
+                  }
+                  return;
+                }
+                if (t <= id(freeze_protection_threshold_c)) {
+                  if (id(fault_code_int) != 3 || !id(fault_active)) {
+                    ESP_LOGI("freeze_protect", "Freeze protection active: temp %.2fC at/below threshold %.2fC.", t, id(freeze_protection_threshold_c));
+                    id(fault_active) = true;
+                    id(fault_code_int) = 3;
+                    id(fill_in_progress) = false;
+                    id(drain_in_progress) = false;
+                    id(fault_description).publish_state("Freeze protection");
+                    id(fault_code).publish_state("3");
+                    id(status_led_flash_red).execute();
+                  }
+                  id(tank_valve_relay).turn_on();
+                }
+                // If temp is healthy and above threshold, do nothing here; clearing fault handled elsewhere.
 
 one_wire:
   - platform: gpio
@@ -466,6 +524,32 @@ binary_sensor:
       inverted: true
     name: "Leak Sensor"
     device_class: moisture
+    on_press:
+      - if:
+          condition:
+            lambda: 'return !id(safety_override);'
+          then:
+            - logger.log: "Leak detected: triggering critical fault and shutting down valve."
+            - globals.set:
+                id: fault_active
+                value: 'true'
+            - globals.set:
+                id: fault_code_int
+                value: '1'
+            - globals.set:
+                id: fill_in_progress
+                value: 'false'
+            - globals.set:
+                id: drain_in_progress
+                value: 'false'
+            - switch.turn_off: tank_valve_relay
+            - text_sensor.template.publish:
+                id: fault_description
+                state: "Leak detected"
+            - text_sensor.template.publish:
+                id: fault_code
+                state: "1"
+            - script.execute: status_led_flash_red
 
   # Expose fill automation state
 
@@ -489,14 +573,17 @@ sensor:
 
   - platform: dallas_temp
     one_wire_id: tank_temp_bus
+    id: tank_temperature
     name: "Tank Temperature"
     filters:
-      - median:
-          window_size: 5
-          send_every: 2
-          send_first_at: 1
+      - lambda: |-
+          if (isnan(x)) return NAN;
+          // Treat common bad readings as invalid so state goes to NAN/unknown
+          if (x == 85.0f || x == 0.0f || x < -55.0f || x > 125.0f) return NAN;
+          return x;
     on_value:
       then:
+        - lambda: 'id(last_temp_update_ms) = millis();'
         - logger.log:
             format: "Tank temperature: %.2f°C"
             args: ["x"]
@@ -546,6 +633,14 @@ text_sensor:
       if (id(tank_valve_relay).state) return std::string("Valve Open");
       return std::string("Idle");
     update_interval: 3s
+  - platform: template
+    id: freeze_protection_state
+    name: "Freeze Protection State"
+    icon: "mdi:snowflake-check"
+    entity_category: diagnostic
+    lambda: |-
+      return id(freeze_protection_enabled) ? std::string("Enabled") : std::string("Disabled");
+    update_interval: 10s
 
 number:
   # User-tunable fill stop threshold exposed to Home Assistant
@@ -562,8 +657,21 @@ number:
     set_action:
       - globals.set:
           id: fill_stop_level
-          value: !lambda |-
-            return (float) x;
+          value: !lambda 'return (float) x;'
+  - platform: template
+    id: freeze_protection_threshold_number
+    name: "Freeze Protection Threshold"
+    entity_category: config
+    unit_of_measurement: "C"
+    icon: "mdi:snowflake"
+    min_value: 0.1
+    max_value: 20
+    step: 0.5
+    lambda: 'return id(freeze_protection_threshold_c);'
+    set_action:
+      - globals.set:
+          id: freeze_protection_threshold_c
+          value: !lambda 'return (float) x;'
   - platform: template
     id: drain_stop_level_number
     name: "Drain Stop Level"
@@ -577,8 +685,7 @@ number:
     set_action:
       - globals.set:
           id: drain_stop_level
-          value: !lambda |-
-            return (float) x;
+          value: !lambda 'return (float) x;'
   - platform: template
     id: drain_timeout_seconds
     name: "Drain Timeout"
@@ -592,14 +699,13 @@ number:
     set_action:
       - globals.set:
           id: drain_timeout_ms
-          value: !lambda |-
-            return (uint32_t)(x * 1000.0f);
+          value: !lambda 'return (uint32_t)(x * 1000.0f);'
 
 switch:
   - platform: gpio
     id: tank_valve_relay
     pin: GPIO5
-    name: "Tank Valve Relay"
+    name: "Valve Override"
     icon: "mdi:valve"
     restore_mode: ALWAYS_OFF
 
@@ -608,16 +714,33 @@ switch:
     pin: GPIO4
     name: "Tank Buzzer"
     icon: "mdi:volume-high"
+    entity_category: config
     restore_mode: ALWAYS_OFF
-
-button:
-  - platform: restart
-    id: restart_device
-    name: "Restart Device"
   - platform: template
-    name: "Enable Safety Override"
+    id: freeze_protection_switch
+    name: "Freeze Protection"
+    icon: "mdi:snowflake-alert"
+    entity_category: config
+    optimistic: false
+    lambda: 'return id(freeze_protection_enabled);'
+    turn_on_action:
+      - logger.log: "Freeze protection enabled."
+      - globals.set:
+          id: freeze_protection_enabled
+          value: 'true'
+    turn_off_action:
+      - logger.log: "Freeze protection disabled."
+      - globals.set:
+          id: freeze_protection_enabled
+          value: 'false'
+  - platform: template
+    id: safety_override_switch
+    name: "Safety Override"
     icon: "mdi:shield-off"
-    on_press:
+    entity_category: config
+    optimistic: false
+    lambda: 'return id(safety_override);'
+    turn_on_action:
       - logger.log: "Safety override enabled: fault triggers and automations disabled."
       - globals.set:
           id: safety_override
@@ -634,14 +757,28 @@ button:
       - text_sensor.template.publish:
           id: fault_code
           state: "0"
-  - platform: template
-    name: "Disable Safety Override"
-    icon: "mdi:shield-check"
-    on_press:
+    turn_off_action:
       - logger.log: "Safety override disabled: normal monitoring resumed."
       - globals.set:
           id: safety_override
           value: 'false'
+      - globals.set:
+          id: fault_active
+          value: 'false'
+      - globals.set:
+          id: fault_code_int
+          value: '0'
+      - text_sensor.template.publish:
+          id: fault_description
+          state: "None"
+      - text_sensor.template.publish:
+          id: fault_code
+          state: "0"
+
+button:
+  - platform: restart
+    id: restart_device
+    name: "Restart Device"
   - platform: template
     name: "Fill Tank"
     icon: "mdi:water-plus"
