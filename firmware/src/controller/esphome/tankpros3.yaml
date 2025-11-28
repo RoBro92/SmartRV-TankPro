@@ -286,6 +286,11 @@ interval:
             lambda: |-
               const float level = id(tank_level).state;
               const bool above = !isnan(level) && level >= id(fill_stop_level);
+              // Skip safety faulting while an intentional drain is underway.
+              if (id(drain_in_progress)) {
+                id(guard_over_stop_counter) = 0;
+                return false;
+              }
               if (above) {
                 id(guard_over_stop_counter) += 1;
               } else {
@@ -462,6 +467,7 @@ sensor:
     id: tank_level
     name: "Tank Level"
     unit_of_measurement: "%"
+    accuracy_decimals: 0
     icon: "mdi:water"
     update_interval: 2s
     lambda: |-
@@ -531,10 +537,9 @@ text_sensor:
     icon: "mdi:information"
     lambda: |-
       if (id(fault_active)) return std::string("Fault");
-      if (id(fill_in_progress)) return std::string("Filling");
-      if (id(drain_in_progress)) return std::string("Draining");
-      if (id(tank_valve_relay).state) return std::string("Valve Open");
-      return std::string("Idle");
+      if (id(fill_in_progress)) return std::string("Fill");
+      if (id(drain_in_progress)) return std::string("Drain");
+      return std::string("OK");
     update_interval: 3s
   - platform: template
     id: freeze_protection_state

@@ -17,7 +17,7 @@ SmartRV TankPro v3.0 is an ESP32-C3-based controller for monitoring and controll
 
 ## Intended use
 - Provide reliable tank level monitoring with tailored analog front-ends per sender range for better resolution.
-- Integrate with Wi‑Fi dashboards (e.g., ESPHome/Home Assistant) and future remote display hardware.
+- Integrate with Wi‑Fi dashboards (e.g., ESPHome/Home Assistant) and an external display client (Cheap Yellow Display LVGL demo in-progress).
 - Fit common RV/caravan/boat wiring practices, including protection against reverse polarity, ESD, and wiring mistakes.
 
 ## Hardware folder map
@@ -27,4 +27,4 @@ SmartRV TankPro v3.0 is an ESP32-C3-based controller for monitoring and controll
 
 ## Firmware map
 - [`firmware/src/controller`](../firmware/src/controller/): ESPHome configuration for the controller PCB.
-- [`firmware/src/display`](../firmware/src/display/): Reserved for a future external display unit that will consume data from the controller over Wi‑Fi or serial.
+- [`firmware/src/display`](../firmware/src/display/): LVGL demo firmware for the Cheap Yellow Display (ESP32-2432S028); UI is present, controller integration is still in-progress.

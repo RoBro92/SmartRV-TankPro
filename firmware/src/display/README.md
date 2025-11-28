@@ -1,16 +1,21 @@
-# Firmware – Display (Placeholder)
+# Firmware – Display (Cheap Yellow Display LVGL)
 
-This directory is reserved for a future external display that will show tank levels and relay status from SmartRV TankPro v3.0.
+LVGL 9.x demo firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. The UI mirrors TankPro concepts (fresh/waste tanks, fault views, display settings) and currently runs with placeholder data while connectivity is built out.
 
-## Planned approach
-- **Hardware:** Likely an ESP32-based board with a small color LCD/TFT or e-paper panel and rotary/button input.
-- **Connectivity:** Wi‑Fi connection to the controller’s ESPHome API
-- **Features (planned):**
-  - Live tank percentage display for one or two tanks.
-  - Pump/valve control via on-screen button or hardware controls.
-  - Alarm indication for low/high tank thresholds.
+## Layout
+- `CYD/`: PlatformIO project targeting the ESP32-2432S028 with ILI9341 TFT + XPT2046 touch.
+  - `platformio.ini`: `env:cyd` build target; pulls LVGL and LovyanGFX.
+  - `main.cpp`: LVGL bring-up, touch + brightness handling, sleep timeout.
+  - `ui/`: SquareLine-generated LVGL UI (v0.0.1 label baked into boot/settings).
+  - Build outputs land in `.pio/build/cyd/` (firmware.bin, bootloader.bin, partitions.bin).
 
-No firmware is provided yet; this folder acts as a placeholder for future development.
+## Flashing
+- Recommended: `pio run -e cyd` then `pio run -t upload -e cyd --upload-port <port>` from inside `CYD/`.
+- Or flash the built binaries with `esptool.py` (addresses: 0x1000 bootloader, 0x8000 partitions, 0x10000 firmware).
+- If the board does not auto-enter bootloader, hold `BOOT`, tap `RST`, then release `BOOT` after upload starts.
 
-## Licensing
-This firmware will be released under the MIT License; see `LICENSE-SOFTWARE` at the repo root.
+## Status / roadmap
+- UI-only preview; Wi‑Fi/Direct buttons and tank values are placeholders until controller integration is finished.
+- Future builds will fetch live data from the TankPro controller over Wi‑Fi or UART.
+
+See `docs/display-firmware.md` for end-user flashing and update instructions.

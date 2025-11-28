@@ -7,7 +7,7 @@ SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for car
 
 ## Repository structure
 - `hardware/`: Hardware design assets (design sources, fabrication outputs, mechanical models) plus legacy archives.
-- `firmware/`: ESP32-C3 firmware/configuration sources and placeholders for future clients.
+- `firmware/`: ESP32-C3 firmware/configuration sources and the LVGL display client for the Cheap Yellow Display (ESP32-2432S028).
 - `docs/`: User guides, wiring, design rationale, and changelog.
 
 ## Key features (v3.0)
@@ -20,12 +20,14 @@ SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for car
 
 ## How to build / fabricate
 - **Hardware:** Use the outputs in `hardware/fabrication/` to order PCBs/assembly from your board house (e.g., JLCPCB). Mechanical models live in `hardware/mechanical/`. Editable schematic/PCB sources will be published in `hardware/design/` in a future OSHW release.
-- **Firmware (ESPHome):** Install ESPHome, connect the ESP32-C3 over USB-C, and run `esphome run firmware/src/controller/tankpro.yaml` to compile and flash. On first boot the device exposes `SmartRV-TankPro-Setup` (password `changeme`) for captive-portal provisioning; then adopt in ESPHome/Home Assistant. Wiring guidance is in `docs/wiring-and-installation.md`.
+- **Firmware (ESPHome controller):** Install ESPHome, connect the ESP32-C3 over USB-C, and run `esphome run firmware/src/controller/tankpro.yaml` to compile and flash. On first boot the device exposes `SmartRV-TankPro-Setup` (password `changeme`) for captive-portal provisioning; then adopt in ESPHome/Home Assistant. Wiring guidance is in `docs/wiring-and-installation.md`.
+- **Display firmware (Cheap Yellow Display):** LVGL demo lives in `firmware/src/display/CYD` (`env:cyd`). Build/flash with PlatformIO or `esptool.py` using the binaries under `.pio/build/cyd/`. See `docs/display-firmware.md` for the flashing walkthrough and current limitations (UI-only v0.0.1).
 
 ## Documentation
 - `docs/overview-v3.md`
 - `docs/getting-started.md`
 - `docs/wiring-and-installation.md`
+- `docs/display-firmware.md`
 - `docs/design-rationale-v3.md`
 - `docs/changelog.md`
 
