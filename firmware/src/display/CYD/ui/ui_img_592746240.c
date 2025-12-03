@@ -55,7 +55,7 @@ const lv_image_dsc_t ui_img_592746240 = {
    .header.w = 50,
    .header.h = 50,
    .data_size = sizeof(ui_img_592746240_data),
-   .header.cf = LV_COLOR_FORMAT_NATIVE_WITH_ALPHA,
+   .header.cf = LV_COLOR_FORMAT_NATIVE,
    .header.magic = LV_IMAGE_HEADER_MAGIC,
    .data = ui_img_592746240_data};
 

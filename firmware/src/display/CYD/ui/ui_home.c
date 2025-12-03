@@ -21,7 +21,7 @@ void ui_event_homeFreshCard( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
 if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_fresh, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_fresh_screen_init);
+      _ui_screen_change( &ui_fresh, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_fresh_screen_init);
 }
 }
 
@@ -29,7 +29,7 @@ void ui_event_homeGreyCard( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
 if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_Grey, LV_SCR_LOAD_ANIM_OVER_TOP, 500, 0, &ui_Grey_screen_init);
+      _ui_screen_change( &ui_Grey, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_Grey_screen_init);
 }
 }
 
@@ -79,12 +79,18 @@ lv_obj_set_y( ui_homeFreshLevelArc, 1 );
 lv_obj_set_align( ui_homeFreshLevelArc, LV_ALIGN_CENTER );
 lv_obj_remove_flag( ui_homeFreshLevelArc, LV_OBJ_FLAG_CLICKABLE );    /// Flags
 lv_arc_set_value(ui_homeFreshLevelArc, 75);
+lv_obj_set_style_arc_width(ui_homeFreshLevelArc, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+lv_obj_set_style_arc_width(ui_homeFreshLevelArc, 20, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+
+lv_obj_set_style_blend_mode(ui_homeFreshLevelArc, LV_BLEND_MODE_NORMAL, LV_PART_KNOB| LV_STATE_DEFAULT);
+lv_obj_set_style_opa(ui_homeFreshLevelArc, 0, LV_PART_KNOB| LV_STATE_DEFAULT);
 
 ui_homeFreshLevelLabel = lv_label_create(ui_homeFreshLevelArc);
 lv_obj_set_width( ui_homeFreshLevelLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_homeFreshLevelLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_homeFreshLevelLabel, -6 );
-lv_obj_set_y( ui_homeFreshLevelLabel, -2 );
+lv_obj_set_x( ui_homeFreshLevelLabel, -7 );
+lv_obj_set_y( ui_homeFreshLevelLabel, 0 );
 lv_obj_set_align( ui_homeFreshLevelLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_homeFreshLevelLabel,"75%");
 lv_obj_set_style_text_font(ui_homeFreshLevelLabel, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -180,12 +186,17 @@ lv_obj_set_y( ui_homeGreyLevelArc, 1 );
 lv_obj_set_align( ui_homeGreyLevelArc, LV_ALIGN_CENTER );
 lv_obj_remove_flag( ui_homeGreyLevelArc, LV_OBJ_FLAG_CLICKABLE );    /// Flags
 lv_arc_set_value(ui_homeGreyLevelArc, 22);
+lv_obj_set_style_arc_width(ui_homeGreyLevelArc, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+lv_obj_set_style_arc_width(ui_homeGreyLevelArc, 20, LV_PART_INDICATOR| LV_STATE_DEFAULT);
+
+lv_obj_set_style_opa(ui_homeGreyLevelArc, 0, LV_PART_KNOB| LV_STATE_DEFAULT);
 
 ui_homeGreyLevelLabel = lv_label_create(ui_homeGreyLevelArc);
 lv_obj_set_width( ui_homeGreyLevelLabel, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_homeGreyLevelLabel, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_homeGreyLevelLabel, -6 );
-lv_obj_set_y( ui_homeGreyLevelLabel, -2 );
+lv_obj_set_x( ui_homeGreyLevelLabel, -7 );
+lv_obj_set_y( ui_homeGreyLevelLabel, 0 );
 lv_obj_set_align( ui_homeGreyLevelLabel, LV_ALIGN_CENTER );
 lv_label_set_text(ui_homeGreyLevelLabel,"22%");
 lv_obj_set_style_text_font(ui_homeGreyLevelLabel, &lv_font_montserrat_16, LV_PART_MAIN| LV_STATE_DEFAULT);

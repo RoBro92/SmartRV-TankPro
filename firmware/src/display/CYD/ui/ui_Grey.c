@@ -11,7 +11,7 @@ void ui_event_ImgButton2( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
 if ( event_code == LV_EVENT_PRESSED) {
-      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_home_screen_init);
+      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_home_screen_init);
 }
 }
 
@@ -44,7 +44,7 @@ lv_obj_set_style_pad_row(ui_freshroot1, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_freshroot1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_hometitelpanel2 = ui_titlepanel_create(ui_freshroot1);
-lv_obj_set_x( ui_hometitelpanel2, 0 );
+lv_obj_set_x( ui_hometitelpanel2, 1 );
 lv_obj_set_y( ui_hometitelpanel2, 0 );
 lv_obj_set_style_bg_color(ui_hometitelpanel2, lv_color_hex(0xCCC5C5), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_bg_opa(ui_hometitelpanel2, 255, LV_PART_MAIN| LV_STATE_DEFAULT);

@@ -1,4 +1,5 @@
 substitutions:
+  # Level calibration defaults assume ~0.5-2.5 V span from a 0-180 ohm sender through the divider.
   default_fill_stop_level: "90.0"
   default_drain_stop_level: "10.0"
   default_drain_timeout_ms: "45000"
@@ -68,13 +69,50 @@ improv_serial:
 web_server:
   port: 80
 
-# Globals for on-device fill automation parameters and state
 globals:
-  # User-adjustable stop level for automatic fill (%)
+  # Persistent configuration (retained across reboots)
   - id: fill_stop_level
     type: float
     restore_value: true
     initial_value: '${default_fill_stop_level}'
+  - id: drain_stop_level
+    type: float
+    restore_value: true
+    initial_value: '${default_drain_stop_level}'
+  - id: drain_timeout_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '${default_drain_timeout_ms}'
+  - id: safety_override
+    type: bool
+    restore_value: true
+    initial_value: '${default_safety_override}'
+  - id: freeze_protection_enabled
+    type: bool
+    restore_value: true
+    initial_value: '${default_freeze_protection_enabled}'
+  - id: freeze_protection_threshold_c
+    type: float
+    restore_value: true
+    initial_value: '${default_freeze_threshold_c}'
+  - id: level_empty_volts
+    type: float
+    restore_value: true
+    initial_value: '${default_level_empty_volts}'
+  - id: level_full_volts
+    type: float
+    restore_value: true
+    initial_value: '${default_level_full_volts}'
+  - id: tank_role
+    type: int
+    restore_value: true
+    initial_value: '0'
+  - id: paired_to_cyd
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+
+  # Runtime state (cleared on boot)
   - id: fill_in_progress
     type: bool
     restore_value: false
@@ -83,11 +121,6 @@ globals:
     type: bool
     restore_value: false
     initial_value: 'false'
-  # User-adjustable stop level for automatic drain (%)
-  - id: drain_stop_level
-    type: float
-    restore_value: true
-    initial_value: '${default_drain_stop_level}'
   - id: drain_start_level
     type: float
     restore_value: false
@@ -104,10 +137,6 @@ globals:
     type: uint32_t
     restore_value: false
     initial_value: '0'
-  - id: drain_timeout_ms
-    type: uint32_t
-    restore_value: true
-    initial_value: '${default_drain_timeout_ms}'
   - id: fault_active
     type: bool
     restore_value: false
@@ -116,19 +145,6 @@ globals:
     type: int
     restore_value: false
     initial_value: '0'
-  - id: safety_override
-    type: bool
-    restore_value: true
-    initial_value: '${default_safety_override}'
-  - id: freeze_protection_enabled
-    type: bool
-    restore_value: true
-    initial_value: '${default_freeze_protection_enabled}'
-  # Minimum temperature before freeze protection triggers (C)
-  - id: freeze_protection_threshold_c
-    type: float
-    restore_value: true
-    initial_value: '${default_freeze_threshold_c}'
   - id: last_temp_update_ms
     type: uint32_t
     restore_value: false
@@ -145,15 +161,18 @@ globals:
     type: int
     restore_value: false
     initial_value: '0'
-  # Calibration points for level sensor (set via buttons in UI)
-  - id: level_empty_volts
-    type: float
-    restore_value: true
-    initial_value: '${default_level_empty_volts}'    # default empty calibration point
-  - id: level_full_volts
-    type: float
-    restore_value: true
-    initial_value: '${default_level_full_volts}'    # default full calibration point
+  - id: pairing_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: pairing_token
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: pairing_start_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
 
 light:
   - platform: neopixelbus
@@ -210,7 +229,7 @@ script:
                     if (isnan(level)) return true;
                     if (level >= stop_level) {
                       if (id(fill_above_stop_seen)) {
-                        return false;  // two consecutive readings above stop
+                        return false;
                       } else {
                         id(fill_above_stop_seen) = true;
                         return true;
@@ -260,14 +279,11 @@ script:
                           const float level = id(tank_level).state;
                           const float stop_level = id(drain_stop_level);
                           const unsigned long now = millis();
-                          // update change timer if level moved meaningfully (>0.5%)
                           if (!isnan(level) && !isnan(id(drain_last_level)) && fabs(level - id(drain_last_level)) > 0.5f) {
                             id(drain_last_change_ms) = now;
                             id(drain_last_level) = level;
                           }
-                          // stop if below/equal target
                           if (!isnan(level) && level <= stop_level) return false;
-                          // stop if stagnant for configured timeout
                           if (now - id(drain_last_change_ms) >= id(drain_timeout_ms)) return false;
                           return true;
                       then:
@@ -276,6 +292,122 @@ script:
                   - globals.set:
                       id: drain_in_progress
                       value: 'false'
+
+  - id: enter_pairing_mode
+    then:
+      - logger.log: "Entering pairing mode."
+      - globals.set:
+          id: pairing_active
+          value: 'true'
+      - lambda: |-
+          uint32_t token = esp_random();
+          id(pairing_token) = token;
+          ESP_LOGI("pairing", "Pairing token generated: %u", token);
+      - lambda: 'id(pairing_start_ms) = millis();'
+
+  - id: factory_reset_script
+    then:
+      - logger.log: "Factory reset starting."
+      - globals.set:
+          id: level_empty_volts
+          value: '${default_level_empty_volts}'
+      - globals.set:
+          id: level_full_volts
+          value: '${default_level_full_volts}'
+      - globals.set:
+          id: fill_stop_level
+          value: '${default_fill_stop_level}'
+      - globals.set:
+          id: drain_stop_level
+          value: '${default_drain_stop_level}'
+      - globals.set:
+          id: safety_override
+          value: '${default_safety_override}'
+      - globals.set:
+          id: freeze_protection_enabled
+          value: '${default_freeze_protection_enabled}'
+      - globals.set:
+          id: tank_role
+          value: '0'
+      - globals.set:
+          id: paired_to_cyd
+          value: 'false'
+      - globals.set:
+          id: pairing_active
+          value: 'false'
+      - globals.set:
+          id: pairing_token
+          value: '0'
+      - globals.set:
+          id: fault_active
+          value: 'false'
+      - globals.set:
+          id: fault_code_int
+          value: '0'
+      - text_sensor.template.publish:
+          id: fault_description
+          state: "None"
+      - text_sensor.template.publish:
+          id: fault_code
+          state: "0"
+      - logger.log: "Factory reset complete; restarting."
+      - button.press: restart_device
+
+  - id: pairing_advert_script
+    then:
+      - lambda: |-
+          std::string ident = id(tankpro_identifier).state;
+          std::string mac = id(module_mac_address).state;
+          std::string role;
+          switch (id(tank_role)) {
+            case 1: role = "Fresh"; break;
+            case 2: role = "Waste"; break;
+            default: role = "Unassigned"; break;
+          }
+          char buf[256];
+          snprintf(buf, sizeof(buf), "{\"type\":\"tank_controller\",\"event\":\"pairing_advert\",\"identifier\":\"%s\",\"mac\":\"%s\",\"role\":\"%s\",\"token\":%u}", ident.c_str(), mac.c_str(), role.c_str(), id(pairing_token));
+          ESP_LOGI("pairing", "%s", buf);
+
+  # Pairing accept shims for CYD testing
+  - id: pair_accept_fresh
+    then:
+      - logger.log: "CYD pair accept (Fresh) received."
+      - if:
+          condition:
+            lambda: 'return id(pairing_active);'
+          then:
+            - globals.set:
+                id: tank_role
+                value: '1'
+            - globals.set:
+                id: paired_to_cyd
+                value: 'true'
+            - globals.set:
+                id: pairing_active
+                value: 'false'
+            - logger.log: "Paired as Fresh. Pairing complete."
+          else:
+            - logger.log: "Pair accept ignored: pairing not active."
+
+  - id: pair_accept_waste
+    then:
+      - logger.log: "CYD pair accept (Waste) received."
+      - if:
+          condition:
+            lambda: 'return id(pairing_active);'
+          then:
+            - globals.set:
+                id: tank_role
+                value: '2'
+            - globals.set:
+                id: paired_to_cyd
+                value: 'true'
+            - globals.set:
+                id: pairing_active
+                value: 'false'
+            - logger.log: "Paired as Waste. Pairing complete."
+          else:
+            - logger.log: "Pair accept ignored: pairing not active."
 
 interval:
   # Safety guard: close valve if level meets/exceeds stop level regardless of state
@@ -286,7 +418,6 @@ interval:
             lambda: |-
               const float level = id(tank_level).state;
               const bool above = !isnan(level) && level >= id(fill_stop_level);
-              // Skip safety faulting while an intentional drain is underway.
               if (id(drain_in_progress)) {
                 id(guard_over_stop_counter) = 0;
                 return false;
@@ -366,7 +497,6 @@ interval:
                 const float t = id(tank_temperature).state;
                 const bool timed_out = id(last_temp_update_ms) > 0 && (millis() - id(last_temp_update_ms) > id(temp_timeout_ms));
                 if (id(fault_active) && id(fault_code_int) != 3 && id(fault_code_int) != 4) {
-                  // Another fault is active; do not override with freeze protection logic.
                   return;
                 }
                 if (isnan(t) || timed_out) {
@@ -397,6 +527,25 @@ interval:
                   id(tank_valve_relay).turn_on();
                 }
                 // If temp is healthy and above threshold, do nothing here; clearing fault handled elsewhere.
+  # Pairing timeout
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(pairing_active) && (millis() - id(pairing_start_ms) > 60000);'
+          then:
+            - logger.log: "Pairing timed out after 60s; deactivating."
+            - globals.set:
+                id: pairing_active
+                value: 'false'
+  # Pairing advert broadcast
+  - interval: 2s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(pairing_active);'
+          then:
+            - script.execute: pairing_advert_script
 
 one_wire:
   - platform: gpio
@@ -410,8 +559,26 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: true
     name: "Button"
-    on_press:
-      - logger.log: "Button pressed"
+    on_multi_click:
+      - timing:
+          - ON for at most 1s
+          - OFF for at least 50ms
+        then:
+          - if:
+              condition:
+                lambda: 'return id(fault_active);'
+              then:
+                - button.press: clear_faults_button
+      - timing:
+          - ON for 3s to 9s
+          - OFF for at least 50ms
+        then:
+          - script.execute: enter_pairing_mode
+      - timing:
+          - ON for at least 10s
+          - OFF for at least 50ms
+        then:
+          - script.execute: factory_reset_script
 
   - platform: status
     name: "Status"
@@ -450,8 +617,6 @@ binary_sensor:
                 state: "1"
             - script.execute: status_led_flash_red
 
-  # Expose fill automation state
-
 sensor:
   - platform: adc
     id: tank_level_voltage
@@ -487,15 +652,17 @@ sensor:
     filters:
       - lambda: |-
           if (isnan(x)) return NAN;
-          // Treat common bad readings as invalid so state goes to NAN/unknown
           if (x == 85.0f || x == 0.0f || x < -55.0f || x > 125.0f) return NAN;
           return x;
     on_value:
       then:
         - lambda: 'id(last_temp_update_ms) = millis();'
-        - logger.log:
-            format: "Tank temperature: %.2f°C"
-            args: ["x"]
+        - lambda: |-
+            static float last_logged = NAN;
+            if (isnan(last_logged) || fabs(x - last_logged) >= 0.1f) {
+              last_logged = x;
+              ESP_LOGI("temp", "Tank temperature: %.2f C", x);
+            }
 
   - platform: wifi_signal
     name: "WiFi Signal"
@@ -515,6 +682,7 @@ text_sensor:
       name: "Connected BSSID"
     mac_address:
       name: "Module MAC"
+      id: module_mac_address
   - platform: template
     id: fault_description
     name: "Fault Description"
@@ -536,11 +704,40 @@ text_sensor:
     name: "Status"
     icon: "mdi:information"
     lambda: |-
+      if (id(pairing_active)) return std::string("Pairing");
       if (id(fault_active)) return std::string("Fault");
       if (id(fill_in_progress)) return std::string("Fill");
       if (id(drain_in_progress)) return std::string("Drain");
       return std::string("OK");
     update_interval: 3s
+  - platform: template
+    id: tank_role_name
+    name: "Tank Role Name"
+    icon: "mdi:water"
+    entity_category: diagnostic
+    internal: false
+    lambda: |-
+      switch (id(tank_role)) {
+        case 1: return std::string("Fresh");
+        case 2: return std::string("Waste");
+        default: return std::string("Unassigned");
+      }
+    update_interval: 10s
+  - platform: template
+    id: tankpro_identifier
+    name: "TankPro Identifier"
+    entity_category: diagnostic
+    internal: false
+    lambda: |-
+      std::string mac = id(module_mac_address).state;
+      std::string compact;
+      compact.reserve(mac.size());
+      for (char c : mac) {
+        if (c != ':') compact.push_back(c);
+      }
+      const std::string suffix = compact.size() >= 4 ? compact.substr(compact.size() - 4) : compact;
+      return std::string("TankPro-") + suffix;
+    update_interval: 10s
   - platform: template
     id: freeze_protection_state
     name: "Freeze Protection State"
@@ -551,7 +748,6 @@ text_sensor:
     update_interval: 10s
 
 number:
-  # User-tunable fill stop threshold exposed to Home Assistant
   - platform: template
     id: fill_stop_level_number
     name: "Fill Stop Level"
@@ -608,6 +804,31 @@ number:
       - globals.set:
           id: drain_timeout_ms
           value: !lambda 'return (uint32_t)(x * 1000.0f);'
+
+select:
+  - platform: template
+    id: tank_role_select
+    name: "Tank Role"
+    entity_category: config
+    options:
+      - "Unassigned"
+      - "Fresh"
+      - "Waste"
+    lambda: |-
+      switch (id(tank_role)) {
+        case 1: return std::string("Fresh");
+        case 2: return std::string("Waste");
+        default: return std::string("Unassigned");
+      }
+    set_action:
+      - lambda: |-
+          int value = 0;
+          if (x == "Fresh") {
+            value = 1;
+          } else if (x == "Waste") {
+            value = 2;
+          }
+          id(tank_role) = value;
 
 switch:
   - platform: gpio
@@ -715,14 +936,12 @@ button:
     entity_category: config
     on_press:
       - logger.log: "Resetting configuration to defaults."
-      # Restore calibration defaults
       - globals.set:
           id: level_empty_volts
           value: '${default_level_empty_volts}'
       - globals.set:
           id: level_full_volts
           value: '${default_level_full_volts}'
-      # Restore thresholds and protections
       - globals.set:
           id: fill_stop_level
           value: '${default_fill_stop_level}'
@@ -741,7 +960,6 @@ button:
       - globals.set:
           id: safety_override
           value: '${default_safety_override}'
-      # Clear state and faults
       - globals.set:
           id: fill_in_progress
           value: 'false'
@@ -769,6 +987,15 @@ button:
       - text_sensor.template.publish:
           id: fault_code
           state: "0"
+  # Test helpers (remove once CYD pairing flow is finalized)
+  - platform: template
+    name: "Simulate CYD Pair as Fresh"
+    on_press:
+      - script.execute: pair_accept_fresh
+  - platform: template
+    name: "Simulate CYD Pair as Waste"
+    on_press:
+      - script.execute: pair_accept_waste
   - platform: template
     name: "Fill Tank"
     icon: "mdi:water-plus"
@@ -820,6 +1047,7 @@ button:
                   - logger.log: "Drain button pressed: starting drain."
                   - script.execute: drain_tank_script
   - platform: template
+    id: clear_faults_button
     name: "Clear Faults"
     icon: "mdi:alert-circle-check"
     on_press:

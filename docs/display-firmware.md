@@ -2,6 +2,8 @@
 
 LVGL-based demo firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. This build targets the stock ILI9341 TFT + XPT2046 touch stack and shows a TankPro-themed UI (home, fresh/waste detail, faults, and display settings). Current build label: **v0.0.1**.
 
+For a step-by-step flashing guide (PlatformIO and esptool.py) aimed at users buying their own CYD, see `docs/display-firmware-installation.md`.
+
 > Status: UI/demo only right now. It does not yet talk to the TankPro controller over Wi‑Fi or UART; values on screen are placeholders. The home screen buttons and Wi‑Fi/Direct selectors are for future transport selection.
 
 ## Files and outputs
@@ -42,7 +44,7 @@ esptool.py --chip esp32 --baud 460800 --before default_reset --after no_reset wr
 - A **Settings** screen with brightness slider, display sleep timeout, light/dark theme, and firmware label `v0.0.1`.
 
 ## Updating
-- Rebuild and re-flash using either method above. No persistent user settings are stored yet, so updates replace the whole app without migration steps.
+- Rebuild and re-flash using either method above. Brightness, sleep timeout, and theme selections persist on the display between updates; the UI remains a data-only demo until controller integration lands.
 
 ## Next steps (planned)
 - Wire the Wi‑Fi/Direct choices into real connectivity to the TankPro controller.

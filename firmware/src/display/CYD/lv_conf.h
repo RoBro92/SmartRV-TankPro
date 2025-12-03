@@ -1,6 +1,4 @@
-/**
- * Minimal LVGL configuration for the CYD (SquareLine UI, LVGL 9.1, 32-bit color).
- */
+
 #ifndef LV_CONF_H
 #define LV_CONF_H
 
@@ -14,15 +12,15 @@
 #define LV_USE_ASSERT_OBJ         0
 
 #define LV_COLOR_DEPTH            32
-#define LV_COLOR_CHROMA_KEY       lv_color_hex(0x00FF00)
+#define LV_COLOR_CHROMA_KEY       lv_color_hex(0xFF00FF)
 
-#define LV_MEM_SIZE               (64U * 1024U)
+#define LV_MEM_SIZE               (80U * 1024U)
 #define LV_MEM_ADR                0
 #define LV_MEM_BUF_MAX_NUM        16
 
 /* Logging */
 #define LV_USE_LOG                1
-#define LV_LOG_LEVEL              LV_LOG_LEVEL_WARN
+#define LV_LOG_LEVEL              LV_LOG_LEVEL_ERROR
 #define LV_LOG_PRINTF             1
 
 /* Tick configuration */
@@ -47,6 +45,7 @@
 #define LV_FONT_MONTSERRAT_20     1
 #define LV_FONT_MONTSERRAT_24     1
 #define LV_FONT_MONTSERRAT_26     1
+#define LV_FONT_MONTSERRAT_30     1
 #define LV_FONT_DEFAULT           &lv_font_montserrat_16
 
 /* Widgets and themes */
@@ -86,4 +85,3 @@
 #define LV_USE_GIF                0
 
 #endif /* LV_CONF_H */
-

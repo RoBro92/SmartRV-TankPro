@@ -72,7 +72,7 @@ const lv_image_dsc_t ui_img_791807475 = {
    .header.w = 60,
    .header.h = 60,
    .data_size = sizeof(ui_img_791807475_data),
-   .header.cf = LV_COLOR_FORMAT_NATIVE_WITH_ALPHA,
+   .header.cf = LV_COLOR_FORMAT_NATIVE,
    .header.magic = LV_IMAGE_HEADER_MAGIC,
    .data = ui_img_791807475_data};
 

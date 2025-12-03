@@ -1,0 +1,23 @@
+.pio/build/cyd_s3/libaba/lvgl/others/monkey/lv_monkey.c.o: \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/lv_monkey.c \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/lv_monkey.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../lv_conf_internal.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../lv_conf_kconfig.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/qio_qspi/include/sdkconfig.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/esp_common/include/esp_attr.h \
+ /Users/robinbrown/Github/SmartRV-TankPro/firmware/src/display/CYD/lv_conf.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/lv_indev.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../core/lv_group.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../core/../lv_conf_internal.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../core/../misc/lv_types.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../core/../misc/../lv_conf_internal.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../core/../misc/lv_ll.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/lv_area.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/../lv_conf_internal.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/lv_types.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/lv_timer.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/../tick/lv_tick.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/../tick/../lv_conf_internal.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/lv_ll.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/lv_event.h \
+ .pio/libdeps/cyd_s3/lvgl/src/others/monkey/../../indev/../misc/lv_array.h

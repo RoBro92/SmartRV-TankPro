@@ -21,12 +21,13 @@ SmartRV TankPro is an open-source, ESP32-C3-based tank monitoring module for car
 ## How to build / fabricate
 - **Hardware:** Use the outputs in `hardware/fabrication/` to order PCBs/assembly from your board house (e.g., JLCPCB). Mechanical models live in `hardware/mechanical/`. Editable schematic/PCB sources will be published in `hardware/design/` in a future OSHW release.
 - **Firmware (ESPHome controller):** Install ESPHome, connect the ESP32-C3 over USB-C, and run `esphome run firmware/src/controller/tankpro.yaml` to compile and flash. On first boot the device exposes `SmartRV-TankPro-Setup` (password `changeme`) for captive-portal provisioning; then adopt in ESPHome/Home Assistant. Wiring guidance is in `docs/wiring-and-installation.md`.
-- **Display firmware (Cheap Yellow Display):** LVGL demo lives in `firmware/src/display/CYD` (`env:cyd`). Build/flash with PlatformIO or `esptool.py` using the binaries under `.pio/build/cyd/`. See `docs/display-firmware.md` for the flashing walkthrough and current limitations (UI-only v0.0.1).
+- **Display firmware (Cheap Yellow Display):** LVGL demo lives in `firmware/src/display/CYD` (`env:cyd`). Build/flash with PlatformIO or `esptool.py` using the binaries under `.pio/build/cyd/`. User-friendly install/update steps for a store-bought Cheap Yellow Display are in `docs/display-firmware-installation.md`; technical notes remain in `docs/display-firmware.md`.
 
 ## Documentation
 - `docs/overview-v3.md`
 - `docs/getting-started.md`
 - `docs/wiring-and-installation.md`
+- `docs/display-firmware-installation.md`
 - `docs/display-firmware.md`
 - `docs/design-rationale-v3.md`
 - `docs/changelog.md`
