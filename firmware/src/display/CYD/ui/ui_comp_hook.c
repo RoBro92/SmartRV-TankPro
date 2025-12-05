@@ -3,8 +3,3 @@
 // LVGL version: 9.1.0
 // Project name: Watertanksensor
 
-#include "ui.h"
-
-void ui_comp_titlepanel_create_hook( lv_obj_t * comp)
-{
-}

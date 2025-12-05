@@ -1,4 +1,4 @@
-.pio/build/cyd_s3/src/ui/ui_cydSettings.c.o: ui/ui_cydSettings.c ui/ui.h \
+.pio/build/cyd_s3/src/ui/ui_cydsettings.c.o: ui/ui_cydsettings.c ui/ui.h \
  .pio/libdeps/cyd_s3/lvgl/lvgl.h .pio/libdeps/cyd_s3/lvgl/src/lv_init.h \
  .pio/libdeps/cyd_s3/lvgl/src/lv_conf_internal.h \
  .pio/libdeps/cyd_s3/lvgl/src/lv_conf_kconfig.h \
@@ -378,7 +378,7 @@
  .pio/libdeps/cyd_s3/lvgl/src/core/../stdlib/builtin/../../misc/lv_ll.h \
  .pio/libdeps/cyd_s3/lvgl/src/core/../tick/lv_tick.h \
  .pio/libdeps/cyd_s3/lvgl/src/core/../layouts/lv_layout.h ui/ui_helpers.h \
- ui/ui_comp.h ui/ui_comp_titlepanel.h ui/ui_comp_hook.h ui/ui_events.h \
- ui/ui_theme_manager.h ui/ui_themes.h ui/ui_boot.h ui/ui_wifisettings.h \
- ui/ui_home.h ui/ui_fresh.h ui/ui_Fresh_Faults.h ui/ui_Grey.h \
- ui/ui_Grey_Faults.h ui/ui_cydSettings.h
+ ui/ui_events.h ui/ui_theme_manager.h ui/ui_themes.h ui/ui_boot.h \
+ ui/ui_home.h ui/ui_fresh.h ui/ui_freshfaults.h ui/ui_waste.h \
+ ui/ui_wastefaults.h ui/ui_cydsettings.h ui/ui_freshsettings.h \
+ ui/ui_wastesettings.h

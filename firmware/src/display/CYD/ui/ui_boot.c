@@ -17,16 +17,8 @@ lv_obj_t *uic_bootTitle3;
 lv_obj_t *uic_bootTitle;
 lv_obj_t *uic_bootRoot;
 lv_obj_t *uic_boot;
-lv_obj_t *ui_boot = NULL;lv_obj_t *ui_Button3 = NULL;lv_obj_t *ui_bootRoot = NULL;lv_obj_t *ui_bootTitle = NULL;lv_obj_t *ui_bootTitle3 = NULL;lv_obj_t *ui_bootwifipanel = NULL;lv_obj_t *ui_bootWifiButton = NULL;lv_obj_t *ui_wifibuttonlabel = NULL;lv_obj_t *ui_wifidesclabel = NULL;lv_obj_t *ui_bootDirectPanel = NULL;lv_obj_t *ui_bootDirectButton = NULL;lv_obj_t *ui_bootDirectLabel = NULL;lv_obj_t *ui_directdesclabel = NULL;lv_obj_t *ui_bootFirmwareLabel = NULL;lv_obj_t *ui_overlayBootWifi = NULL;lv_obj_t *ui_popupbootwifi = NULL;lv_obj_t *ui_lblbootwifititle = NULL;lv_obj_t *ui_lblbootwifidesc = NULL;lv_obj_t *ui_ssid_container = NULL;lv_obj_t *ui_Label4 = NULL;lv_obj_t *ui_bootWifissid = NULL;lv_obj_t *ui_pwd_container1 = NULL;lv_obj_t *ui_Label9 = NULL;lv_obj_t *ui_bootWifipass = NULL;lv_obj_t *ui_Label10 = NULL;lv_obj_t *ui_Container4 = NULL;lv_obj_t *ui_buttonBootWifiBack = NULL;lv_obj_t *ui_Label11 = NULL;lv_obj_t *ui_buttonBootWifiNext = NULL;lv_obj_t *ui_Label12 = NULL;lv_obj_t *ui_overlayBootDirect = NULL;lv_obj_t *ui_popupbootwifi1 = NULL;lv_obj_t *ui_lbldirect = NULL;lv_obj_t *ui_directcont1 = NULL;lv_obj_t *ui_Label13 = NULL;lv_obj_t *ui_bootdirectlist = NULL;lv_obj_t *ui_lblBootDirectEmpty = NULL;lv_obj_t *ui_directdevicetemplate = NULL;lv_obj_t *ui_lbldirectdevnametemplate = NULL;lv_obj_t *ui_lbldirectdeviptemplate = NULL;lv_obj_t *ui_direct_buttons = NULL;lv_obj_t *ui_buttonbootdirectback = NULL;lv_obj_t *ui_Label29 = NULL;lv_obj_t *ui_buttonbootdirectscan = NULL;lv_obj_t *ui_Label30 = NULL;lv_obj_t *ui_overlayAssignDirectRole = NULL;lv_obj_t *ui_contasign1 = NULL;lv_obj_t *ui_lblasign = NULL;lv_obj_t *ui_contasign2 = NULL;lv_obj_t *ui_lvlassigndevicetitle = NULL;lv_obj_t *ui_DirectAssignDeviceName = NULL;lv_obj_t *ui_contasignbuttons = NULL;lv_obj_t *ui_buttonbootasignfresh = NULL;lv_obj_t *ui_Label28 = NULL;lv_obj_t *ui_buttonbootasignwaste = NULL;lv_obj_t *ui_Label31 = NULL;lv_obj_t *ui_contasignbuttons1 = NULL;lv_obj_t *ui_buttonbootasignfresh1 = NULL;lv_obj_t *ui_Label23 = NULL;lv_obj_t *ui_buttonbootasignwaste1 = NULL;lv_obj_t *ui_Label32 = NULL;
+lv_obj_t *ui_boot = NULL;lv_obj_t *ui_bootRoot = NULL;lv_obj_t *ui_bootTitle = NULL;lv_obj_t *ui_bootTitle3 = NULL;lv_obj_t *ui_bootwifipanel = NULL;lv_obj_t *ui_bootWifiButton = NULL;lv_obj_t *ui_wifibuttonlabel = NULL;lv_obj_t *ui_wifidesclabel = NULL;lv_obj_t *ui_bootDirectPanel = NULL;lv_obj_t *ui_bootDirectButton = NULL;lv_obj_t *ui_bootDirectLabel = NULL;lv_obj_t *ui_directdesclabel = NULL;lv_obj_t *ui_bootFirmwareLabel = NULL;lv_obj_t *ui_overlayBootWifi = NULL;lv_obj_t *ui_popupbootwifi = NULL;lv_obj_t *ui_lblbootwifititle = NULL;lv_obj_t *ui_lblbootwifidesc = NULL;lv_obj_t *ui_ssid_container = NULL;lv_obj_t *ui_Label4 = NULL;lv_obj_t *ui_bootWifissid = NULL;lv_obj_t *ui_pwd_container1 = NULL;lv_obj_t *ui_Label9 = NULL;lv_obj_t *ui_bootWifipass = NULL;lv_obj_t *ui_Label10 = NULL;lv_obj_t *ui_Container4 = NULL;lv_obj_t *ui_buttonBootWifiBack = NULL;lv_obj_t *ui_Label11 = NULL;lv_obj_t *ui_buttonBootWifiNext = NULL;lv_obj_t *ui_Label12 = NULL;lv_obj_t *ui_overlayBootDirect = NULL;lv_obj_t *ui_popupbootwifi1 = NULL;lv_obj_t *ui_lbldirect = NULL;lv_obj_t *ui_directcont1 = NULL;lv_obj_t *ui_Label13 = NULL;lv_obj_t *ui_bootdirectlist = NULL;lv_obj_t *ui_lblBootDirectEmpty = NULL;lv_obj_t *ui_directdevicetemplate = NULL;lv_obj_t *ui_lbldirectdevnametemplate = NULL;lv_obj_t *ui_lbldirectdeviptemplate = NULL;lv_obj_t *ui_direct_buttons = NULL;lv_obj_t *ui_buttonbootdirectback = NULL;lv_obj_t *ui_Label29 = NULL;lv_obj_t *ui_buttonbootdirectscan = NULL;lv_obj_t *ui_Label30 = NULL;lv_obj_t *ui_overlayAssignDirectRole = NULL;lv_obj_t *ui_contasign1 = NULL;lv_obj_t *ui_lblasign = NULL;lv_obj_t *ui_contasign2 = NULL;lv_obj_t *ui_lvlassigndevicetitle = NULL;lv_obj_t *ui_DirectAssignDeviceName = NULL;lv_obj_t *ui_contasignbuttons = NULL;lv_obj_t *ui_buttonbootasignfresh = NULL;lv_obj_t *ui_Label28 = NULL;lv_obj_t *ui_buttonbootasignwaste = NULL;lv_obj_t *ui_Label31 = NULL;lv_obj_t *ui_contasignbuttons1 = NULL;lv_obj_t *ui_buttonbootasignfresh1 = NULL;lv_obj_t *ui_Label23 = NULL;lv_obj_t *ui_buttonbootasignwaste1 = NULL;lv_obj_t *ui_Label32 = NULL;
 // event funtions
-void ui_event_Button3( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);
-
-if ( event_code == LV_EVENT_CLICKED) {
-      _ui_screen_change( &ui_home, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_home_screen_init);
-}
-}
-
 void ui_event_bootWifiButton( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -43,15 +35,6 @@ ui_boot = lv_obj_create(NULL);
 lv_obj_remove_flag( ui_boot, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 ui_object_set_themeable_style_property(ui_boot, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_black);
 ui_object_set_themeable_style_property(ui_boot, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_black);
-
-ui_Button3 = lv_button_create(ui_boot);
-lv_obj_set_width( ui_Button3, 44);
-lv_obj_set_height( ui_Button3, 26);
-lv_obj_set_x( ui_Button3, -85 );
-lv_obj_set_y( ui_Button3, 138 );
-lv_obj_set_align( ui_Button3, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_Button3, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_remove_flag( ui_Button3, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
 ui_bootRoot = lv_obj_create(ui_boot);
 lv_obj_remove_style_all(ui_bootRoot);
@@ -628,7 +611,6 @@ lv_obj_set_height( ui_Label32, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label32, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label32,"Confirm");
 
-lv_obj_add_event_cb(ui_Button3, ui_event_Button3, LV_EVENT_ALL, NULL);
 lv_obj_add_event_cb(ui_bootWifiButton, ui_event_bootWifiButton, LV_EVENT_ALL, NULL);
 uic_boot = ui_boot;
 uic_bootRoot = ui_bootRoot;
@@ -652,7 +634,6 @@ void ui_boot_screen_destroy(void)
 // NULL screen variables
 uic_boot= NULL;
 ui_boot= NULL;
-ui_Button3= NULL;
 uic_bootRoot= NULL;
 ui_bootRoot= NULL;
 uic_bootTitle= NULL;

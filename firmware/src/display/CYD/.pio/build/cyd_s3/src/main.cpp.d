@@ -668,8 +668,34 @@
  .pio/libdeps/cyd_s3/LovyanGFX/src/lgfx/v1/touch/Touch_XPT2046.hpp \
  .pio/libdeps/cyd_s3/LovyanGFX/src/lgfx/v1/touch/Touch_RA8875.hpp \
  /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src/Preferences.h \
- ui/ui.h ui/ui_helpers.h ui/ui.h ui/ui_comp.h ui/ui_comp_titlepanel.h \
- ui/ui_comp_hook.h ui/ui_events.h ui/ui_theme_manager.h ui/ui_themes.h \
- ui/ui_boot.h ui/ui_wifisettings.h ui/ui_home.h ui/ui_fresh.h \
- ui/ui_Fresh_Faults.h ui/ui_Grey.h ui/ui_Grey_Faults.h \
- ui/ui_cydSettings.h ui_custom.h
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFi.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPv6Address.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiType.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiSTA.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiGeneric.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/esp_wifi/include/esp_smartconfig.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/wifi_provisioning/include/wifi_provisioning/manager.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/protocomm/include/common/protocomm.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/protocomm/include/security/protocomm_security.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/wifi_provisioning/include/wifi_provisioning/wifi_config.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiAP.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiScan.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiClient.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/cores/esp32/Client.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiServer.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/cores/esp32/Server.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/cores/esp32/Udp.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src/WebServer.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src/HTTP_Method.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32s3/include/nghttp/port/include/http_parser.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src/Uri.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src/detail/RequestHandler.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/DNSServer/src/DNSServer.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiUdp.h \
+ ui/ui.h ui/ui_helpers.h ui/ui.h ui/ui_events.h ui/ui_theme_manager.h \
+ ui/ui_themes.h ui/ui_boot.h ui/ui_home.h ui/ui_fresh.h \
+ ui/ui_freshfaults.h ui/ui_waste.h ui/ui_wastefaults.h \
+ ui/ui_cydsettings.h ui/ui_freshsettings.h ui/ui_wastesettings.h \
+ ui_custom.h cyd_state.h

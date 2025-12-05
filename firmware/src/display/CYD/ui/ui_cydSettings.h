@@ -10,24 +10,26 @@
 extern "C" {
 #endif
 
-// SCREEN: ui_cydSettings
-extern void ui_cydSettings_screen_init(void);
-extern void ui_cydSettings_screen_destroy(void);
-extern lv_obj_t *ui_cydSettings;
+// SCREEN: ui_cydsettings
+extern void ui_cydsettings_screen_init(void);
+extern void ui_cydsettings_screen_destroy(void);
+extern lv_obj_t *ui_cydsettings;
 extern lv_obj_t *ui_CYDSettingsRoot;
-extern lv_obj_t *ui_Panel10;
+extern lv_obj_t *ui_cydsettingsheader;
 extern lv_obj_t *ui_Label33;
-extern void ui_event_ImgButton5( lv_event_t * e);
-extern lv_obj_t *ui_ImgButton5;
+extern lv_obj_t *ui_cydsettingsBackButton;
+extern lv_obj_t *ui_Label39;
 extern lv_obj_t *ui_Panel11;
 extern lv_obj_t *ui_contset;
 extern lv_obj_t *ui_cydBrightnessSlider;
 extern lv_obj_t *ui_cydTimeout;
 extern lv_obj_t *ui_cydTheme;
+extern lv_obj_t *ui_cydUnits;
 extern lv_obj_t *ui_Container21;
 extern lv_obj_t *ui_Label35;
 extern lv_obj_t *ui_Label14;
 extern lv_obj_t *ui_Label15;
+extern lv_obj_t *ui_Label37;
 extern lv_obj_t *ui_cydFirmwareLabel;
 // CUSTOM VARIABLES
 

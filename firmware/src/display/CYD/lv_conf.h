@@ -11,10 +11,10 @@
 #define LV_USE_ASSERT_MEM_INTEGRITY 0
 #define LV_USE_ASSERT_OBJ         0
 
-#define LV_COLOR_DEPTH            32
+#define LV_COLOR_DEPTH            16
 #define LV_COLOR_CHROMA_KEY       lv_color_hex(0xFF00FF)
 
-#define LV_MEM_SIZE               (80U * 1024U)
+#define LV_MEM_SIZE               (120U * 1024U)
 #define LV_MEM_ADR                0
 #define LV_MEM_BUF_MAX_NUM        16
 
@@ -32,6 +32,8 @@
 #define LV_DRAW_SW_COMPLEX        1
 #define LV_DRAW_SW_SHADOW_CACHE_SIZE 0
 #define LV_DRAW_SW_TEXT_CACHE     1
+#define LV_USE_GPU_SDL            0
+#define LV_USE_DRAW_SDL           0
 
 #define LV_BUILD_EXAMPLES         0
 #define LV_USE_PERF_MONITOR       0

@@ -125,7 +125,7 @@ public:
             cfg.x_max = CYD_TOUCH_X_MAX;
             cfg.y_min = CYD_TOUCH_Y_MIN;
             cfg.y_max = CYD_TOUCH_Y_MAX;
-            cfg.offset_rotation = 0;
+            cfg.offset_rotation = 2;  // rotate touch 180 so corners map correctly (BR->BR)
             _touch.config(cfg);
         }
         _panel.setTouch(&_touch);

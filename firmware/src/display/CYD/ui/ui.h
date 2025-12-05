@@ -23,21 +23,20 @@ extern "C" {
 #endif
 
 #include "ui_helpers.h"
-#include "ui_comp.h"
-#include "ui_comp_hook.h"
 #include "ui_events.h"
 #include "ui_theme_manager.h"
 #include "ui_themes.h"
 
 ///////////////////// SCREENS ////////////////////
 #include "ui_boot.h"
-#include "ui_wifisettings.h"
 #include "ui_home.h"
 #include "ui_fresh.h"
-#include "ui_Fresh_Faults.h"
-#include "ui_Grey.h"
-#include "ui_Grey_Faults.h"
-#include "ui_cydSettings.h"
+#include "ui_freshfaults.h"
+#include "ui_waste.h"
+#include "ui_wastefaults.h"
+#include "ui_cydsettings.h"
+#include "ui_freshsettings.h"
+#include "ui_wastesettings.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -45,8 +44,7 @@ extern "C" {
 extern lv_obj_t *ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
-LV_IMG_DECLARE( ui_img_791807475);   // assets/_Pngtree_back_vector_icon_4279667-2-removebg-preview.png
-LV_IMG_DECLARE( ui_img_592746240);   // assets/Two-gear-icon-removebg-preview-3.png
+LV_IMG_DECLARE( ui_img_314706763);   // assets/gear2-2.png
 
 // UI INIT
 void ui_init(void);

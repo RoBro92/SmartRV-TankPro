@@ -14,8 +14,6 @@ extern "C" {
 extern void ui_boot_screen_init(void);
 extern void ui_boot_screen_destroy(void);
 extern lv_obj_t *ui_boot;
-extern void ui_event_Button3( lv_event_t * e);
-extern lv_obj_t *ui_Button3;
 extern lv_obj_t *ui_bootRoot;
 extern lv_obj_t *ui_bootTitle;
 extern lv_obj_t *ui_bootTitle3;
