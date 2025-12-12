@@ -44,7 +44,12 @@ extern "C" {
 extern lv_obj_t *ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
-LV_IMG_DECLARE( ui_img_314706763);   // assets/gear2-2.png
+LV_IMG_DECLARE( ui_img_322567660);   // assets/gear2-2-removebg-preview.png
+LV_IMG_DECLARE( ui_img_1278265770);   // assets/images-2-2-removebg-preview.png
+LV_IMG_DECLARE( ui_img_1791936227);   // assets/freshwater-2.png
+LV_IMG_DECLARE( ui_img_wastetank_png);   // assets/wastetank.png
+LV_IMG_DECLARE( ui_img_back2_png);   // assets/back2.png
+LV_IMG_DECLARE( ui_img_warning_png);   // assets/warning.png
 
 // UI INIT
 void ui_init(void);

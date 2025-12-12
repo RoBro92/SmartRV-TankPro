@@ -6,7 +6,7 @@
 #include "ui.h"
 
 lv_obj_t *uic_wastesettingsFreezeProtection;
-lv_obj_t *ui_wastesettings = NULL;lv_obj_t *ui_wastesettingsroot = NULL;lv_obj_t *ui_wastesettingsheader = NULL;lv_obj_t *ui_Label34 = NULL;lv_obj_t *ui_wastesettingsBackButton = NULL;lv_obj_t *ui_Label45 = NULL;lv_obj_t *ui_wastesettingsMainCard = NULL;lv_obj_t *ui_wastesettingslabels = NULL;lv_obj_t *ui_Label73 = NULL;lv_obj_t *ui_Label64 = NULL;lv_obj_t *ui_Label66 = NULL;lv_obj_t *ui_Label67 = NULL;lv_obj_t *ui_Label68 = NULL;lv_obj_t *ui_Label69 = NULL;lv_obj_t *ui_Label70 = NULL;lv_obj_t *ui_Label71 = NULL;lv_obj_t *ui_wastesettingsControls = NULL;lv_obj_t *ui_wastesettingsDrainLevelButton = NULL;lv_obj_t *ui_wastesettingsDrainStopLevelLabel = NULL;lv_obj_t *ui_wastesettingsSetFullButton = NULL;lv_obj_t *ui_wastesettingsFullVoltage = NULL;lv_obj_t *ui_wastesettingsSetEmptyButton = NULL;lv_obj_t *ui_wastesettingsEmptyVoltage = NULL;lv_obj_t *ui_wastesettingsFreezeProtection = NULL;lv_obj_t *ui_wastesettingsRestart = NULL;lv_obj_t *ui_wastesettingsSafetyOveride = NULL;lv_obj_t *ui_wastesettingsValveOveride = NULL;lv_obj_t *ui_wastesettingsDiagnostic = NULL;lv_obj_t *ui_wastesettingsDrainOverlay = NULL;lv_obj_t *ui_wastesettingsOverlayDrainSlider = NULL;lv_obj_t *ui_wastesettingsOverlayDrainPercentage = NULL;lv_obj_t *ui_wastesettingsOverlayBackButton = NULL;lv_obj_t *ui_Label65 = NULL;lv_obj_t *ui_wastesettingsDiagnosticOverlay = NULL;lv_obj_t *ui_Container8 = NULL;lv_obj_t *ui_Container1 = NULL;lv_obj_t *ui_Label83 = NULL;lv_obj_t *ui_Label72 = NULL;lv_obj_t *ui_Label74 = NULL;lv_obj_t *ui_Label75 = NULL;lv_obj_t *ui_Label76 = NULL;lv_obj_t *ui_Label77 = NULL;lv_obj_t *ui_Label78 = NULL;lv_obj_t *ui_Label79 = NULL;lv_obj_t *ui_Label80 = NULL;lv_obj_t *ui_Container2 = NULL;lv_obj_t *ui_wastesettingsdiagoverlayIP = NULL;lv_obj_t *ui_wastesettingsdiagoverlayID = NULL;lv_obj_t *ui_wastesettingsdiagoverlayMAC = NULL;lv_obj_t *ui_wastesettingsdiagoverlayStatus = NULL;lv_obj_t *ui_wastesettingsdiagoverlayRole = NULL;lv_obj_t *ui_wastesettingsdiagoverlayUptime = NULL;lv_obj_t *ui_wastesettingsdiagoverlaySignal = NULL;lv_obj_t *ui_wastesettingsdiagoverlayVersion = NULL;lv_obj_t *ui_wastesettingDiagnosticOverlayBackButton = NULL;lv_obj_t *ui_Label81 = NULL;
+lv_obj_t *ui_wastesettings = NULL;lv_obj_t *ui_wastesettingsroot = NULL;lv_obj_t *ui_wastesettingsheader = NULL;lv_obj_t *ui_Label34 = NULL;lv_obj_t *ui_wastesettingsBackButton = NULL;lv_obj_t *ui_wastesettingsMainCard = NULL;lv_obj_t *ui_wastesettingslabels = NULL;lv_obj_t *ui_Label73 = NULL;lv_obj_t *ui_Label64 = NULL;lv_obj_t *ui_Label66 = NULL;lv_obj_t *ui_Label67 = NULL;lv_obj_t *ui_Label68 = NULL;lv_obj_t *ui_Label69 = NULL;lv_obj_t *ui_Label70 = NULL;lv_obj_t *ui_Label71 = NULL;lv_obj_t *ui_Label103 = NULL;lv_obj_t *ui_wastesettingsControls = NULL;lv_obj_t *ui_wastesettingsDrainLevelButton = NULL;lv_obj_t *ui_wastesettingsDrainStopLevelLabel = NULL;lv_obj_t *ui_wastesettingsSetFullButton = NULL;lv_obj_t *ui_wastesettingsFullVoltage = NULL;lv_obj_t *ui_wastesettingsSetEmptyButton = NULL;lv_obj_t *ui_wastesettingsEmptyVoltage = NULL;lv_obj_t *ui_wastesettingsFreezeProtection = NULL;lv_obj_t *ui_wastesettingsRestart = NULL;lv_obj_t *ui_wastesettingsSafetyOveride = NULL;lv_obj_t *ui_wastesettingsValveOveride = NULL;lv_obj_t *ui_wastesettingsDiagnostic = NULL;lv_obj_t *ui_wastesettingsRemove = NULL;lv_obj_t *ui_wastesettingsDrainOverlay = NULL;lv_obj_t *ui_wastesettingsOverlayDrainSlider = NULL;lv_obj_t *ui_wastesettingsOverlayDrainPercentage = NULL;lv_obj_t *ui_wastesettingsOverlayBackButton = NULL;lv_obj_t *ui_Label65 = NULL;lv_obj_t *ui_wastesettingsDiagnosticOverlay = NULL;lv_obj_t *ui_Container8 = NULL;lv_obj_t *ui_Container1 = NULL;lv_obj_t *ui_Label83 = NULL;lv_obj_t *ui_Label72 = NULL;lv_obj_t *ui_Label74 = NULL;lv_obj_t *ui_Label75 = NULL;lv_obj_t *ui_Label76 = NULL;lv_obj_t *ui_Label77 = NULL;lv_obj_t *ui_Label78 = NULL;lv_obj_t *ui_Label79 = NULL;lv_obj_t *ui_Container2 = NULL;lv_obj_t *ui_wastesettingsdiagoverlayIP = NULL;lv_obj_t *ui_wastesettingsdiagoverlayID = NULL;lv_obj_t *ui_wastesettingsdiagoverlayMAC = NULL;lv_obj_t *ui_wastesettingsdiagoverlayStatus = NULL;lv_obj_t *ui_wastesettingsdiagoverlayRole = NULL;lv_obj_t *ui_wastesettingsdiagoverlayUptime = NULL;lv_obj_t *ui_wastesettingsdiagoverlaySignal = NULL;lv_obj_t *ui_wastesettingsdiagoverlayVersion = NULL;lv_obj_t *ui_wastesettingDiagnosticOverlayBackButton = NULL;lv_obj_t *ui_Label81 = NULL;
 // event funtions
 
 // build funtions
@@ -53,32 +53,16 @@ ui_object_set_themeable_style_property(ui_Label34, LV_PART_MAIN| LV_STATE_DEFAUL
 ui_object_set_themeable_style_property(ui_Label34, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_black);
 lv_obj_set_style_text_font(ui_Label34, &lv_font_montserrat_20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_wastesettingsBackButton = lv_button_create(ui_wastesettingsheader);
-lv_obj_set_width( ui_wastesettingsBackButton, 40);
-lv_obj_set_height( ui_wastesettingsBackButton, 40);
+ui_wastesettingsBackButton = lv_image_create(ui_wastesettingsheader);
+lv_image_set_src(ui_wastesettingsBackButton, &ui_img_back2_png);
+lv_obj_set_width( ui_wastesettingsBackButton, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_wastesettingsBackButton, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_wastesettingsBackButton, -93 );
-lv_obj_set_y( ui_wastesettingsBackButton, 0 );
+lv_obj_set_y( ui_wastesettingsBackButton, 3 );
 lv_obj_set_align( ui_wastesettingsBackButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_wastesettingsBackButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_wastesettingsBackButton, LV_OBJ_FLAG_CLICKABLE );   /// Flags
 lv_obj_remove_flag( ui_wastesettingsBackButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_radius(ui_wastesettingsBackButton, 50, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_wastesettingsBackButton, lv_color_hex(0x0099A5), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_wastesettingsBackButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_wastesettingsBackButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_outline_opa(ui_wastesettingsBackButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_width(ui_wastesettingsBackButton, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_pad(ui_wastesettingsBackButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_Label45 = lv_label_create(ui_wastesettingsBackButton);
-lv_obj_set_width( ui_Label45, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label45, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_Label45, -2 );
-lv_obj_set_y( ui_Label45, 1 );
-lv_obj_set_align( ui_Label45, LV_ALIGN_CENTER );
-lv_label_set_text(ui_Label45,"<");
-lv_obj_set_style_text_color(ui_Label45, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_Label45, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label45, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_transform_scale(ui_wastesettingsBackButton, 220, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_wastesettingsMainCard = lv_obj_create(ui_wastesettingsroot);
 lv_obj_set_width( ui_wastesettingsMainCard, 224);
@@ -158,12 +142,18 @@ lv_obj_set_height( ui_Label71, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label71, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label71,"Diagnostic");
 
+ui_Label103 = lv_label_create(ui_wastesettingslabels);
+lv_obj_set_width( ui_Label103, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label103, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label103, LV_ALIGN_CENTER );
+lv_label_set_text(ui_Label103,"Remove");
+
 ui_wastesettingsControls = lv_obj_create(ui_wastesettingsMainCard);
 lv_obj_remove_style_all(ui_wastesettingsControls);
 lv_obj_set_width( ui_wastesettingsControls, 61);
 lv_obj_set_height( ui_wastesettingsControls, 380);
 lv_obj_set_x( ui_wastesettingsControls, 67 );
-lv_obj_set_y( ui_wastesettingsControls, 26 );
+lv_obj_set_y( ui_wastesettingsControls, 27 );
 lv_obj_set_align( ui_wastesettingsControls, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_wastesettingsControls,LV_FLEX_FLOW_COLUMN);
 lv_obj_set_flex_align(ui_wastesettingsControls, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_END, LV_FLEX_ALIGN_END);
@@ -250,6 +240,13 @@ lv_obj_set_align( ui_wastesettingsDiagnostic, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_wastesettingsDiagnostic, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_remove_flag( ui_wastesettingsDiagnostic, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
+ui_wastesettingsRemove = lv_button_create(ui_wastesettingsControls);
+lv_obj_set_width( ui_wastesettingsRemove, 60);
+lv_obj_set_height( ui_wastesettingsRemove, 30);
+lv_obj_set_align( ui_wastesettingsRemove, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_wastesettingsRemove, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_remove_flag( ui_wastesettingsRemove, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
 ui_wastesettingsDrainOverlay = lv_obj_create(ui_wastesettings);
 lv_obj_remove_style_all(ui_wastesettingsDrainOverlay);
 lv_obj_set_width( ui_wastesettingsDrainOverlay, 207);
@@ -324,9 +321,9 @@ lv_obj_set_style_pad_column(ui_wastesettingsDiagnosticOverlay, 0, LV_PART_MAIN| 
 ui_Container8 = lv_obj_create(ui_wastesettingsDiagnosticOverlay);
 lv_obj_remove_style_all(ui_Container8);
 lv_obj_set_width( ui_Container8, 196);
-lv_obj_set_height( ui_Container8, 207);
+lv_obj_set_height( ui_Container8, 247);
 lv_obj_set_x( ui_Container8, 0 );
-lv_obj_set_y( ui_Container8, -46 );
+lv_obj_set_y( ui_Container8, -31 );
 lv_obj_set_align( ui_Container8, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_Container8,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_Container8, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -392,12 +389,6 @@ lv_obj_set_width( ui_Label79, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label79, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label79, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label79,"Version");
-
-ui_Label80 = lv_label_create(ui_Container1);
-lv_obj_set_width( ui_Label80, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label80, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_Label80, LV_ALIGN_CENTER );
-lv_label_set_text(ui_Label80,"");
 
 ui_Container2 = lv_obj_create(ui_Container8);
 lv_obj_remove_style_all(ui_Container2);
@@ -492,7 +483,6 @@ ui_wastesettingsroot= NULL;
 ui_wastesettingsheader= NULL;
 ui_Label34= NULL;
 ui_wastesettingsBackButton= NULL;
-ui_Label45= NULL;
 ui_wastesettingsMainCard= NULL;
 ui_wastesettingslabels= NULL;
 ui_Label73= NULL;
@@ -503,6 +493,7 @@ ui_Label68= NULL;
 ui_Label69= NULL;
 ui_Label70= NULL;
 ui_Label71= NULL;
+ui_Label103= NULL;
 ui_wastesettingsControls= NULL;
 ui_wastesettingsDrainLevelButton= NULL;
 ui_wastesettingsDrainStopLevelLabel= NULL;
@@ -516,6 +507,7 @@ ui_wastesettingsRestart= NULL;
 ui_wastesettingsSafetyOveride= NULL;
 ui_wastesettingsValveOveride= NULL;
 ui_wastesettingsDiagnostic= NULL;
+ui_wastesettingsRemove= NULL;
 ui_wastesettingsDrainOverlay= NULL;
 ui_wastesettingsOverlayDrainSlider= NULL;
 ui_wastesettingsOverlayDrainPercentage= NULL;
@@ -532,7 +524,6 @@ ui_Label76= NULL;
 ui_Label77= NULL;
 ui_Label78= NULL;
 ui_Label79= NULL;
-ui_Label80= NULL;
 ui_Container2= NULL;
 ui_wastesettingsdiagoverlayIP= NULL;
 ui_wastesettingsdiagoverlayID= NULL;

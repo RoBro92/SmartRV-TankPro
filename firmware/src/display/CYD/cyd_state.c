@@ -3,19 +3,35 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <limits.h>
 #include <lvgl.h>
 #include "ui.h"
 
 cyd_state_t cyd_state;
 
-static const uint8_t LEVEL_INVALID = 0xFF;
-static const uint8_t SETTING_INVALID = 0xFF;
-static const uint16_t VOLT_INVALID = 0xFFFF;
-static const uint16_t FAULT_INVALID = 0xFFFF;
+static const uint8_t LEVEL_INVALID = CYD_LEVEL_INVALID;
+static const uint8_t SETTING_INVALID = CYD_SETTING_INVALID;
+static const uint16_t VOLT_INVALID = CYD_VOLT_INVALID;
+static const uint16_t FAULT_INVALID = CYD_FAULT_INVALID;
+static lv_color_t home_fresh_status_base;
+static bool home_fresh_status_base_set = false;
+static lv_color_t home_waste_status_base;
+static bool home_waste_status_base_set = false;
+static lv_color_t fresh_leak_base;
+static bool fresh_leak_base_set = false;
+static lv_color_t waste_leak_base;
+static bool waste_leak_base_set = false;
+static lv_color_t fresh_fill_base;
+static bool fresh_fill_base_set = false;
+static lv_color_t fresh_drain_base;
+static bool fresh_drain_base_set = false;
+static lv_color_t waste_drain_base;
+static bool waste_drain_base_set = false;
 
 void cyd_state_init_defaults(void) {
     memset(&cyd_state, 0, sizeof(cyd_state));
 
+    // User-facing labels and defaults; tweak here if you rebrand screens.
     strncpy(cyd_state.fresh.name, "Fresh Tank", sizeof(cyd_state.fresh.name) - 1);
     cyd_state.fresh.role = TANK_ROLE_FRESH;
     cyd_state.fresh.level_percent = LEVEL_INVALID;
@@ -68,8 +84,17 @@ void cyd_state_init_defaults(void) {
     cyd_state.waste.diag_signal_dbm = 0;
     cyd_state.waste.diag_version[0] = '\0';
 
-    strncpy(cyd_state.firmware_version, "V 0.0.1", sizeof(cyd_state.firmware_version) - 1);
+    strncpy(cyd_state.firmware_version, "V 0.1.0", sizeof(cyd_state.firmware_version) - 1);
     cyd_state.setup_complete = false;
+    cyd_state.wifi_connected = false;
+    cyd_state.wifi_ssid[0] = '\0';
+    cyd_state.wifi_ip[0] = '\0';
+    cyd_state.diag_id[0] = '\0';
+    cyd_state.diag_ip[0] = '\0';
+    cyd_state.diag_mac[0] = '\0';
+    cyd_state.diag_status[0] = '\0';
+    cyd_state.diag_signal_dbm = INT16_MIN;
+    cyd_state.diag_uptime_s = 0;
 }
 
 static const char *cyd_tank_status_to_string(tank_status_t status) {
@@ -84,6 +109,17 @@ static const char *cyd_tank_status_to_string(tank_status_t status) {
 
 static bool s_units_metric = true;
 
+void cyd_state_update_leak_base_colors(lv_color_t text_color) {
+    fresh_leak_base = text_color;
+    fresh_leak_base_set = true;
+    waste_leak_base = text_color;
+    waste_leak_base_set = true;
+    home_fresh_status_base = text_color;
+    home_fresh_status_base_set = true;
+    home_waste_status_base = text_color;
+    home_waste_status_base_set = true;
+}
+
 void cyd_state_set_units_metric(bool metric) {
     s_units_metric = metric;
 }
@@ -93,8 +129,32 @@ bool cyd_state_units_metric(void) {
 }
 
 void cyd_state_apply_to_home_screen(void) {
-    const bool fresh_valid = cyd_state.fresh.paired && cyd_state.fresh.level_percent != LEVEL_INVALID;
-    const bool waste_valid = cyd_state.waste.paired && cyd_state.waste.level_percent != LEVEL_INVALID;
+    const bool fresh_assigned = cyd_state.fresh.diag_id[0] != '\0';
+    const bool waste_assigned = cyd_state.waste.diag_id[0] != '\0';
+    const bool fresh_valid = fresh_assigned && cyd_state.fresh.level_percent != LEVEL_INVALID;
+    const bool waste_valid = waste_assigned && cyd_state.waste.level_percent != LEVEL_INVALID;
+    const bool wifi_ok = cyd_state.wifi_connected;
+    if (ui_homeFreshSetupButton) {
+        if (fresh_assigned) {
+            lv_obj_add_flag(ui_homeFreshSetupButton, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_clear_flag(ui_homeFreshSetupButton, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+    if (ui_homeWasteSetupButton) {
+        if (waste_assigned) {
+            lv_obj_add_flag(ui_homeWasteSetupButton, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_clear_flag(ui_homeWasteSetupButton, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+    if (ui_homeheaderWifiConnected) {
+        if (wifi_ok) {
+            lv_obj_clear_flag(ui_homeheaderWifiConnected, LV_OBJ_FLAG_HIDDEN);
+        } else {
+            lv_obj_add_flag(ui_homeheaderWifiConnected, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
     if (ui_homeFreshLevelArc) {
         lv_arc_set_value(ui_homeFreshLevelArc, fresh_valid ? cyd_state.fresh.level_percent : 0);
     }
@@ -103,18 +163,34 @@ void cyd_state_apply_to_home_screen(void) {
         else lv_label_set_text(ui_homeFreshLevelLabel, "--");
     }
     if (ui_homeFreshTempLabel) {
-        if (cyd_state.fresh.paired && !isnan(cyd_state.fresh.temp_c)) {
+        if (fresh_assigned && !isnan(cyd_state.fresh.temp_c)) {
             char buf[16];
-            const float temp = s_units_metric ? cyd_state.fresh.temp_c : (cyd_state.fresh.temp_c * 9.0f / 5.0f) + 32.0f;
-            snprintf(buf, sizeof(buf), "%.1f°%c", temp, s_units_metric ? 'C' : 'F');
+            float temp = s_units_metric ? cyd_state.fresh.temp_c : (cyd_state.fresh.temp_c * 9.0f / 5.0f) + 32.0f;
+            int rounded = (int) lroundf(temp);
+            snprintf(buf, sizeof(buf), "%d°%c", rounded, s_units_metric ? 'C' : 'F');
             lv_label_set_text(ui_homeFreshTempLabel, buf);
         } else {
             lv_label_set_text(ui_homeFreshTempLabel, "--");
         }
     }
     if (ui_homeFreshStatusLabel) {
-        if (!cyd_state.fresh.paired) lv_label_set_text(ui_homeFreshStatusLabel, "--");
-        else lv_label_set_text(ui_homeFreshStatusLabel, cyd_tank_status_to_string(cyd_state.fresh.status));
+        if (!home_fresh_status_base_set) {
+            home_fresh_status_base = lv_obj_get_style_text_color(ui_homeFreshStatusLabel, LV_PART_MAIN);
+            home_fresh_status_base_set = true;
+        }
+        if (!fresh_assigned) {
+            lv_label_set_text(ui_homeFreshStatusLabel, "--");
+            lv_obj_set_style_text_color(ui_homeFreshStatusLabel, home_fresh_status_base,
+                                        LV_PART_MAIN | LV_STATE_DEFAULT);
+        } else {
+            lv_label_set_text(ui_homeFreshStatusLabel, cyd_tank_status_to_string(cyd_state.fresh.status));
+            if (cyd_state.fresh.status == TANK_STATUS_FAULT) {
+                lv_obj_set_style_text_color(ui_homeFreshStatusLabel, lv_palette_main(LV_PALETTE_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+            } else {
+                lv_obj_set_style_text_color(ui_homeFreshStatusLabel, home_fresh_status_base,
+                                            LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
     }
 
     if (ui_homeGreyLevelArc) {
@@ -127,16 +203,32 @@ void cyd_state_apply_to_home_screen(void) {
     if (ui_homeGreyTempLabel) {
         if (cyd_state.waste.paired && !isnan(cyd_state.waste.temp_c)) {
             char buf[16];
-            const float temp = s_units_metric ? cyd_state.waste.temp_c : (cyd_state.waste.temp_c * 9.0f / 5.0f) + 32.0f;
-            snprintf(buf, sizeof(buf), "%.1f°%c", temp, s_units_metric ? 'C' : 'F');
+            float temp = s_units_metric ? cyd_state.waste.temp_c : (cyd_state.waste.temp_c * 9.0f / 5.0f) + 32.0f;
+            int rounded = (int) lroundf(temp);
+            snprintf(buf, sizeof(buf), "%d°%c", rounded, s_units_metric ? 'C' : 'F');
             lv_label_set_text(ui_homeGreyTempLabel, buf);
         } else {
             lv_label_set_text(ui_homeGreyTempLabel, "--");
         }
     }
     if (ui_homeGreyStatusLabel) {
-        if (!cyd_state.waste.paired) lv_label_set_text(ui_homeGreyStatusLabel, "--");
-        else lv_label_set_text(ui_homeGreyStatusLabel, cyd_tank_status_to_string(cyd_state.waste.status));
+        if (!home_waste_status_base_set) {
+            home_waste_status_base = lv_obj_get_style_text_color(ui_homeGreyStatusLabel, LV_PART_MAIN);
+            home_waste_status_base_set = true;
+        }
+        if (!waste_assigned) {
+            lv_label_set_text(ui_homeGreyStatusLabel, "--");
+            lv_obj_set_style_text_color(ui_homeGreyStatusLabel, home_waste_status_base,
+                                        LV_PART_MAIN | LV_STATE_DEFAULT);
+        } else {
+            lv_label_set_text(ui_homeGreyStatusLabel, cyd_tank_status_to_string(cyd_state.waste.status));
+            if (cyd_state.waste.status == TANK_STATUS_FAULT) {
+                lv_obj_set_style_text_color(ui_homeGreyStatusLabel, lv_palette_main(LV_PALETTE_RED), LV_PART_MAIN | LV_STATE_DEFAULT);
+            } else {
+                lv_obj_set_style_text_color(ui_homeGreyStatusLabel, home_waste_status_base,
+                                            LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
+        }
     }
 }
 
@@ -152,8 +244,9 @@ void cyd_state_apply_to_fresh_screen(void) {
     if (ui_freshTempLabel) {
         if (cyd_state.fresh.paired && !isnan(cyd_state.fresh.temp_c)) {
             char buf[16];
-            const float temp = s_units_metric ? cyd_state.fresh.temp_c : (cyd_state.fresh.temp_c * 9.0f / 5.0f) + 32.0f;
-            snprintf(buf, sizeof(buf), "%.1f°%c", temp, s_units_metric ? 'C' : 'F');
+            float temp = s_units_metric ? cyd_state.fresh.temp_c : (cyd_state.fresh.temp_c * 9.0f / 5.0f) + 32.0f;
+            int rounded = (int) lroundf(temp);
+            snprintf(buf, sizeof(buf), "%d°%c", rounded, s_units_metric ? 'C' : 'F');
             lv_label_set_text(ui_freshTempLabel, buf);
         } else {
             lv_label_set_text(ui_freshTempLabel, "--");
@@ -164,19 +257,52 @@ void cyd_state_apply_to_fresh_screen(void) {
         else lv_label_set_text(ui_FreshStatusLabel, cyd_tank_status_to_string(cyd_state.fresh.status));
     }
     if (ui_freshLeakLabel) {
-        if (!cyd_state.fresh.paired) lv_label_set_text(ui_freshLeakLabel, "--");
-        else lv_label_set_text(ui_freshLeakLabel, cyd_state.fresh.leak ? "Leak" : "No Leak");
+        if (!fresh_leak_base_set) {
+            fresh_leak_base = lv_obj_get_style_text_color(ui_freshLeakLabel, LV_PART_MAIN);
+            fresh_leak_base_set = true;
+        }
+        if (!cyd_state.fresh.paired) {
+            lv_label_set_text(ui_freshLeakLabel, "--");
+            lv_obj_set_style_text_color(ui_freshLeakLabel, fresh_leak_base, LV_PART_MAIN | LV_STATE_DEFAULT);
+        } else {
+            const bool wet = cyd_state.fresh.leak;
+            lv_label_set_text(ui_freshLeakLabel, wet ? "Wet" : "Dry");
+            lv_obj_set_style_text_color(ui_freshLeakLabel,
+                                        wet ? lv_palette_main(LV_PALETTE_RED) : fresh_leak_base,
+                                        LV_PART_MAIN | LV_STATE_DEFAULT);
+        }
     }
     if (ui_freshFreezeLabel) {
         if (!cyd_state.fresh.paired) lv_label_set_text(ui_freshFreezeLabel, "--");
-        else lv_label_set_text(ui_freshFreezeLabel, cyd_state.fresh.freeze_enabled ? "Freeze On" : "Freeze Off");
+        else lv_label_set_text(ui_freshFreezeLabel,
+                               (cyd_state.fresh.freeze_setting > 0) ? "On" : "Off");
     }
     if (ui_freshFaultButtonLabel) {
         if (!cyd_state.fresh.paired || cyd_state.fresh.fault_code == FAULT_INVALID) {
-            lv_label_set_text(ui_freshFaultButtonLabel, "Fault --");
+            lv_label_set_text(ui_freshFaultButtonLabel, "--");
         } else {
-            lv_label_set_text_fmt(ui_freshFaultButtonLabel, "Fault %u", cyd_state.fresh.fault_code);
+            lv_label_set_text_fmt(ui_freshFaultButtonLabel, "%u", cyd_state.fresh.fault_code);
         }
+    }
+    if (ui_freshFillButton) {
+        if (!fresh_fill_base_set) {
+            fresh_fill_base = lv_obj_get_style_bg_color(ui_freshFillButton, LV_PART_MAIN);
+            fresh_fill_base_set = true;
+        }
+        const bool active = cyd_state.fresh.status == TANK_STATUS_FILL;
+        lv_obj_set_style_bg_color(ui_freshFillButton,
+                                  active ? lv_palette_main(LV_PALETTE_GREEN) : fresh_fill_base,
+                                  LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    if (ui_freshDrainButton) {
+        if (!fresh_drain_base_set) {
+            fresh_drain_base = lv_obj_get_style_bg_color(ui_freshDrainButton, LV_PART_MAIN);
+            fresh_drain_base_set = true;
+        }
+        const bool active = cyd_state.fresh.status == TANK_STATUS_DRAIN;
+        lv_obj_set_style_bg_color(ui_freshDrainButton,
+                                  active ? lv_palette_main(LV_PALETTE_GREEN) : fresh_drain_base,
+                                  LV_PART_MAIN | LV_STATE_DEFAULT);
     }
 }
 
@@ -192,8 +318,9 @@ void cyd_state_apply_to_waste_screen(void) {
     if (ui_wasteTempLabel) {
         if (cyd_state.waste.paired && !isnan(cyd_state.waste.temp_c)) {
             char buf[16];
-            const float temp = s_units_metric ? cyd_state.waste.temp_c : (cyd_state.waste.temp_c * 9.0f / 5.0f) + 32.0f;
-            snprintf(buf, sizeof(buf), "%.1f°%c", temp, s_units_metric ? 'C' : 'F');
+            float temp = s_units_metric ? cyd_state.waste.temp_c : (cyd_state.waste.temp_c * 9.0f / 5.0f) + 32.0f;
+            int rounded = (int) lroundf(temp);
+            snprintf(buf, sizeof(buf), "%d°%c", rounded, s_units_metric ? 'C' : 'F');
             lv_label_set_text(ui_wasteTempLabel, buf);
         } else {
             lv_label_set_text(ui_wasteTempLabel, "--");
@@ -204,19 +331,42 @@ void cyd_state_apply_to_waste_screen(void) {
         else lv_label_set_text(ui_wasteStatusLabel, cyd_tank_status_to_string(cyd_state.waste.status));
     }
     if (ui_wasteLeakLabel) {
-        if (!cyd_state.waste.paired) lv_label_set_text(ui_wasteLeakLabel, "--");
-        else lv_label_set_text(ui_wasteLeakLabel, cyd_state.waste.leak ? "Leak" : "No Leak");
+        if (!waste_leak_base_set) {
+            waste_leak_base = lv_obj_get_style_text_color(ui_wasteLeakLabel, LV_PART_MAIN);
+            waste_leak_base_set = true;
+        }
+        if (!cyd_state.waste.paired) {
+            lv_label_set_text(ui_wasteLeakLabel, "--");
+            lv_obj_set_style_text_color(ui_wasteLeakLabel, waste_leak_base, LV_PART_MAIN | LV_STATE_DEFAULT);
+        } else {
+            const bool wet = cyd_state.waste.leak;
+            lv_label_set_text(ui_wasteLeakLabel, wet ? "Wet" : "Dry");
+            lv_obj_set_style_text_color(ui_wasteLeakLabel,
+                                        wet ? lv_palette_main(LV_PALETTE_RED) : waste_leak_base,
+                                        LV_PART_MAIN | LV_STATE_DEFAULT);
+        }
     }
     if (ui_wasteFreezeLabel) {
         if (!cyd_state.waste.paired) lv_label_set_text(ui_wasteFreezeLabel, "--");
-        else lv_label_set_text(ui_wasteFreezeLabel, cyd_state.waste.freeze_enabled ? "Freeze On" : "Freeze Off");
+        else lv_label_set_text(ui_wasteFreezeLabel,
+                               (cyd_state.waste.freeze_setting > 0) ? "On" : "Off");
     }
     if (ui_wasteFaultButtonLabel) {
         if (!cyd_state.waste.paired || cyd_state.waste.fault_code == FAULT_INVALID) {
-            lv_label_set_text(ui_wasteFaultButtonLabel, "Fault --");
+            lv_label_set_text(ui_wasteFaultButtonLabel, "--");
         } else {
-            lv_label_set_text_fmt(ui_wasteFaultButtonLabel, "Fault %u", cyd_state.waste.fault_code);
+            lv_label_set_text_fmt(ui_wasteFaultButtonLabel, "%u", cyd_state.waste.fault_code);
         }
+    }
+    if (ui_WasteDrainButton) {
+        if (!waste_drain_base_set) {
+            waste_drain_base = lv_obj_get_style_bg_color(ui_WasteDrainButton, LV_PART_MAIN);
+            waste_drain_base_set = true;
+        }
+        const bool active = cyd_state.waste.status == TANK_STATUS_DRAIN;
+        lv_obj_set_style_bg_color(ui_WasteDrainButton,
+                                  active ? lv_palette_main(LV_PALETTE_GREEN) : waste_drain_base,
+                                  LV_PART_MAIN | LV_STATE_DEFAULT);
     }
 }
 
@@ -334,6 +484,49 @@ void cyd_state_apply_to_wastesettings_screen(void) {
 void cyd_state_apply_to_cydsettings_screen(void) {
     if (ui_cydFirmwareLabel) {
         lv_label_set_text(ui_cydFirmwareLabel, cyd_state.firmware_version);
+    }
+}
+
+void cyd_state_apply_to_cydsettings_diag_overlay(void) {
+    const bool wifi_ok = cyd_state.wifi_connected;
+    if (ui_cydsettingsdiagoverlayIP) {
+        lv_label_set_text(ui_cydsettingsdiagoverlayIP,
+                          (wifi_ok && cyd_state.wifi_ip[0]) ? cyd_state.wifi_ip : "Not connected");
+    }
+    if (ui_cydsettingsdiagoverlayID) {
+        lv_label_set_text(ui_cydsettingsdiagoverlayID,
+                          cyd_state.diag_id[0] ? cyd_state.diag_id : "--");
+    }
+    if (ui_cydsettingsdiagoverlayMAC) {
+        lv_label_set_text(ui_cydsettingsdiagoverlayMAC,
+                          cyd_state.diag_mac[0] ? cyd_state.diag_mac : "--");
+    }
+    if (ui_cydsettingsdiagoverlayWifiStatus) {
+        lv_label_set_text(ui_cydsettingsdiagoverlayWifiStatus, wifi_ok ? "Connected" : "Not connected");
+    }
+    if (ui_cydsettingsdiagoverlayWifiSignal) {
+        if (wifi_ok && cyd_state.diag_signal_dbm != INT16_MIN) {
+            lv_label_set_text_fmt(ui_cydsettingsdiagoverlayWifiSignal, "%d dBm", cyd_state.diag_signal_dbm);
+        } else {
+            lv_label_set_text(ui_cydsettingsdiagoverlayWifiSignal, "--");
+        }
+    }
+    if (ui_cydsettingsdiagoverlayUptime) {
+        const uint32_t secs = cyd_state.diag_uptime_s;
+        if (wifi_ok && secs > 0) {
+            const uint32_t mins = secs / 60;
+            const uint32_t rem = secs % 60;
+            lv_label_set_text_fmt(ui_cydsettingsdiagoverlayUptime, "%lum %02lus",
+                                  (unsigned long)mins, (unsigned long)rem);
+        } else {
+            lv_label_set_text(ui_cydsettingsdiagoverlayUptime, "--");
+        }
+    }
+    if (ui_cydsettingsdiagoverlayFreshConnected) {
+        lv_label_set_text(ui_cydsettingsdiagoverlayFreshConnected, cyd_state.fresh.paired ? "Yes" : "No");
+    }
+    if (ui_cydsettingsdiagoverlayWasteConnected) {
+        lv_label_set_text(ui_cydsettingsdiagoverlayWasteConnected, cyd_state.waste.paired ? "Yes" : "No");
     }
 }
 

@@ -1,10 +1,8 @@
 # Display Firmware (Cheap Yellow Display)
 
-LVGL-based demo firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. This build targets the stock ILI9341 TFT + XPT2046 touch stack and shows a TankPro-themed UI (home, fresh/waste detail, faults, and display settings). Current build label: **v0.0.1**.
+LVGL firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. This build targets the stock ILI9341 TFT + XPT2046 touch stack and shows live TankPro data (fresh/waste), lets you pair controllers, trigger fill/drain, clear faults, tweak thresholds, and restart controllers. Current build label: **v0.1.0**.
 
 For a step-by-step flashing guide (PlatformIO and esptool.py) aimed at users buying their own CYD, see `docs/display-firmware-installation.md`.
-
-> Status: UI/demo only right now. It does not yet talk to the TankPro controller over Wi‑Fi or UART; values on screen are placeholders. The home screen buttons and Wi‑Fi/Direct selectors are for future transport selection.
 
 ## Files and outputs
 - Source: `firmware/src/display/CYD/` (PlatformIO project).
@@ -16,6 +14,12 @@ For a step-by-step flashing guide (PlatformIO and esptool.py) aimed at users buy
 - Cheap Yellow Display / ESP32-2432S028 (240×320 ILI9341 + XPT2046 touch).
 - USB-C or Micro-USB cable for flashing (depends on your board revision).
 - USB-to-UART driver for your OS (CH9102/CP2102/CH340 as fitted to your board).
+
+## Quick usage (post-flash)
+- Connect the CYD to the same Wi‑Fi network as the controllers (or use Direct with the controller’s AP if needed).
+- Put the controller into pairing mode (3 s hold on the controller’s pair button; LEDs alternate white/blue), then assign it to Fresh/Waste from the CYD setup buttons. The CYD remembers assignments.
+- From the Fresh/Waste screens you can Fill, Drain, Clear Faults (now clears immediately on both CYD and controller), and Restart. Calibration sliders and overrides live under the Settings overlays.
+- Faults, leak status, signal strength, and firmware versions are mirrored on the CYD in real time.
 
 ## Flash with PlatformIO (recommended)
 ```bash
@@ -39,14 +43,15 @@ esptool.py --chip esp32 --baud 460800 --before default_reset --after no_reset wr
 - Adjust baud or serial port with `--port <device>` if needed.
 
 ## What you’ll see on first boot
-- Boot screen offering **Wi‑Fi** or **Direct** (non-functional placeholders for now).
-- Home cards for **Fresh** and **Waste** tanks with sample percentages and temps.
-- A **Settings** screen with brightness slider, display sleep timeout, light/dark theme, and firmware label `v0.0.1`.
+- Boot screen offering **Wi‑Fi** or **Direct** (Wi‑Fi is primary; Direct is for controller AP fallback).
+- Home cards for **Fresh** and **Waste** tanks; once paired, they show live levels, temps, leak status, and connection health.
+- Buttons for **Fill**, **Drain**, **Clear Faults**, and **Restart** per tank. Clear Faults immediately clears the local UI and sends a clear command to the controller.
+- Settings screen with brightness, sleep timeout, theme toggle, and firmware label `v0.1.0`.
 
 ## Updating
-- Rebuild and re-flash using either method above. Brightness, sleep timeout, and theme selections persist on the display between updates; the UI remains a data-only demo until controller integration lands.
+- Rebuild and re-flash using either method above. Brightness, sleep timeout, theme selections, and stored controller assignments persist on the display between updates.
 
 ## Next steps (planned)
-- Wire the Wi‑Fi/Direct choices into real connectivity to the TankPro controller.
-- Replace placeholder tank values with live data from the controller.
+- Broader direct-mode support without Wi‑Fi infrastructure.
+- Optional haptic/beeper cues and richer fault details on-screen.
 - Ship signed/prebuilt binaries alongside source for easier end-user installs.

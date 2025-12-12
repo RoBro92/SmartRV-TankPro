@@ -5,7 +5,7 @@
 
 #include "ui.h"
 
-lv_obj_t *ui_freshsettings = NULL;lv_obj_t *ui_freshsettingsroot = NULL;lv_obj_t *ui_freshsettingsheader = NULL;lv_obj_t *ui_Label43 = NULL;lv_obj_t *ui_freshsettingsBackButton = NULL;lv_obj_t *ui_Label40 = NULL;lv_obj_t *ui_freshsettingsMainCard = NULL;lv_obj_t *ui_freshsettingslabels = NULL;lv_obj_t *ui_Label38 = NULL;lv_obj_t *ui_Label49 = NULL;lv_obj_t *ui_Label50 = NULL;lv_obj_t *ui_Label46 = NULL;lv_obj_t *ui_Label47 = NULL;lv_obj_t *ui_Label48 = NULL;lv_obj_t *ui_Label52 = NULL;lv_obj_t *ui_Label53 = NULL;lv_obj_t *ui_freshsettingsControls = NULL;lv_obj_t *ui_freshsettingsFillLevelButton = NULL;lv_obj_t *ui_freshsettingsFillStopLevelLabel = NULL;lv_obj_t *ui_freshsettingsSetFullButton = NULL;lv_obj_t *ui_freshsettingsFullVoltage = NULL;lv_obj_t *ui_freshsettingsSetEmptyButton = NULL;lv_obj_t *ui_freshsettingsEmptyVoltage = NULL;lv_obj_t *ui_freshsettingsFreezeProtection = NULL;lv_obj_t *ui_freshsettingsRestart = NULL;lv_obj_t *ui_freshsettingsSafetyOveride = NULL;lv_obj_t *ui_freshsettingsValveOveride = NULL;lv_obj_t *ui_freshsettingsDiagnostic = NULL;lv_obj_t *ui_freshsettingsFillOverlay = NULL;lv_obj_t *ui_freshsettingsOverlayFillSlider = NULL;lv_obj_t *ui_freshsettingsOverlayFillPercentage = NULL;lv_obj_t *ui_freshsettingsOverlayBackButton = NULL;lv_obj_t *ui_Label51 = NULL;lv_obj_t *ui_freshsettingsDiagnosticOverlay = NULL;lv_obj_t *ui_Container7 = NULL;lv_obj_t *ui_Container5 = NULL;lv_obj_t *ui_Label54 = NULL;lv_obj_t *ui_Label55 = NULL;lv_obj_t *ui_Label56 = NULL;lv_obj_t *ui_Label57 = NULL;lv_obj_t *ui_Label58 = NULL;lv_obj_t *ui_Label59 = NULL;lv_obj_t *ui_Label60 = NULL;lv_obj_t *ui_Label61 = NULL;lv_obj_t *ui_Label62 = NULL;lv_obj_t *ui_Container6 = NULL;lv_obj_t *ui_freshsettingsdiagoverlayIP = NULL;lv_obj_t *ui_freshsettingsdiagoverlayID = NULL;lv_obj_t *ui_freshsettingsdiagoverlayMAC = NULL;lv_obj_t *ui_freshsettingsdiagoverlayStatus = NULL;lv_obj_t *ui_freshsettingsdiagoverlayRole = NULL;lv_obj_t *ui_freshsettingsdiagoverlayUptime = NULL;lv_obj_t *ui_freshsettingsdiagoverlaySignal = NULL;lv_obj_t *ui_freshsettingsdiagoverlayVersion = NULL;lv_obj_t *ui_freshsettingDiagnosticOverlayBackButton = NULL;lv_obj_t *ui_Label63 = NULL;
+lv_obj_t *ui_freshsettings = NULL;lv_obj_t *ui_freshsettingsroot = NULL;lv_obj_t *ui_freshsettingsheader = NULL;lv_obj_t *ui_Label43 = NULL;lv_obj_t *ui_freshsettingsBackButton = NULL;lv_obj_t *ui_freshsettingsMainCard = NULL;lv_obj_t *ui_freshsettingslabels = NULL;lv_obj_t *ui_Label38 = NULL;lv_obj_t *ui_Label49 = NULL;lv_obj_t *ui_Label50 = NULL;lv_obj_t *ui_Label46 = NULL;lv_obj_t *ui_Label47 = NULL;lv_obj_t *ui_Label48 = NULL;lv_obj_t *ui_Label52 = NULL;lv_obj_t *ui_Label53 = NULL;lv_obj_t *ui_Label102 = NULL;lv_obj_t *ui_freshsettingsControls = NULL;lv_obj_t *ui_freshsettingsFillLevelButton = NULL;lv_obj_t *ui_freshsettingsFillStopLevelLabel = NULL;lv_obj_t *ui_freshsettingsSetFullButton = NULL;lv_obj_t *ui_freshsettingsFullVoltage = NULL;lv_obj_t *ui_freshsettingsSetEmptyButton = NULL;lv_obj_t *ui_freshsettingsEmptyVoltage = NULL;lv_obj_t *ui_freshsettingsFreezeProtection = NULL;lv_obj_t *ui_freshsettingsRestart = NULL;lv_obj_t *ui_freshsettingsSafetyOveride = NULL;lv_obj_t *ui_freshsettingsValveOveride = NULL;lv_obj_t *ui_freshsettingsDiagnostic = NULL;lv_obj_t *ui_freshsettingsRemove = NULL;lv_obj_t *ui_freshsettingsFillOverlay = NULL;lv_obj_t *ui_freshsettingsOverlayFillSlider = NULL;lv_obj_t *ui_freshsettingsOverlayFillPercentage = NULL;lv_obj_t *ui_freshsettingsOverlayBackButton = NULL;lv_obj_t *ui_Label51 = NULL;lv_obj_t *ui_freshsettingsDiagnosticOverlay = NULL;lv_obj_t *ui_Container7 = NULL;lv_obj_t *ui_Container5 = NULL;lv_obj_t *ui_Label54 = NULL;lv_obj_t *ui_Label55 = NULL;lv_obj_t *ui_Label56 = NULL;lv_obj_t *ui_Label57 = NULL;lv_obj_t *ui_Label58 = NULL;lv_obj_t *ui_Label59 = NULL;lv_obj_t *ui_Label60 = NULL;lv_obj_t *ui_Label61 = NULL;lv_obj_t *ui_Container6 = NULL;lv_obj_t *ui_freshsettingsdiagoverlayIP = NULL;lv_obj_t *ui_freshsettingsdiagoverlayID = NULL;lv_obj_t *ui_freshsettingsdiagoverlayMAC = NULL;lv_obj_t *ui_freshsettingsdiagoverlayStatus = NULL;lv_obj_t *ui_freshsettingsdiagoverlayRole = NULL;lv_obj_t *ui_freshsettingsdiagoverlayUptime = NULL;lv_obj_t *ui_freshsettingsdiagoverlaySignal = NULL;lv_obj_t *ui_freshsettingsdiagoverlayVersion = NULL;lv_obj_t *ui_freshsettingDiagnosticOverlayBackButton = NULL;lv_obj_t *ui_Label63 = NULL;
 // event funtions
 
 // build funtions
@@ -52,32 +52,16 @@ ui_object_set_themeable_style_property(ui_Label43, LV_PART_MAIN| LV_STATE_DEFAUL
 ui_object_set_themeable_style_property(ui_Label43, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_black);
 lv_obj_set_style_text_font(ui_Label43, &lv_font_montserrat_20, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_freshsettingsBackButton = lv_button_create(ui_freshsettingsheader);
-lv_obj_set_width( ui_freshsettingsBackButton, 40);
-lv_obj_set_height( ui_freshsettingsBackButton, 40);
+ui_freshsettingsBackButton = lv_image_create(ui_freshsettingsheader);
+lv_image_set_src(ui_freshsettingsBackButton, &ui_img_back2_png);
+lv_obj_set_width( ui_freshsettingsBackButton, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_freshsettingsBackButton, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_freshsettingsBackButton, -93 );
-lv_obj_set_y( ui_freshsettingsBackButton, 0 );
+lv_obj_set_y( ui_freshsettingsBackButton, 3 );
 lv_obj_set_align( ui_freshsettingsBackButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_freshsettingsBackButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_freshsettingsBackButton, LV_OBJ_FLAG_CLICKABLE );   /// Flags
 lv_obj_remove_flag( ui_freshsettingsBackButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_radius(ui_freshsettingsBackButton, 50, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_freshsettingsBackButton, lv_color_hex(0x0099A5), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_freshsettingsBackButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_freshsettingsBackButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_outline_opa(ui_freshsettingsBackButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_width(ui_freshsettingsBackButton, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_pad(ui_freshsettingsBackButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_Label40 = lv_label_create(ui_freshsettingsBackButton);
-lv_obj_set_width( ui_Label40, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label40, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_Label40, -2 );
-lv_obj_set_y( ui_Label40, 1 );
-lv_obj_set_align( ui_Label40, LV_ALIGN_CENTER );
-lv_label_set_text(ui_Label40,"<");
-lv_obj_set_style_text_color(ui_Label40, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_Label40, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label40, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_transform_scale(ui_freshsettingsBackButton, 220, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_freshsettingsMainCard = lv_obj_create(ui_freshsettingsroot);
 lv_obj_set_width( ui_freshsettingsMainCard, 224);
@@ -129,7 +113,7 @@ ui_Label46 = lv_label_create(ui_freshsettingslabels);
 lv_obj_set_width( ui_Label46, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label46, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label46, LV_ALIGN_CENTER );
-lv_label_set_text(ui_Label46,"Freeze Protection");
+lv_label_set_text(ui_Label46,"Freeze Protect");
 
 ui_Label47 = lv_label_create(ui_freshsettingslabels);
 lv_obj_set_width( ui_Label47, LV_SIZE_CONTENT);  /// 1
@@ -154,6 +138,12 @@ lv_obj_set_width( ui_Label53, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label53, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label53, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label53,"Diagnostic");
+
+ui_Label102 = lv_label_create(ui_freshsettingslabels);
+lv_obj_set_width( ui_Label102, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_Label102, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label102, LV_ALIGN_CENTER );
+lv_label_set_text(ui_Label102,"Remove");
 
 ui_freshsettingsControls = lv_obj_create(ui_freshsettingsMainCard);
 lv_obj_remove_style_all(ui_freshsettingsControls);
@@ -247,6 +237,13 @@ lv_obj_set_align( ui_freshsettingsDiagnostic, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_freshsettingsDiagnostic, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 lv_obj_remove_flag( ui_freshsettingsDiagnostic, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
+ui_freshsettingsRemove = lv_button_create(ui_freshsettingsControls);
+lv_obj_set_width( ui_freshsettingsRemove, 60);
+lv_obj_set_height( ui_freshsettingsRemove, 30);
+lv_obj_set_align( ui_freshsettingsRemove, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_freshsettingsRemove, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_remove_flag( ui_freshsettingsRemove, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+
 ui_freshsettingsFillOverlay = lv_obj_create(ui_freshsettings);
 lv_obj_remove_style_all(ui_freshsettingsFillOverlay);
 lv_obj_set_width( ui_freshsettingsFillOverlay, 207);
@@ -321,9 +318,9 @@ lv_obj_set_style_pad_column(ui_freshsettingsDiagnosticOverlay, 0, LV_PART_MAIN| 
 ui_Container7 = lv_obj_create(ui_freshsettingsDiagnosticOverlay);
 lv_obj_remove_style_all(ui_Container7);
 lv_obj_set_width( ui_Container7, 196);
-lv_obj_set_height( ui_Container7, 207);
+lv_obj_set_height( ui_Container7, 241);
 lv_obj_set_x( ui_Container7, 0 );
-lv_obj_set_y( ui_Container7, -46 );
+lv_obj_set_y( ui_Container7, -35 );
 lv_obj_set_align( ui_Container7, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_Container7,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_Container7, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -389,12 +386,6 @@ lv_obj_set_width( ui_Label61, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label61, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label61, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label61,"Version");
-
-ui_Label62 = lv_label_create(ui_Container5);
-lv_obj_set_width( ui_Label62, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label62, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_Label62, LV_ALIGN_CENTER );
-lv_label_set_text(ui_Label62,"");
 
 ui_Container6 = lv_obj_create(ui_Container7);
 lv_obj_remove_style_all(ui_Container6);
@@ -489,7 +480,6 @@ ui_freshsettingsroot= NULL;
 ui_freshsettingsheader= NULL;
 ui_Label43= NULL;
 ui_freshsettingsBackButton= NULL;
-ui_Label40= NULL;
 ui_freshsettingsMainCard= NULL;
 ui_freshsettingslabels= NULL;
 ui_Label38= NULL;
@@ -500,6 +490,7 @@ ui_Label47= NULL;
 ui_Label48= NULL;
 ui_Label52= NULL;
 ui_Label53= NULL;
+ui_Label102= NULL;
 ui_freshsettingsControls= NULL;
 ui_freshsettingsFillLevelButton= NULL;
 ui_freshsettingsFillStopLevelLabel= NULL;
@@ -512,6 +503,7 @@ ui_freshsettingsRestart= NULL;
 ui_freshsettingsSafetyOveride= NULL;
 ui_freshsettingsValveOveride= NULL;
 ui_freshsettingsDiagnostic= NULL;
+ui_freshsettingsRemove= NULL;
 ui_freshsettingsFillOverlay= NULL;
 ui_freshsettingsOverlayFillSlider= NULL;
 ui_freshsettingsOverlayFillPercentage= NULL;
@@ -528,7 +520,6 @@ ui_Label58= NULL;
 ui_Label59= NULL;
 ui_Label60= NULL;
 ui_Label61= NULL;
-ui_Label62= NULL;
 ui_Container6= NULL;
 ui_freshsettingsdiagoverlayIP= NULL;
 ui_freshsettingsdiagoverlayID= NULL;

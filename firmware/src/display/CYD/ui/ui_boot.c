@@ -17,7 +17,7 @@ lv_obj_t *uic_bootTitle3;
 lv_obj_t *uic_bootTitle;
 lv_obj_t *uic_bootRoot;
 lv_obj_t *uic_boot;
-lv_obj_t *ui_boot = NULL;lv_obj_t *ui_bootRoot = NULL;lv_obj_t *ui_bootTitle = NULL;lv_obj_t *ui_bootTitle3 = NULL;lv_obj_t *ui_bootwifipanel = NULL;lv_obj_t *ui_bootWifiButton = NULL;lv_obj_t *ui_wifibuttonlabel = NULL;lv_obj_t *ui_wifidesclabel = NULL;lv_obj_t *ui_bootDirectPanel = NULL;lv_obj_t *ui_bootDirectButton = NULL;lv_obj_t *ui_bootDirectLabel = NULL;lv_obj_t *ui_directdesclabel = NULL;lv_obj_t *ui_bootFirmwareLabel = NULL;lv_obj_t *ui_overlayBootWifi = NULL;lv_obj_t *ui_popupbootwifi = NULL;lv_obj_t *ui_lblbootwifititle = NULL;lv_obj_t *ui_lblbootwifidesc = NULL;lv_obj_t *ui_ssid_container = NULL;lv_obj_t *ui_Label4 = NULL;lv_obj_t *ui_bootWifissid = NULL;lv_obj_t *ui_pwd_container1 = NULL;lv_obj_t *ui_Label9 = NULL;lv_obj_t *ui_bootWifipass = NULL;lv_obj_t *ui_Label10 = NULL;lv_obj_t *ui_Container4 = NULL;lv_obj_t *ui_buttonBootWifiBack = NULL;lv_obj_t *ui_Label11 = NULL;lv_obj_t *ui_buttonBootWifiNext = NULL;lv_obj_t *ui_Label12 = NULL;lv_obj_t *ui_overlayBootDirect = NULL;lv_obj_t *ui_popupbootwifi1 = NULL;lv_obj_t *ui_lbldirect = NULL;lv_obj_t *ui_directcont1 = NULL;lv_obj_t *ui_Label13 = NULL;lv_obj_t *ui_bootdirectlist = NULL;lv_obj_t *ui_lblBootDirectEmpty = NULL;lv_obj_t *ui_directdevicetemplate = NULL;lv_obj_t *ui_lbldirectdevnametemplate = NULL;lv_obj_t *ui_lbldirectdeviptemplate = NULL;lv_obj_t *ui_direct_buttons = NULL;lv_obj_t *ui_buttonbootdirectback = NULL;lv_obj_t *ui_Label29 = NULL;lv_obj_t *ui_buttonbootdirectscan = NULL;lv_obj_t *ui_Label30 = NULL;lv_obj_t *ui_overlayAssignDirectRole = NULL;lv_obj_t *ui_contasign1 = NULL;lv_obj_t *ui_lblasign = NULL;lv_obj_t *ui_contasign2 = NULL;lv_obj_t *ui_lvlassigndevicetitle = NULL;lv_obj_t *ui_DirectAssignDeviceName = NULL;lv_obj_t *ui_contasignbuttons = NULL;lv_obj_t *ui_buttonbootasignfresh = NULL;lv_obj_t *ui_Label28 = NULL;lv_obj_t *ui_buttonbootasignwaste = NULL;lv_obj_t *ui_Label31 = NULL;lv_obj_t *ui_contasignbuttons1 = NULL;lv_obj_t *ui_buttonbootasignfresh1 = NULL;lv_obj_t *ui_Label23 = NULL;lv_obj_t *ui_buttonbootasignwaste1 = NULL;lv_obj_t *ui_Label32 = NULL;
+lv_obj_t *ui_boot = NULL;lv_obj_t *ui_bootRoot = NULL;lv_obj_t *ui_bootTitle = NULL;lv_obj_t *ui_bootTitle3 = NULL;lv_obj_t *ui_bootwifipanel = NULL;lv_obj_t *ui_bootWifiButton = NULL;lv_obj_t *ui_wifibuttonlabel = NULL;lv_obj_t *ui_wifidesclabel = NULL;lv_obj_t *ui_bootDirectPanel = NULL;lv_obj_t *ui_bootDirectButton = NULL;lv_obj_t *ui_bootDirectLabel = NULL;lv_obj_t *ui_directdesclabel = NULL;lv_obj_t *ui_bootFirmwareLabel = NULL;lv_obj_t *ui_overlayBootWifi = NULL;lv_obj_t *ui_popupbootwifi = NULL;lv_obj_t *ui_lblbootwifititle = NULL;lv_obj_t *ui_lblbootwifidesc = NULL;lv_obj_t *ui_ssid_container = NULL;lv_obj_t *ui_Label4 = NULL;lv_obj_t *ui_bootWifissid = NULL;lv_obj_t *ui_pwd_container1 = NULL;lv_obj_t *ui_Label9 = NULL;lv_obj_t *ui_bootWifipass = NULL;lv_obj_t *ui_Label10 = NULL;lv_obj_t *ui_Container4 = NULL;lv_obj_t *ui_buttonBootWifiBack = NULL;lv_obj_t *ui_Label11 = NULL;lv_obj_t *ui_overlayBootDirect = NULL;lv_obj_t *ui_popupbootwifi1 = NULL;lv_obj_t *ui_lbldirect = NULL;lv_obj_t *ui_directcont1 = NULL;lv_obj_t *ui_Label13 = NULL;lv_obj_t *ui_bootdirectlist = NULL;lv_obj_t *ui_lblBootDirectEmpty = NULL;lv_obj_t *ui_directdevicetemplate = NULL;lv_obj_t *ui_lbldirectdevnametemplate = NULL;lv_obj_t *ui_lbldirectdeviptemplate = NULL;lv_obj_t *ui_direct_buttons = NULL;lv_obj_t *ui_buttonbootdirectback = NULL;lv_obj_t *ui_Label29 = NULL;lv_obj_t *ui_buttonbootdirectscan = NULL;lv_obj_t *ui_Label30 = NULL;lv_obj_t *ui_bootOverlayAssignRole = NULL;lv_obj_t *ui_contasignheader = NULL;lv_obj_t *ui_lblasign = NULL;lv_obj_t *ui_contasigndevice = NULL;lv_obj_t *ui_Label12 = NULL;lv_obj_t *ui_bootAssignDeviceList = NULL;lv_obj_t *ui_contasignbuttons = NULL;lv_obj_t *ui_bootAssignFreshButton = NULL;lv_obj_t *ui_Label28 = NULL;lv_obj_t *ui_bootAssignWasteButton = NULL;lv_obj_t *ui_Label31 = NULL;lv_obj_t *ui_contasignbuttons1 = NULL;lv_obj_t *ui_bootAssignCancelButton = NULL;lv_obj_t *ui_Label23 = NULL;lv_obj_t *ui_bootAssignConfirmButton = NULL;lv_obj_t *ui_Label32 = NULL;
 // event funtions
 void ui_event_bootWifiButton( lv_event_t * e) {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -67,7 +67,7 @@ lv_obj_set_height( ui_bootTitle3, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_bootTitle3, 12 );
 lv_obj_set_y( ui_bootTitle3, -316 );
 lv_obj_set_align( ui_bootTitle3, LV_ALIGN_TOP_MID );
-lv_label_set_text(ui_bootTitle3,"Choose how this display connects to your controller");
+lv_label_set_text(ui_bootTitle3,"Choose how this display connects to your system.");
 lv_obj_set_style_text_color(ui_bootTitle3, lv_color_hex(0xF8F2F2), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_bootTitle3, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_text_align(ui_bootTitle3, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -155,7 +155,7 @@ lv_obj_set_height( ui_bootFirmwareLabel, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_bootFirmwareLabel, 59 );
 lv_obj_set_y( ui_bootFirmwareLabel, 3 );
 lv_obj_set_align( ui_bootFirmwareLabel, LV_ALIGN_CENTER );
-lv_label_set_text(ui_bootFirmwareLabel,"Firmware: v0.0.1");
+lv_label_set_text(ui_bootFirmwareLabel,"versiontest");
 ui_object_set_themeable_style_property(ui_bootFirmwareLabel, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_text);
 ui_object_set_themeable_style_property(ui_bootFirmwareLabel, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_text);
 lv_obj_set_style_text_align(ui_bootFirmwareLabel, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
@@ -234,7 +234,7 @@ ui_bootWifissid = lv_label_create(ui_ssid_container);
 lv_obj_set_width( ui_bootWifissid, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_bootWifissid, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_bootWifissid, LV_ALIGN_CENTER );
-lv_label_set_text(ui_bootWifissid,"SmartRV-TankPro-xxxx");
+lv_label_set_text(ui_bootWifissid,"test");
 ui_object_set_themeable_style_property(ui_bootWifissid, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_text);
 ui_object_set_themeable_style_property(ui_bootWifissid, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_text);
 
@@ -262,7 +262,7 @@ ui_bootWifipass = lv_label_create(ui_pwd_container1);
 lv_obj_set_width( ui_bootWifipass, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_bootWifipass, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_bootWifipass, LV_ALIGN_CENTER );
-lv_label_set_text(ui_bootWifipass,"changeme");
+lv_label_set_text(ui_bootWifipass,"test");
 ui_object_set_themeable_style_property(ui_bootWifipass, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_text);
 ui_object_set_themeable_style_property(ui_bootWifipass, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_text);
 
@@ -289,7 +289,7 @@ lv_obj_set_style_pad_row(ui_Container4, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_Container4, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_buttonBootWifiBack = lv_button_create(ui_Container4);
-lv_obj_set_width( ui_buttonBootWifiBack, 80);
+lv_obj_set_width( ui_buttonBootWifiBack, 164);
 lv_obj_set_height( ui_buttonBootWifiBack, 40);
 lv_obj_set_align( ui_buttonBootWifiBack, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_buttonBootWifiBack, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
@@ -300,19 +300,6 @@ lv_obj_set_width( ui_Label11, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label11, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label11, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label11,"Back");
-
-ui_buttonBootWifiNext = lv_button_create(ui_Container4);
-lv_obj_set_width( ui_buttonBootWifiNext, 80);
-lv_obj_set_height( ui_buttonBootWifiNext, 40);
-lv_obj_set_align( ui_buttonBootWifiNext, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_buttonBootWifiNext, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_remove_flag( ui_buttonBootWifiNext, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-
-ui_Label12 = lv_label_create(ui_buttonBootWifiNext);
-lv_obj_set_width( ui_Label12, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label12, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_align( ui_Label12, LV_ALIGN_CENTER );
-lv_label_set_text(ui_Label12,"Next");
 
 ui_overlayBootDirect = lv_obj_create(ui_boot);
 lv_obj_remove_style_all(ui_overlayBootDirect);
@@ -465,37 +452,42 @@ lv_obj_set_height( ui_Label30, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label30, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label30,"Scan");
 
-ui_overlayAssignDirectRole = lv_obj_create(ui_boot);
-lv_obj_remove_style_all(ui_overlayAssignDirectRole);
-lv_obj_set_width( ui_overlayAssignDirectRole, 240);
-lv_obj_set_height( ui_overlayAssignDirectRole, 295);
-lv_obj_set_align( ui_overlayAssignDirectRole, LV_ALIGN_CENTER );
-lv_obj_set_flex_flow(ui_overlayAssignDirectRole,LV_FLEX_FLOW_COLUMN);
-lv_obj_set_flex_align(ui_overlayAssignDirectRole, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-lv_obj_add_flag( ui_overlayAssignDirectRole, LV_OBJ_FLAG_HIDDEN );   /// Flags
-lv_obj_remove_flag( ui_overlayAssignDirectRole, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-ui_object_set_themeable_style_property(ui_overlayAssignDirectRole, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_black);
-ui_object_set_themeable_style_property(ui_overlayAssignDirectRole, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_black);
-lv_obj_set_style_blend_mode(ui_overlayAssignDirectRole, LV_BLEND_MODE_NORMAL, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_opa(ui_overlayAssignDirectRole, 240, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_overlayAssignDirectRole, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_overlayAssignDirectRole, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+ui_bootOverlayAssignRole = lv_obj_create(ui_boot);
+lv_obj_remove_style_all(ui_bootOverlayAssignRole);
+lv_obj_set_width( ui_bootOverlayAssignRole, lv_pct(100));
+lv_obj_set_height( ui_bootOverlayAssignRole, lv_pct(100));
+lv_obj_set_align( ui_bootOverlayAssignRole, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_bootOverlayAssignRole,LV_FLEX_FLOW_COLUMN);
+lv_obj_set_flex_align(ui_bootOverlayAssignRole, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_add_flag( ui_bootOverlayAssignRole, LV_OBJ_FLAG_HIDDEN );   /// Flags
+lv_obj_remove_flag( ui_bootOverlayAssignRole, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(ui_bootOverlayAssignRole, 20, LV_PART_MAIN| LV_STATE_DEFAULT);
+ui_object_set_themeable_style_property(ui_bootOverlayAssignRole, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_COLOR, _ui_theme_color_black);
+ui_object_set_themeable_style_property(ui_bootOverlayAssignRole, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_BG_OPA, _ui_theme_alpha_black);
+lv_obj_set_style_blend_mode(ui_bootOverlayAssignRole, LV_BLEND_MODE_NORMAL, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_opa(ui_bootOverlayAssignRole, 240, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_left(ui_bootOverlayAssignRole, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_right(ui_bootOverlayAssignRole, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_top(ui_bootOverlayAssignRole, 10, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_bottom(ui_bootOverlayAssignRole, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_bootOverlayAssignRole, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_bootOverlayAssignRole, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_contasign1 = lv_obj_create(ui_overlayAssignDirectRole);
-lv_obj_remove_style_all(ui_contasign1);
-lv_obj_set_width( ui_contasign1, 220);
-lv_obj_set_height( ui_contasign1, 43);
-lv_obj_set_x( ui_contasign1, 1 );
-lv_obj_set_y( ui_contasign1, -53 );
-lv_obj_set_align( ui_contasign1, LV_ALIGN_CENTER );
-lv_obj_set_flex_flow(ui_contasign1,LV_FLEX_FLOW_COLUMN);
-lv_obj_set_flex_align(ui_contasign1, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-lv_obj_remove_flag( ui_contasign1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_radius(ui_contasign1, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_row(ui_contasign1, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_contasign1, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
+ui_contasignheader = lv_obj_create(ui_bootOverlayAssignRole);
+lv_obj_remove_style_all(ui_contasignheader);
+lv_obj_set_width( ui_contasignheader, 220);
+lv_obj_set_height( ui_contasignheader, 43);
+lv_obj_set_x( ui_contasignheader, 1 );
+lv_obj_set_y( ui_contasignheader, -53 );
+lv_obj_set_align( ui_contasignheader, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_contasignheader,LV_FLEX_FLOW_COLUMN);
+lv_obj_set_flex_align(ui_contasignheader, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_remove_flag( ui_contasignheader, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_radius(ui_contasignheader, 12, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_row(ui_contasignheader, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_contasignheader, 8, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_lblasign = lv_label_create(ui_contasign1);
+ui_lblasign = lv_label_create(ui_contasignheader);
 lv_obj_set_width( ui_lblasign, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_lblasign, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_lblasign, LV_ALIGN_CENTER );
@@ -504,43 +496,42 @@ ui_object_set_themeable_style_property(ui_lblasign, LV_PART_MAIN| LV_STATE_DEFAU
 ui_object_set_themeable_style_property(ui_lblasign, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_text);
 lv_obj_set_style_text_font(ui_lblasign, &lv_font_montserrat_30, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_contasign2 = lv_obj_create(ui_overlayAssignDirectRole);
-lv_obj_remove_style_all(ui_contasign2);
-lv_obj_set_width( ui_contasign2, 220);
-lv_obj_set_height( ui_contasign2, 100);
-lv_obj_set_align( ui_contasign2, LV_ALIGN_CENTER );
-lv_obj_set_flex_flow(ui_contasign2,LV_FLEX_FLOW_COLUMN);
-lv_obj_set_flex_align(ui_contasign2, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-lv_obj_remove_flag( ui_contasign2, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_pad_row(ui_contasign2, 35, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_pad_column(ui_contasign2, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
+ui_contasigndevice = lv_obj_create(ui_bootOverlayAssignRole);
+lv_obj_remove_style_all(ui_contasigndevice);
+lv_obj_set_width( ui_contasigndevice, 220);
+lv_obj_set_height( ui_contasigndevice, 157);
+lv_obj_set_x( ui_contasigndevice, 0 );
+lv_obj_set_y( ui_contasigndevice, -3 );
+lv_obj_set_align( ui_contasigndevice, LV_ALIGN_CENTER );
+lv_obj_set_flex_flow(ui_contasigndevice,LV_FLEX_FLOW_COLUMN);
+lv_obj_set_flex_align(ui_contasigndevice, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+lv_obj_remove_flag( ui_contasigndevice, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_pad_row(ui_contasigndevice, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_pad_column(ui_contasigndevice, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_lvlassigndevicetitle = lv_label_create(ui_contasign2);
-lv_obj_set_width( ui_lvlassigndevicetitle, lv_pct(100));
-lv_obj_set_height( ui_lvlassigndevicetitle, lv_pct(10));
-lv_obj_set_x( ui_lvlassigndevicetitle, -4 );
-lv_obj_set_y( ui_lvlassigndevicetitle, -51 );
-lv_obj_set_align( ui_lvlassigndevicetitle, LV_ALIGN_CENTER );
-lv_label_set_text(ui_lvlassigndevicetitle,"Device:");
-ui_object_set_themeable_style_property(ui_lvlassigndevicetitle, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_text);
-ui_object_set_themeable_style_property(ui_lvlassigndevicetitle, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_text);
-lv_obj_set_style_text_align(ui_lvlassigndevicetitle, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
+ui_Label12 = lv_label_create(ui_contasigndevice);
+lv_obj_set_width( ui_Label12, lv_pct(90));
+lv_obj_set_height( ui_Label12, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_Label12, LV_ALIGN_CENTER );
+lv_label_set_text(ui_Label12,"Press and hold PAIR on the controller for 5 seconds\n\nLights on controller will flash:\n\nDevice ID:");
+ui_object_set_themeable_style_property(ui_Label12, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_text);
+ui_object_set_themeable_style_property(ui_Label12, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_text);
+lv_obj_set_style_text_align(ui_Label12, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_Label12, &lv_font_montserrat_12, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_DirectAssignDeviceName = lv_label_create(ui_contasign2);
-lv_obj_set_width( ui_DirectAssignDeviceName, lv_pct(100));
-lv_obj_set_height( ui_DirectAssignDeviceName, lv_pct(10));
-lv_obj_set_x( ui_DirectAssignDeviceName, -4 );
-lv_obj_set_y( ui_DirectAssignDeviceName, -51 );
-lv_obj_set_align( ui_DirectAssignDeviceName, LV_ALIGN_CENTER );
-lv_label_set_text(ui_DirectAssignDeviceName,"None");
-ui_object_set_themeable_style_property(ui_DirectAssignDeviceName, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_COLOR, _ui_theme_color_text);
-ui_object_set_themeable_style_property(ui_DirectAssignDeviceName, LV_PART_MAIN| LV_STATE_DEFAULT, LV_STYLE_TEXT_OPA, _ui_theme_alpha_text);
-lv_obj_set_style_text_align(ui_DirectAssignDeviceName, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN| LV_STATE_DEFAULT);
+ui_bootAssignDeviceList = lv_dropdown_create(ui_contasigndevice);
+lv_dropdown_set_options( ui_bootAssignDeviceList, "test" );
+lv_obj_set_width( ui_bootAssignDeviceList, 206);
+lv_obj_set_height( ui_bootAssignDeviceList, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_align( ui_bootAssignDeviceList, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_bootAssignDeviceList, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
 
-ui_contasignbuttons = lv_obj_create(ui_overlayAssignDirectRole);
+ui_contasignbuttons = lv_obj_create(ui_bootOverlayAssignRole);
 lv_obj_remove_style_all(ui_contasignbuttons);
 lv_obj_set_width( ui_contasignbuttons, 220);
-lv_obj_set_height( ui_contasignbuttons, 97);
+lv_obj_set_height( ui_contasignbuttons, 47);
+lv_obj_set_x( ui_contasignbuttons, 0 );
+lv_obj_set_y( ui_contasignbuttons, -19 );
 lv_obj_set_align( ui_contasignbuttons, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_contasignbuttons,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_contasignbuttons, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
@@ -548,36 +539,38 @@ lv_obj_remove_flag( ui_contasignbuttons, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCR
 lv_obj_set_style_pad_row(ui_contasignbuttons, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_contasignbuttons, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_buttonbootasignfresh = lv_button_create(ui_contasignbuttons);
-lv_obj_set_width( ui_buttonbootasignfresh, 80);
-lv_obj_set_height( ui_buttonbootasignfresh, 40);
-lv_obj_set_align( ui_buttonbootasignfresh, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_buttonbootasignfresh, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_remove_flag( ui_buttonbootasignfresh, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+ui_bootAssignFreshButton = lv_button_create(ui_contasignbuttons);
+lv_obj_set_width( ui_bootAssignFreshButton, 80);
+lv_obj_set_height( ui_bootAssignFreshButton, 40);
+lv_obj_set_align( ui_bootAssignFreshButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_bootAssignFreshButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_remove_flag( ui_bootAssignFreshButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_Label28 = lv_label_create(ui_buttonbootasignfresh);
+ui_Label28 = lv_label_create(ui_bootAssignFreshButton);
 lv_obj_set_width( ui_Label28, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label28, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label28, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label28,"Fresh");
 
-ui_buttonbootasignwaste = lv_button_create(ui_contasignbuttons);
-lv_obj_set_width( ui_buttonbootasignwaste, 80);
-lv_obj_set_height( ui_buttonbootasignwaste, 40);
-lv_obj_set_align( ui_buttonbootasignwaste, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_buttonbootasignwaste, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_remove_flag( ui_buttonbootasignwaste, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+ui_bootAssignWasteButton = lv_button_create(ui_contasignbuttons);
+lv_obj_set_width( ui_bootAssignWasteButton, 80);
+lv_obj_set_height( ui_bootAssignWasteButton, 40);
+lv_obj_set_align( ui_bootAssignWasteButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_bootAssignWasteButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_remove_flag( ui_bootAssignWasteButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 
-ui_Label31 = lv_label_create(ui_buttonbootasignwaste);
+ui_Label31 = lv_label_create(ui_bootAssignWasteButton);
 lv_obj_set_width( ui_Label31, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label31, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label31, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label31,"Waste");
 
-ui_contasignbuttons1 = lv_obj_create(ui_overlayAssignDirectRole);
+ui_contasignbuttons1 = lv_obj_create(ui_bootOverlayAssignRole);
 lv_obj_remove_style_all(ui_contasignbuttons1);
 lv_obj_set_width( ui_contasignbuttons1, 220);
 lv_obj_set_height( ui_contasignbuttons1, 47);
+lv_obj_set_x( ui_contasignbuttons1, -2 );
+lv_obj_set_y( ui_contasignbuttons1, 16 );
 lv_obj_set_align( ui_contasignbuttons1, LV_ALIGN_CENTER );
 lv_obj_set_flex_flow(ui_contasignbuttons1,LV_FLEX_FLOW_ROW);
 lv_obj_set_flex_align(ui_contasignbuttons1, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
@@ -585,31 +578,39 @@ lv_obj_remove_flag( ui_contasignbuttons1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SC
 lv_obj_set_style_pad_row(ui_contasignbuttons1, 1, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_obj_set_style_pad_column(ui_contasignbuttons1, 15, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_buttonbootasignfresh1 = lv_button_create(ui_contasignbuttons1);
-lv_obj_set_width( ui_buttonbootasignfresh1, 80);
-lv_obj_set_height( ui_buttonbootasignfresh1, 40);
-lv_obj_set_align( ui_buttonbootasignfresh1, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_buttonbootasignfresh1, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_remove_flag( ui_buttonbootasignfresh1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+ui_bootAssignCancelButton = lv_button_create(ui_contasignbuttons1);
+lv_obj_set_width( ui_bootAssignCancelButton, 80);
+lv_obj_set_height( ui_bootAssignCancelButton, 40);
+lv_obj_set_align( ui_bootAssignCancelButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_bootAssignCancelButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_remove_flag( ui_bootAssignCancelButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_bootAssignCancelButton, lv_color_hex(0xDD1515), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_bootAssignCancelButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_Label23 = lv_label_create(ui_buttonbootasignfresh1);
+ui_Label23 = lv_label_create(ui_bootAssignCancelButton);
 lv_obj_set_width( ui_Label23, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label23, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label23, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label23,"Cancel");
+lv_obj_set_style_text_color(ui_Label23, lv_color_hex(0x0D0D0D), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_Label23, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_buttonbootasignwaste1 = lv_button_create(ui_contasignbuttons1);
-lv_obj_set_width( ui_buttonbootasignwaste1, 80);
-lv_obj_set_height( ui_buttonbootasignwaste1, 40);
-lv_obj_set_align( ui_buttonbootasignwaste1, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_buttonbootasignwaste1, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
-lv_obj_remove_flag( ui_buttonbootasignwaste1, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+ui_bootAssignConfirmButton = lv_button_create(ui_contasignbuttons1);
+lv_obj_set_width( ui_bootAssignConfirmButton, 80);
+lv_obj_set_height( ui_bootAssignConfirmButton, 40);
+lv_obj_set_align( ui_bootAssignConfirmButton, LV_ALIGN_CENTER );
+lv_obj_add_flag( ui_bootAssignConfirmButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_remove_flag( ui_bootAssignConfirmButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_bootAssignConfirmButton, lv_color_hex(0x10E857), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_bootAssignConfirmButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_Label32 = lv_label_create(ui_buttonbootasignwaste1);
+ui_Label32 = lv_label_create(ui_bootAssignConfirmButton);
 lv_obj_set_width( ui_Label32, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label32, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_align( ui_Label32, LV_ALIGN_CENTER );
 lv_label_set_text(ui_Label32,"Confirm");
+lv_obj_set_style_text_color(ui_Label32, lv_color_hex(0x010101), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_Label32, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 lv_obj_add_event_cb(ui_bootWifiButton, ui_event_bootWifiButton, LV_EVENT_ALL, NULL);
 uic_boot = ui_boot;
@@ -671,8 +672,6 @@ ui_Label10= NULL;
 ui_Container4= NULL;
 ui_buttonBootWifiBack= NULL;
 ui_Label11= NULL;
-ui_buttonBootWifiNext= NULL;
-ui_Label12= NULL;
 ui_overlayBootDirect= NULL;
 ui_popupbootwifi1= NULL;
 ui_lbldirect= NULL;
@@ -688,21 +687,21 @@ ui_buttonbootdirectback= NULL;
 ui_Label29= NULL;
 ui_buttonbootdirectscan= NULL;
 ui_Label30= NULL;
-ui_overlayAssignDirectRole= NULL;
-ui_contasign1= NULL;
+ui_bootOverlayAssignRole= NULL;
+ui_contasignheader= NULL;
 ui_lblasign= NULL;
-ui_contasign2= NULL;
-ui_lvlassigndevicetitle= NULL;
-ui_DirectAssignDeviceName= NULL;
+ui_contasigndevice= NULL;
+ui_Label12= NULL;
+ui_bootAssignDeviceList= NULL;
 ui_contasignbuttons= NULL;
-ui_buttonbootasignfresh= NULL;
+ui_bootAssignFreshButton= NULL;
 ui_Label28= NULL;
-ui_buttonbootasignwaste= NULL;
+ui_bootAssignWasteButton= NULL;
 ui_Label31= NULL;
 ui_contasignbuttons1= NULL;
-ui_buttonbootasignfresh1= NULL;
+ui_bootAssignCancelButton= NULL;
 ui_Label23= NULL;
-ui_buttonbootasignwaste1= NULL;
+ui_bootAssignConfirmButton= NULL;
 ui_Label32= NULL;
 
 }

@@ -582,4 +582,5 @@
  ui/ui_themes.h ui/ui_boot.h ui/ui_home.h ui/ui_fresh.h \
  ui/ui_freshfaults.h ui/ui_waste.h ui/ui_wastefaults.h \
  ui/ui_cydsettings.h ui/ui_freshsettings.h ui/ui_wastesettings.h \
- cyd_state.h
+ cyd_state.h controller_link.h \
+ /Users/robinbrown/.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src/Preferences.h

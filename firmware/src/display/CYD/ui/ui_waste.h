@@ -19,7 +19,6 @@ extern lv_obj_t *ui_wasteheader;
 extern lv_obj_t *ui_wasteheaderlabel;
 extern lv_obj_t *ui_wasteSettingsButton;
 extern lv_obj_t *ui_wasteBackButton;
-extern lv_obj_t *ui_Label44;
 extern lv_obj_t *ui_wastemaincard;
 extern lv_obj_t *ui_wasteLevelBar;
 extern lv_obj_t *ui_wasteLevelLabel;

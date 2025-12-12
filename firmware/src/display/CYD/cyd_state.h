@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <lvgl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,6 +21,11 @@ typedef enum {
     TANK_STATUS_DRAIN,
     TANK_STATUS_FAULT
 } tank_status_t;
+
+#define CYD_LEVEL_INVALID 0xFF
+#define CYD_SETTING_INVALID 0xFF
+#define CYD_VOLT_INVALID 0xFFFF
+#define CYD_FAULT_INVALID 0xFFFF
 
 typedef struct {
     bool paired;
@@ -54,6 +60,15 @@ typedef struct {
     tank_state_t waste;
     char firmware_version[16];
     bool setup_complete;
+    bool wifi_connected;
+    char wifi_ssid[32];
+    char wifi_ip[16];
+    char diag_id[24];
+    char diag_ip[32];
+    char diag_mac[24];
+    char diag_status[24];
+    int16_t diag_signal_dbm;
+    uint32_t diag_uptime_s;
 } cyd_state_t;
 
 extern cyd_state_t cyd_state;
@@ -65,6 +80,7 @@ void cyd_state_apply_to_waste_screen(void);
 void cyd_state_apply_to_freshsettings_screen(void);
 void cyd_state_apply_to_wastesettings_screen(void);
 void cyd_state_apply_to_cydsettings_screen(void);
+void cyd_state_apply_to_cydsettings_diag_overlay(void);
 void cyd_state_apply_to_freshsettings_diag_overlay(void);
 void cyd_state_apply_to_wastesettings_diag_overlay(void);
 void cyd_state_apply_to_boot_screen(void);
@@ -72,6 +88,8 @@ void cyd_state_set_units_metric(bool metric);
 bool cyd_state_units_metric(void);
 void cyd_state_apply_to_freshfaults_screen(void);
 void cyd_state_apply_to_wastefaults_screen(void);
+// Update leak label base colors to match current theme text color.
+void cyd_state_update_leak_base_colors(lv_color_t text_color);
 
 #ifdef __cplusplus
 }  // extern "C"

@@ -698,4 +698,4 @@
  ui/ui_themes.h ui/ui_boot.h ui/ui_home.h ui/ui_fresh.h \
  ui/ui_freshfaults.h ui/ui_waste.h ui/ui_wastefaults.h \
  ui/ui_cydsettings.h ui/ui_freshsettings.h ui/ui_wastesettings.h \
- ui_custom.h cyd_state.h
+ ui_custom.h cyd_state.h controller_link.h theme_manager.h

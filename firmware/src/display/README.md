@@ -1,12 +1,12 @@
 # Firmware – Display (Cheap Yellow Display LVGL)
 
-LVGL 9.x demo firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. The UI mirrors TankPro concepts (fresh/waste tanks, fault views, display settings) and currently runs with placeholder data while connectivity is built out.
+LVGL 9.x firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. The UI mirrors TankPro concepts (fresh/waste tanks, faults, display settings) and now drives live controller data plus commands (fill, drain, clear faults, restart, config).
 
 ## Layout
 - `CYD/`: PlatformIO project targeting the ESP32-2432S028 with ILI9341 TFT + XPT2046 touch.
   - `platformio.ini`: `env:cyd` build target; pulls LVGL and LovyanGFX.
   - `main.cpp`: LVGL bring-up, touch + brightness handling, sleep timeout.
-  - `ui/`: SquareLine-generated LVGL UI (v0.0.1 label baked into boot/settings).
+  - `ui/`: SquareLine-generated LVGL UI (v0.1.0 label baked into boot/settings).
   - Build outputs land in `.pio/build/cyd/` (firmware.bin, bootloader.bin, partitions.bin).
 
 ## Flashing
@@ -20,7 +20,7 @@ LVGL 9.x demo firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. T
 - Display settings (brightness, sleep timeout, theme) are persisted locally on the display between reboots.
 
 ## Status / roadmap
-- UI-only preview; Wi‑Fi/Direct buttons and tank values are placeholders until controller integration is finished.
-- Future builds will fetch live data from the TankPro controller over Wi‑Fi or UART.
+- Current build: live Wi‑Fi link to TankPro controllers, pairing/assignment, config sync, Clear Faults, Fill/Drain, and Restart commands.
+- Next: tighter direct-mode support without infrastructure Wi‑Fi plus richer on-screen diagnostics.
 
 See `docs/display-firmware.md` for project details and `docs/display-firmware-installation.md` for end-user flashing and update instructions.

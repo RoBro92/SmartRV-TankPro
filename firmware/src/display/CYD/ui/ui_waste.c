@@ -5,7 +5,7 @@
 
 #include "ui.h"
 
-lv_obj_t *ui_waste = NULL;lv_obj_t *ui_freshroot1 = NULL;lv_obj_t *ui_wasteheader = NULL;lv_obj_t *ui_wasteheaderlabel = NULL;lv_obj_t *ui_wasteSettingsButton = NULL;lv_obj_t *ui_wasteBackButton = NULL;lv_obj_t *ui_Label44 = NULL;lv_obj_t *ui_wastemaincard = NULL;lv_obj_t *ui_wasteLevelBar = NULL;lv_obj_t *ui_wasteLevelLabel = NULL;lv_obj_t *ui_wastecont2 = NULL;lv_obj_t *ui_wasteTempLabel = NULL;lv_obj_t *ui_wasteStatusLabel = NULL;lv_obj_t *ui_wasteLeakLabel = NULL;lv_obj_t *ui_wasteFreezeLabel = NULL;lv_obj_t *ui_wastelabels = NULL;lv_obj_t *ui_Label3 = NULL;lv_obj_t *ui_Label5 = NULL;lv_obj_t *ui_Label6 = NULL;lv_obj_t *ui_Label7 = NULL;lv_obj_t *ui_wastefaultcont = NULL;lv_obj_t *ui_Label8 = NULL;lv_obj_t *ui_wasteFaultButton = NULL;lv_obj_t *ui_wasteFaultButtonLabel = NULL;lv_obj_t *ui_wastecontrolpanel = NULL;lv_obj_t *ui_WasteDrainButton = NULL;lv_obj_t *ui_wastedrainlabel = NULL;
+lv_obj_t *ui_waste = NULL;lv_obj_t *ui_freshroot1 = NULL;lv_obj_t *ui_wasteheader = NULL;lv_obj_t *ui_wasteheaderlabel = NULL;lv_obj_t *ui_wasteSettingsButton = NULL;lv_obj_t *ui_wasteBackButton = NULL;lv_obj_t *ui_wastemaincard = NULL;lv_obj_t *ui_wasteLevelBar = NULL;lv_obj_t *ui_wasteLevelLabel = NULL;lv_obj_t *ui_wastecont2 = NULL;lv_obj_t *ui_wasteTempLabel = NULL;lv_obj_t *ui_wasteStatusLabel = NULL;lv_obj_t *ui_wasteLeakLabel = NULL;lv_obj_t *ui_wasteFreezeLabel = NULL;lv_obj_t *ui_wastelabels = NULL;lv_obj_t *ui_Label3 = NULL;lv_obj_t *ui_Label5 = NULL;lv_obj_t *ui_Label6 = NULL;lv_obj_t *ui_Label7 = NULL;lv_obj_t *ui_wastefaultcont = NULL;lv_obj_t *ui_Label8 = NULL;lv_obj_t *ui_wasteFaultButton = NULL;lv_obj_t *ui_wasteFaultButtonLabel = NULL;lv_obj_t *ui_wastecontrolpanel = NULL;lv_obj_t *ui_WasteDrainButton = NULL;lv_obj_t *ui_wastedrainlabel = NULL;
 // event funtions
 
 // build funtions
@@ -51,41 +51,26 @@ ui_object_set_themeable_style_property(ui_wasteheaderlabel, LV_PART_MAIN| LV_STA
 lv_obj_set_style_text_font(ui_wasteheaderlabel, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_wasteSettingsButton = lv_image_create(ui_wasteheader);
-lv_image_set_src(ui_wasteSettingsButton, &ui_img_314706763);
+lv_image_set_src(ui_wasteSettingsButton, &ui_img_322567660);
 lv_obj_set_width( ui_wasteSettingsButton, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_wasteSettingsButton, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_wasteSettingsButton, 84 );
-lv_obj_set_y( ui_wasteSettingsButton, 0 );
+lv_obj_set_x( ui_wasteSettingsButton, 99 );
+lv_obj_set_y( ui_wasteSettingsButton, 3 );
 lv_obj_set_align( ui_wasteSettingsButton, LV_ALIGN_CENTER );
 lv_obj_add_flag( ui_wasteSettingsButton, LV_OBJ_FLAG_CLICKABLE );   /// Flags
 lv_obj_remove_flag( ui_wasteSettingsButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_transform_scale(ui_wasteSettingsButton, 220, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-ui_wasteBackButton = lv_button_create(ui_wasteheader);
-lv_obj_set_width( ui_wasteBackButton, 40);
-lv_obj_set_height( ui_wasteBackButton, 40);
+ui_wasteBackButton = lv_image_create(ui_wasteheader);
+lv_image_set_src(ui_wasteBackButton, &ui_img_back2_png);
+lv_obj_set_width( ui_wasteBackButton, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_wasteBackButton, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_wasteBackButton, -93 );
-lv_obj_set_y( ui_wasteBackButton, 0 );
+lv_obj_set_y( ui_wasteBackButton, 3 );
 lv_obj_set_align( ui_wasteBackButton, LV_ALIGN_CENTER );
-lv_obj_add_flag( ui_wasteBackButton, LV_OBJ_FLAG_SCROLL_ON_FOCUS );   /// Flags
+lv_obj_add_flag( ui_wasteBackButton, LV_OBJ_FLAG_CLICKABLE );   /// Flags
 lv_obj_remove_flag( ui_wasteBackButton, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
-lv_obj_set_style_radius(ui_wasteBackButton, 50, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(ui_wasteBackButton, lv_color_hex(0x0099A5), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_bg_opa(ui_wasteBackButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_color(ui_wasteBackButton, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_outline_opa(ui_wasteBackButton, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_width(ui_wasteBackButton, 3, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_outline_pad(ui_wasteBackButton, 0, LV_PART_MAIN| LV_STATE_DEFAULT);
-
-ui_Label44 = lv_label_create(ui_wasteBackButton);
-lv_obj_set_width( ui_Label44, LV_SIZE_CONTENT);  /// 1
-lv_obj_set_height( ui_Label44, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_Label44, -2 );
-lv_obj_set_y( ui_Label44, 1 );
-lv_obj_set_align( ui_Label44, LV_ALIGN_CENTER );
-lv_label_set_text(ui_Label44,"<");
-lv_obj_set_style_text_color(ui_Label44, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
-lv_obj_set_style_text_opa(ui_Label44, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-    lv_obj_set_style_text_font(ui_Label44, &lv_font_montserrat_26, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_transform_scale(ui_wasteBackButton, 220, LV_PART_MAIN| LV_STATE_DEFAULT);
 
 ui_wastemaincard = lv_obj_create(ui_freshroot1);
 lv_obj_set_width( ui_wastemaincard, 224);
@@ -276,7 +261,6 @@ ui_wasteheader= NULL;
 ui_wasteheaderlabel= NULL;
 ui_wasteSettingsButton= NULL;
 ui_wasteBackButton= NULL;
-ui_Label44= NULL;
 ui_wastemaincard= NULL;
 ui_wasteLevelBar= NULL;
 ui_wasteLevelLabel= NULL;

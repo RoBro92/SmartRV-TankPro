@@ -13,6 +13,8 @@ extern "C" {
 }
 #include "ui_custom.h"
 #include "cyd_state.h"
+#include "controller_link.h"
+#include "theme_manager.h"
 
 #ifndef CYD_PANEL_ST7789
 #define CYD_PANEL_ST7789 0
@@ -31,8 +33,12 @@ extern "C" {
 #define CYD_TFT_RGB_ORDER 0  // Use RGB order to match LVGL buffer when using RGB565
 #endif
 
+// Force RGB order here so we override any -DCYD_TFT_RGB_ORDER from build flags.
+#undef CYD_TFT_RGB_ORDER
+#define CYD_TFT_RGB_ORDER 0
+
 #ifndef CYD_TFT_INVERT
-#define CYD_TFT_INVERT 0
+#define CYD_TFT_INVERT 1
 #endif
 
 #ifndef CYD_TOUCH_SPI_HOST
@@ -73,7 +79,7 @@ extern "C" {
 constexpr uint16_t SCREEN_WIDTH = 240;
 constexpr uint16_t SCREEN_HEIGHT = 320;
 constexpr uint32_t LVGL_TICK_MS = 5;
-constexpr uint16_t DRAW_BUF_LINES = 16;  // lines per buffer; keeps RAM use reasonable
+constexpr uint16_t DRAW_BUF_LINES = 8;   // lines per buffer; keeps RAM use reasonable and saves heap
 constexpr uint8_t SETTINGS_VERSION = 1;
 constexpr const char *SETUP_FLAG_KEY = "setup_done";
 constexpr const char *WIFI_SSID_KEY = "wifi_ssid";
@@ -205,6 +211,13 @@ static uint32_t last_heap_log_ms = 0;
 static bool display_sleep = false;
 static uint8_t current_brightness_duty = 255;
 static bool setup_complete = false;
+static bool last_wifi_connected = false;
+static String stored_ssid;
+static String stored_pass;
+static bool wifi_creds_valid = false;
+static bool wifi_station_started = false;
+static String device_id;
+static String make_device_id();
 
 struct OnboardingContext {
     bool active = false;
@@ -298,6 +311,11 @@ static void apply_timeout_selection(int sel) {
 
 static void handle_inactivity() {
     if (display_sleep || inactivity_timeout_ms == 0) return;
+    // Do not sleep while critical overlays (e.g., factory reset) are visible
+    if (ui_cydsettingsFactoryResetConfirmationOverlay &&
+        !lv_obj_has_flag(ui_cydsettingsFactoryResetConfirmationOverlay, LV_OBJ_FLAG_HIDDEN)) {
+        return;
+    }
     const uint32_t now = millis();
     if (now - last_activity_ms >= inactivity_timeout_ms) {
         lcd.setBrightness(0);
@@ -311,11 +329,8 @@ static void handle_inactivity() {
 }
 
 static void apply_theme_selection(int sel) {
-    const bool dark = (sel == 1);
-    lv_theme_t *theme = lv_theme_default_init(display, lv_palette_main(LV_PALETTE_BLUE),
-                                              lv_palette_main(LV_PALETTE_RED), dark, LV_FONT_DEFAULT);
-    lv_display_set_theme(display, theme);
-    Serial.printf("[theme] selection=%d (%s)\n", sel, dark ? "dark" : "light");
+    // Route through the theme manager so styles are applied consistently.
+    theme_manager_set(sel == 1 ? THEME_DARK : THEME_LIGHT);
 }
 
 static void save_settings() {
@@ -340,6 +355,22 @@ static void load_settings() {
 static void load_setup_flag() {
     setup_complete = prefs.getBool(SETUP_FLAG_KEY, false);
     cyd_state.setup_complete = setup_complete;
+}
+
+static void load_device_identity() {
+    device_id = make_device_id();
+    snprintf(cyd_state.diag_id, sizeof(cyd_state.diag_id), "%s", device_id.c_str());
+}
+
+static void load_wifi_credentials() {
+    stored_ssid = prefs.getString(WIFI_SSID_KEY, "");
+    stored_pass = prefs.getString(WIFI_PASS_KEY, "");
+    wifi_creds_valid = !stored_ssid.isEmpty() && !stored_pass.isEmpty();
+    if (wifi_creds_valid) {
+        snprintf(cyd_state.wifi_ssid, sizeof(cyd_state.wifi_ssid), "%s", stored_ssid.c_str());
+    } else {
+        cyd_state.wifi_ssid[0] = '\0';
+    }
 }
 
 static void lvgl_theme_cb(lv_event_t *e) {
@@ -398,6 +429,10 @@ static String make_mac_suffix() {
     return String(buf);
 }
 
+static String make_device_id() {
+    return "TankProCYD-" + make_mac_suffix();
+}
+
 static String make_temp_password() {
     static const char charset[] = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     String pass;
@@ -426,6 +461,32 @@ void stop_wifi_onboarding() {
     onboarding.active = false;
 }
 
+static void start_wifi_station() {
+    if (!wifi_creds_valid || onboarding.active || wifi_station_started) return;
+    Serial.printf("[wifi] starting STA for SSID '%s'\n", stored_ssid.c_str());
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(stored_ssid.c_str(), stored_pass.c_str());
+    wifi_station_started = true;
+}
+
+static void stop_wifi_station() {
+    if (!wifi_station_started) return;
+    WiFi.disconnect(true, true);
+    wifi_station_started = false;
+    cyd_state.wifi_connected = false;
+    cyd_state.wifi_ip[0] = '\0';
+}
+
+void factory_reset_and_reboot() {
+    Serial.println("[factory] reset: clearing stored config and rebooting");
+    stop_wifi_onboarding();
+    prefs.clear();   // clear all CYD namespace keys (settings, Wi-Fi creds, setup flag)
+    prefs.end();
+    WiFi.disconnect(true, true);  // drop station creds and stop AP
+    delay(200);
+    ESP.restart();
+}
+
 static void handle_scan_route() {
     // Faster active scan; keep hidden networks out to reduce noise
     int16_t n = WiFi.scanNetworks(false /*async*/, false /*show_hidden*/, false /*passive*/, 200 /*ms/chan*/);
@@ -433,9 +494,9 @@ static void handle_scan_route() {
 <!DOCTYPE html><html><head>
 <title>TankPro CYD Scan</title>
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; color:#0a0a0a; margin:0; padding:0; }
-.wrap { max-width: 520px; margin: 0 auto; padding: 28px; }
-.card { background:#ffffff; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.08); }
+body,html { font-family: Arial, sans-serif; background:#f4f6f8; color:#0a0a0a; margin:0; padding:0; height:100%; }
+.wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding: 20px; }
+.card { width:100%; max-width: 720px; background:#ffffff; padding:24px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.10); }
 h1 { font-size: 22px; margin:0 0 12px 0; }
 .field { margin: 12px 0; }
 .field label { display:block; font-weight:600; margin-bottom:6px; }
@@ -460,8 +521,8 @@ a { color:#2563eb; font-weight:600; }
     }
     page += R"HTML(    </select>
   </div>
-  <div class="field"><label>Or enter SSID</label><input name="ssid_other" placeholder="Your Wi‑Fi name"></div>
-  <div class="field"><label>Password</label><input name="pass" type="password" placeholder="Wi‑Fi password"></div>
+  <div class="field"><label>Or enter SSID</label><input name="ssid_other" placeholder="Your Wi-Fi name"></div>
+  <div class="field"><label>Password</label><input name="pass" type="password" placeholder="Wi-Fi password"></div>
   <button type="submit">Connect</button>
 </form>
 <p style="text-align:center; margin-top:14px;"><a href="/">Back</a></p>
@@ -474,10 +535,10 @@ static void handle_root_route() {
 <!DOCTYPE html><html><head>
 <title>TankPro CYD Setup</title>
 <style>
-body { font-family: Arial, sans-serif; background:#f4f6f8; color:#0a0a0a; margin:0; padding:0; }
-.wrap { max-width: 520px; margin: 0 auto; padding: 28px; }
-.card { background:#ffffff; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.08); }
-h1 { font-size: 24px; margin:0 0 12px 0; }
+body,html { font-family: Arial, sans-serif; background:#f4f6f8; color:#0a0a0a; margin:0; padding:0; height:100%; }
+.wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding: 20px; }
+.card { width:100%; max-width: 720px; background:#ffffff; padding:26px; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.10); }
+h1 { font-size: 26px; margin:0 0 12px 0; }
 p { margin: 8px 0; }
 .list { padding-left: 18px; }
 .field { margin: 12px 0; }
@@ -488,18 +549,11 @@ button:hover { background:#1d4ed8; }
 a { color:#2563eb; font-weight:600; }
 </style>
 </head><body><div class="wrap"><div class="card">
-<h1>TankPro CYD Wi‑Fi Setup</h1>
-<p>Connect to this AP:</p>
-<ul class="list">
-<li><strong>SSID:</strong> )HTML";
-    page += onboarding.ap_ssid;
-    page += "</li><li><strong>Password:</strong> ";
-    page += onboarding.ap_pass;
-    page += R"HTML(</li></ul>
-<p>Enter the Wi‑Fi network you want the CYD to join:</p>
+<h1>TankPro CYD Wi-Fi Setup</h1>
+<p>To connect this display to your Wi-Fi, enter the network name and password below, or tap Scan to pick from nearby networks.</p>
 <form action="/connect" method="POST">
-  <div class="field"><label>Network SSID</label><input name="ssid" placeholder="Your Wi‑Fi name"></div>
-  <div class="field"><label>Password</label><input name="pass" type="password" placeholder="Wi‑Fi password"></div>
+  <div class="field"><label>Network SSID</label><input name="ssid" placeholder="Your Wi-Fi name"></div>
+  <div class="field"><label>Password</label><input name="pass" type="password" placeholder="Wi-Fi password"></div>
   <button type="submit">Connect</button>
 </form>
 <p style="text-align:center; margin-top:14px;"><a href="/scan">Scan nearby networks</a></p>
@@ -587,6 +641,7 @@ void setup() {
     Serial.begin(115200);
     delay(200);  // give USB CDC a moment to connect
     Serial.println("[boot] CYD display starting");
+    Serial.printf("[debug] CYD_TFT_RGB_ORDER=%d\n", CYD_TFT_RGB_ORDER);
 
     lcd.init();
     lcd.setRotation(2);  // Portrait: 240 x 320
@@ -594,8 +649,12 @@ void setup() {
     current_brightness_duty = 255;
     last_activity_ms = millis();
 
+
     lv_init();
     cyd_state_init_defaults();
+
+    // Minimise RAM used by decoded image cache (large assets added recently).
+    lv_image_cache_resize(0, true);
 
     static lv_color_t draw_buf1[SCREEN_WIDTH * DRAW_BUF_LINES];
     display = lv_display_create(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -620,16 +679,24 @@ void setup() {
     esp_timer_start_periodic(lvgl_tick_timer, LVGL_TICK_MS * 1000);
 
     prefs.begin("cyd", false);
+    load_device_identity();
     load_settings();
     load_setup_flag();
+    load_wifi_credentials();
+    controller_link_init(&prefs);
+    theme_manager_init(&prefs, display);
 
     ui_init();
     ui_register_custom_actions();
+    theme_manager_apply_current();
     cyd_state_apply_to_home_screen();
     cyd_state_apply_to_boot_screen();
     if (setup_complete) {
         _ui_screen_change(&ui_home, LV_SCR_LOAD_ANIM_NONE, 0, 0, NULL);
         cyd_state_apply_to_home_screen();
+        if (wifi_creds_valid) {
+            start_wifi_station();
+        }
     }
     log_heap_stats(" setup");
 
@@ -650,9 +717,9 @@ void setup() {
 
     // Attach theme dropdown
     if (ui_cydTheme) {
+        settings.theme_index = static_cast<uint8_t>(theme_manager_get());
         lv_dropdown_set_selected(ui_cydTheme, settings.theme_index);
         lv_obj_add_event_cb(ui_cydTheme, lvgl_theme_cb, LV_EVENT_VALUE_CHANGED, nullptr);
-        apply_theme_selection(settings.theme_index);
     }
 
     // Attach units dropdown
@@ -671,6 +738,27 @@ void setup() {
 void loop() {
     lv_timer_handler();
     handle_onboarding();
+    if (wifi_station_started) {
+        const wl_status_t st = WiFi.status();
+        const bool wifi_now = (st == WL_CONNECTED);
+        if (wifi_now != last_wifi_connected) {
+            last_wifi_connected = wifi_now;
+            cyd_state.wifi_connected = wifi_now;
+            if (wifi_now) {
+                const String ip = WiFi.localIP().toString();
+                snprintf(cyd_state.wifi_ip, sizeof(cyd_state.wifi_ip), "%s", ip.c_str());
+                snprintf(cyd_state.diag_mac, sizeof(cyd_state.diag_mac), "%s", WiFi.macAddress().c_str());
+                cyd_state.diag_signal_dbm = WiFi.RSSI();
+                cyd_state.diag_uptime_s = millis() / 1000;
+                controller_link_on_wifi_connected();
+            } else {
+                cyd_state.wifi_ip[0] = '\0';
+                controller_link_on_wifi_disconnected();
+            }
+            cyd_state_apply_to_home_screen();
+        }
+    }
+    controller_link_loop();
     handle_inactivity();
     const uint32_t now = millis();
     if (now - last_heap_log_ms >= 5000) {

@@ -1,6 +1,6 @@
 # Cheap Yellow Display – Firmware Install & Updates
 
-Step-by-step guide for flashing the LVGL firmware onto a 2.8" Cheap Yellow Display (ESP32-2432S028). The current build label shown on the Settings screen is **v0.0.1**.
+Step-by-step guide for flashing the LVGL firmware onto a 2.8" Cheap Yellow Display (ESP32-2432S028). The current build label shown on the Settings screen is **v0.1.0**.
 
 ## What you need
 - A Cheap Yellow Display (ESP32-2432S028) with USB cable.

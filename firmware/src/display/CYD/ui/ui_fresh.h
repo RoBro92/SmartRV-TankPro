@@ -19,7 +19,6 @@ extern lv_obj_t *ui_freshheader;
 extern lv_obj_t *ui_Label36;
 extern lv_obj_t *ui_freshSettingsButton;
 extern lv_obj_t *ui_freshBackButton;
-extern lv_obj_t *ui_Label41;
 extern lv_obj_t *ui_freshMainCard;
 extern lv_obj_t *ui_freshLevelBar;
 extern lv_obj_t *ui_freshLevelLabel;
