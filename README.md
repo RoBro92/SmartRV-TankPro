@@ -2,6 +2,8 @@
 
 Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers on each tank plus a Cheap Yellow Display (CYD) as the primary node.
 
+![TankPro assembled](hardware/media/images/v3.1_actual.JPG)
+
 ## Key features
 - Works over Wi‑Fi or Direct (ESP‑NOW) between CYD and controllers.
 - Fresh + Waste roles, max two controllers per display.
