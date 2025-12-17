@@ -1,3 +1,4 @@
+# Package: fault evaluation / safety guards / annunciation
 script:
   - id: status_led_flash_red
     then:

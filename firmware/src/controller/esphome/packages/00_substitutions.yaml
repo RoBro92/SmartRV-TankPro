@@ -1,4 +1,5 @@
 # User-tunable defaults (adjust to match your tank hardware/thresholds).
+# Package: substitutions / constants (no logic)
 substitutions:
   # Level calibration defaults assume ~0.5-2.5 V span from a 0-180 ohm sender through the divider.
   default_fill_stop_level: "90.0"

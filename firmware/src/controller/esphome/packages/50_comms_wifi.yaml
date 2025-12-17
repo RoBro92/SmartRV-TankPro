@@ -1,3 +1,4 @@
+# Package: Wi-Fi / UDP comms (pairing adverts, config/command RX/TX)
 script:
   - id: pairing_advert_script
     then:

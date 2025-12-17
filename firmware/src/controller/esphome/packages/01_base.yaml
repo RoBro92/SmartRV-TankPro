@@ -1,3 +1,4 @@
+# Package: platform/base plumbing (esphome/esp32/logger/wifi/api/etc)
 esphome:
   name: smartrv-tankpro
   name_add_mac_suffix: true

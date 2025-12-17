@@ -1,3 +1,4 @@
+# Package: general scripts/services/interval glue (non-fault, non-comms)
 script:
   - id: pair_button_hold_monitor
     mode: restart

@@ -1,3 +1,4 @@
+# Package: hardware bindings (lights/outputs/switches/buttons)
 light:
   - platform: esp32_rmt_led_strip
     id: status_led

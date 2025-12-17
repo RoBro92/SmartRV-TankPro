@@ -1,3 +1,4 @@
+# Package: Direct ESP-NOW transport (pairing, state, commands)
 script:
   - id: send_direct_state_once
     then:

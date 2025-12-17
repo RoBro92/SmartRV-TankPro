@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <string>
 
+// --- MAC utilities ---------------------------------------------------------
 // Parse MAC address string "AA:BB:CC:DD:EE:FF" into 6-byte array.
 // Returns true on success.
 inline bool tp_parse_mac_str(const std::string &str, uint8_t out[6]) {
@@ -19,6 +20,7 @@ inline void tp_format_mac(const uint8_t mac[6], char buf[18]) {
            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 }
 
+// --- Config packing --------------------------------------------------------
 // Fill a JSON params object with current configuration fields (mirrors existing lambdas).
 inline void tp_pack_config_params(JsonObject params) {
   params["fill_stop_percent"] = id(fill_stop_level);
@@ -32,6 +34,7 @@ inline void tp_pack_config_params(JsonObject params) {
   params["valve_override"] = id(valve_override);
 }
 
+// --- Fault helpers ---------------------------------------------------------
 // Fault helpers (no side-effects beyond fault fields/text sensors).
 inline void tp_set_fault(uint8_t code, const char *description) {
   id(fault_active) = true;

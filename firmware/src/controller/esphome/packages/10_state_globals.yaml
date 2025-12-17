@@ -1,3 +1,4 @@
+# Package: globals and stored state/config (no hardware or comms)
 globals:
   # Persistent configuration (retained across reboots)
   - id: fill_stop_level

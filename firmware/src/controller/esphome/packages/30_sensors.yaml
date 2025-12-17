@@ -3,6 +3,7 @@ one_wire:
     pin: GPIO1
     id: tank_temp_bus
 
+# Package: sensors (temp/level/adc) and related intervals
 sensor:
   - platform: adc
     id: tank_level_voltage
