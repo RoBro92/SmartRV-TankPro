@@ -4,6 +4,7 @@ esphome:
   comment: "ESPHome production firmware for SmartRV TankPro (ESP32-C3, factory AP provisioning)."
   includes:
     - esp_direct_includes.h
+    - includes/tankpro_helpers.h
   on_boot:
     - priority: -10
       then:
