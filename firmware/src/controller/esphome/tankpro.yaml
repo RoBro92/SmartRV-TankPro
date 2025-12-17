@@ -6,4 +6,5 @@ packages:
   30_sensors: !include packages/30_sensors.yaml
   40_faults: !include packages/40_faults.yaml
   50_comms_wifi: !include packages/50_comms_wifi.yaml
+  51_comms_direct: !include packages/51_comms_direct.yaml
   60_services_scripts: !include packages/60_services_scripts.yaml
