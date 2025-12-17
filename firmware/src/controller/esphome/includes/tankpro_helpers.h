@@ -3,6 +3,7 @@
 #include "esphome.h"
 #include <ArduinoJson.h>
 #include <algorithm>
+#include <string>
 
 // Parse MAC address string "AA:BB:CC:DD:EE:FF" into 6-byte array.
 // Returns true on success.
@@ -29,4 +30,20 @@ inline void tp_pack_config_params(JsonObject params) {
   params["level_full_volts"] = id(level_full_volts);
   params["safety_override"] = id(safety_override);
   params["valve_override"] = id(valve_override);
+}
+
+// Fault helpers (no side-effects beyond fault fields/text sensors).
+inline void tp_set_fault(uint8_t code, const char *description) {
+  id(fault_active) = true;
+  id(fault_code_int) = code;
+  id(fault_description).publish_state(description);
+  std::string code_str = std::to_string(code);
+  id(fault_code).publish_state(code_str.c_str());
+}
+
+inline void tp_clear_fault() {
+  id(fault_active) = false;
+  id(fault_code_int) = 0;
+  id(fault_description).publish_state("None");
+  id(fault_code).publish_state("0");
 }
