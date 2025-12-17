@@ -1,0 +1,139 @@
+esphome:
+  name: smartrv-tankpro
+  name_add_mac_suffix: true
+  comment: "ESPHome production firmware for SmartRV TankPro (ESP32-C3, factory AP provisioning)."
+  includes:
+    - esp_direct_includes.h
+  on_boot:
+    - priority: -10
+      then:
+        - switch.turn_off: tank_valve_relay
+        - globals.set:
+            id: fill_in_progress
+            value: 'false'
+        - globals.set:
+            id: drain_in_progress
+            value: 'false'
+        - globals.set:
+            id: fill_above_stop_seen
+            value: 'false'
+        - globals.set:
+            id: guard_over_stop_counter
+            value: '0'
+        - text_sensor.template.publish:
+            id: fault_description
+            state: "None"
+        - text_sensor.template.publish:
+            id: fault_code
+            state: "0"
+        - text_sensor.template.publish:
+            id: firmware_version_text
+            state: !lambda 'return id(firmware_version);'
+    - priority: 50
+      then:
+        - lambda: |-
+            #include <esp_wifi.h>
+            const bool has_wifi_creds = WiFi.SSID().length() > 0;
+            const bool pairing = id(pairing_active);
+            const bool direct_lock = id(direct_mode_locked);
+            const bool use_direct = direct_lock || (!has_wifi_creds && pairing);
+            if (use_direct) {
+              id(direct_mode_active) = true;
+              WiFi.softAPdisconnect(true);
+              WiFi.enableAP(false);
+              WiFi.disconnect(true, true);
+              WiFi.mode(WIFI_STA);
+              esp_wifi_set_channel(id(direct_channel), WIFI_SECOND_CHAN_NONE);
+              id(paired_to_cyd) = true;
+              id(direct_peer_role) = id(tank_role);
+              ESP_LOGI("direct", "Direct mode active (lock=%d pairing=%d creds=%d)", direct_lock, pairing, has_wifi_creds);
+            } else {
+              id(direct_mode_active) = false;
+              if (id(paired_to_cyd)) {
+                WiFi.softAPdisconnect(true);
+                WiFi.enableAP(false);
+                WiFi.mode(WIFI_STA);
+                ESP_LOGI("wifi", "Paired to CYD; skipping fallback AP.");
+              } else if (!has_wifi_creds && !pairing) {
+                std::string mac = WiFi.macAddress().c_str();
+                std::string compact;
+                compact.reserve(mac.size());
+                for (char c : mac) {
+                  if (c != ':') compact.push_back(c);
+                }
+                std::string suffix = compact.size() >= 4 ? compact.substr(compact.size() - 4) : compact;
+                std::string ssid = std::string("TankPro-") + suffix + "-Setup";
+                WiFi.softAPdisconnect(true);
+                WiFi.enableAP(false);
+                WiFi.mode(WIFI_AP_STA);
+                WiFi.softAP(ssid.c_str(), "changeme");
+                ESP_LOGI("wifi", "Fallback AP active as %s", ssid.c_str());
+              } else {
+                WiFi.softAPdisconnect(true);
+                WiFi.enableAP(false);
+                WiFi.mode(WIFI_STA);
+                ESP_LOGI("wifi", "Wi-Fi mode (creds present, pairing off, no direct lock)");
+              }
+            }
+        - if:
+            condition:
+              lambda: 'return id(direct_mode_active);'
+            then:
+              - script.execute: direct_mode_init
+        - globals.set:
+            id: boot_complete
+            value: 'true'
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: esp32c3
+  flash_size: 4MB
+  framework:
+    type: arduino
+
+logger:
+  baud_rate: 115200
+  level: DEBUG
+  logs:
+    light: WARN
+
+debug:
+
+api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
+    password: 'smartrv'
+    on_begin:
+      then:
+        - globals.set:
+            id: ota_active
+            value: 'true'
+    on_end:
+      then:
+        - globals.set:
+            id: ota_active
+            value: 'false'
+    on_error:
+      then:
+        - globals.set:
+            id: ota_active
+            value: 'false'
+
+wifi:
+  id: wifi_main
+  ap:
+    ssid: "TankPro-Setup"
+    password: "changeme"
+  on_connect:
+    - globals.set:
+        id: wifi_ever_connected
+        value: 'true'
+
+captive_portal:
+
+improv_serial:
+
+web_server:
+  port: 80

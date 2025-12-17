@@ -1,0 +1,61 @@
+one_wire:
+  - platform: gpio
+    pin: GPIO1
+    id: tank_temp_bus
+
+sensor:
+  - platform: adc
+    id: tank_level_voltage
+    pin: GPIO0
+    name: "Tank Level Voltage"
+    update_interval: 2s
+    attenuation: 0db
+    unit_of_measurement: "V"
+    icon: "mdi:water"
+    internal: true
+
+  - platform: template
+    id: tank_level
+    name: "Tank Level"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    icon: "mdi:water"
+    update_interval: 2s
+    lambda: |-
+      const float volts = id(tank_level_voltage).state;
+      const float empty_v = id(level_empty_volts);
+      const float full_v = id(level_full_volts);
+      if (isnan(volts) || full_v <= empty_v) return NAN;
+      float pct = (volts - empty_v) * 100.0f / (full_v - empty_v);
+      if (pct < 0) pct = 0;
+      if (pct > 100) pct = 100;
+      return pct;
+
+  - platform: dallas_temp
+    one_wire_id: tank_temp_bus
+    id: tank_temperature
+    name: "Tank Temperature"
+    filters:
+      - lambda: |-
+          if (isnan(x)) return NAN;
+          if (x == 85.0f || x == 0.0f || x < -55.0f || x > 125.0f) return NAN;
+          return x;
+    on_value:
+      then:
+        - lambda: 'id(last_temp_update_ms) = millis();'
+        - lambda: |-
+            static float last_logged = NAN;
+            if (isnan(last_logged) || fabs(x - last_logged) >= 0.1f) {
+              last_logged = x;
+              ESP_LOGI("temp", "Tank temperature: %.2f C", x);
+            }
+
+  - platform: wifi_signal
+    id: wifi_signal_dbm
+    name: "WiFi Signal"
+    update_interval: 60s
+
+  - platform: uptime
+    id: uptime_sensor
+    name: "Uptime"
+    update_interval: 60s

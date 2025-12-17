@@ -1,0 +1,14 @@
+# User-tunable defaults (adjust to match your tank hardware/thresholds).
+substitutions:
+  # Level calibration defaults assume ~0.5-2.5 V span from a 0-180 ohm sender through the divider.
+  default_fill_stop_level: "90.0"
+  default_drain_stop_level: "10.0"
+  default_drain_timeout_ms: "45000"
+  default_freeze_threshold_c: "2.0"
+  default_freeze_protection_enabled: "false"
+  default_level_empty_volts: "0.5"
+  default_level_full_volts: "2.5"
+  default_safety_override: "false"
+  firmware_version: "v0.1.0"
+  cyd_udp_port: "60505"
+  direct_channel: "6"

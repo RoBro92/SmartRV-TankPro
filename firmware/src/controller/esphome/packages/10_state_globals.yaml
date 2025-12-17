@@ -1,0 +1,383 @@
+globals:
+  # Persistent configuration (retained across reboots)
+  - id: fill_stop_level
+    type: float
+    restore_value: true
+    initial_value: '${default_fill_stop_level}'
+  - id: drain_stop_level
+    type: float
+    restore_value: true
+    initial_value: '${default_drain_stop_level}'
+  - id: drain_timeout_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '${default_drain_timeout_ms}'
+  - id: safety_override
+    type: bool
+    restore_value: true
+    initial_value: '${default_safety_override}'
+  - id: valve_override
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+  - id: freeze_protection_enabled
+    type: bool
+    restore_value: true
+    initial_value: '${default_freeze_protection_enabled}'
+  - id: freeze_protection_threshold_c
+    type: float
+    restore_value: true
+    initial_value: '${default_freeze_threshold_c}'
+  - id: level_empty_volts
+    type: float
+    restore_value: true
+    initial_value: '${default_level_empty_volts}'
+  - id: level_full_volts
+    type: float
+    restore_value: true
+    initial_value: '${default_level_full_volts}'
+  - id: tank_role
+    type: int
+    restore_value: true
+    initial_value: '0'
+  - id: paired_to_cyd
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+  - id: cyd_identifier
+    type: std::string
+    restore_value: true
+    initial_value: '""'
+  - id: firmware_version
+    type: std::string
+    restore_value: true
+    initial_value: '"${firmware_version}"'
+  - id: direct_mode_locked
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+  - id: direct_mode_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: direct_peer_mac
+    type: std::string
+    restore_value: true
+    initial_value: '""'
+  - id: direct_peer_key
+    type: uint32_t
+    restore_value: true
+    initial_value: '0'
+  - id: direct_peer_role
+    type: int
+    restore_value: true
+    initial_value: '0'
+  - id: direct_channel
+    type: int
+    restore_value: true
+    initial_value: '${direct_channel}'
+  - id: direct_seq
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+
+  # Runtime state (cleared on boot)
+  - id: fill_in_progress
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: drain_in_progress
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: drain_start_level
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: drain_last_level
+    type: float
+    restore_value: false
+    initial_value: '0.0'
+  - id: drain_start_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: drain_last_change_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: fault_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: fault_code_int
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: last_temp_update_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: temp_timeout_ms
+    type: uint32_t
+    restore_value: true
+    initial_value: '300000'
+  - id: fill_above_stop_seen
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: guard_over_stop_counter
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: pairing_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: pairing_token
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: pairing_start_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: boot_complete
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: wifi_ever_connected
+    type: bool
+    restore_value: true
+    initial_value: 'false'
+  - id: ota_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: pair_button_press_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: reset_warning_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: net_flash_steps
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: pairing_cancel_press
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: last_cyd_rx_ms
+    type: uint32_t
+    restore_value: false
+    initial_value: '0'
+  - id: direct_link_ok
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: failsafe_active
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "Module IP"
+    ssid:
+      name: "Connected SSID"
+    bssid:
+      name: "Connected BSSID"
+    mac_address:
+      name: "Module MAC"
+      id: module_mac_address
+  - platform: template
+    id: fault_description
+    name: "Fault Description"
+    update_interval: never
+    icon: "mdi:alert-circle-outline"
+    entity_category: diagnostic
+    internal: false
+  - platform: template
+    id: fault_code
+    name: "Fault Code"
+    entity_category: diagnostic
+    lambda: |-
+      char buf[8];
+      snprintf(buf, sizeof(buf), "%d", id(fault_code_int));
+      return std::string(buf);
+    update_interval: 3s
+  - platform: template
+    id: system_status
+    name: "Status"
+    icon: "mdi:information"
+    lambda: |-
+      if (id(pairing_active)) return std::string("Pairing");
+      if (id(fault_active)) return std::string("Fault");
+      if (id(fill_in_progress)) return std::string("Fill");
+      if (id(drain_in_progress)) return std::string("Drain");
+      return std::string("OK");
+    update_interval: 3s
+  - platform: template
+    id: firmware_version_text
+    name: "Firmware Version"
+    entity_category: diagnostic
+    lambda: |-
+      return id(firmware_version);
+    update_interval: never
+  - platform: template
+    id: wifi_status_text
+    name: "WiFi Status"
+    entity_category: diagnostic
+    icon: "mdi:wifi"
+    lambda: |-
+      if (WiFi.status() == WL_CONNECTED) {
+        return std::string("Connected");
+      }
+      return std::string("Disconnected");
+    update_interval: 5s
+  - platform: template
+    id: cyd_pair_status
+    name: "CYD Link Status"
+    entity_category: diagnostic
+    icon: "mdi:link-variant"
+    lambda: |-
+      if (id(paired_to_cyd)) return std::string("Connected");
+      if (id(pairing_active)) return std::string("Pairing");
+      return std::string("Unassigned");
+    update_interval: 5s
+  - platform: template
+    id: cyd_identifier_text
+    name: "Paired CYD ID"
+    entity_category: diagnostic
+    icon: "mdi:identifier"
+    lambda: |-
+      if (!id(paired_to_cyd) || id(cyd_identifier).empty()) return std::string("");
+      return id(cyd_identifier);
+    update_interval: 10s
+  - platform: template
+    id: tank_role_name
+    name: "Tank Role Name"
+    icon: "mdi:water"
+    entity_category: diagnostic
+    internal: false
+    lambda: |-
+      switch (id(tank_role)) {
+        case 1: return std::string("Fresh");
+        case 2: return std::string("Waste");
+        default: return std::string("Unassigned");
+      }
+    update_interval: 10s
+  - platform: template
+    id: tankpro_identifier
+    name: "TankPro Identifier"
+    entity_category: diagnostic
+    internal: false
+    lambda: |-
+      std::string mac = id(module_mac_address).state;
+      std::string compact;
+      compact.reserve(mac.size());
+      for (char c : mac) {
+        if (c != ':') compact.push_back(c);
+      }
+      const std::string suffix = compact.size() >= 4 ? compact.substr(compact.size() - 4) : compact;
+      return std::string("TankPro-") + suffix;
+    update_interval: 10s
+  - platform: template
+    id: freeze_protection_state
+    name: "Freeze Protection State"
+    icon: "mdi:snowflake-check"
+    entity_category: diagnostic
+    lambda: |-
+      return id(freeze_protection_enabled) ? std::string("Enabled") : std::string("Disabled");
+    update_interval: 10s
+
+number:
+  - platform: template
+    id: fill_stop_level_number
+    name: "Fill Stop Level"
+    entity_category: config
+    unit_of_measurement: "%"
+    icon: "mdi:water-check"
+    min_value: 0
+    max_value: 100
+    step: 1
+    lambda: 'return id(fill_stop_level);'
+    set_action:
+      - globals.set:
+          id: fill_stop_level
+          value: !lambda 'return (float) x;'
+  - platform: template
+    id: freeze_protection_threshold_number
+    name: "Freeze Protection Threshold"
+    entity_category: config
+    unit_of_measurement: "C"
+    icon: "mdi:snowflake"
+    min_value: 0.1
+    max_value: 5
+    step: 0.1
+    lambda: 'return id(freeze_protection_threshold_c);'
+    set_action:
+      - globals.set:
+          id: freeze_protection_threshold_c
+          value: !lambda 'return (float) x;'
+  - platform: template
+    id: drain_stop_level_number
+    name: "Drain Stop Level"
+    entity_category: config
+    unit_of_measurement: "%"
+    icon: "mdi:water-remove"
+    min_value: 0
+    max_value: 100
+    step: 1
+    lambda: 'return id(drain_stop_level);'
+    set_action:
+      - globals.set:
+          id: drain_stop_level
+          value: !lambda 'return (float) x;'
+  - platform: template
+    id: drain_timeout_seconds
+    name: "Drain Timeout"
+    entity_category: config
+    unit_of_measurement: "s"
+    icon: "mdi:timer-off"
+    min_value: 5
+    max_value: 300
+    step: 5
+    lambda: 'return (float) id(drain_timeout_ms) / 1000.0f;'
+    set_action:
+      - globals.set:
+          id: drain_timeout_ms
+          value: !lambda 'return (uint32_t)(x * 1000.0f);'
+
+select:
+  - platform: template
+    id: tank_role_select
+    name: "Tank Role"
+    entity_category: config
+    options:
+      - "Unassigned"
+      - "Fresh"
+      - "Waste"
+    lambda: |-
+      switch (id(tank_role)) {
+        case 1: return std::string("Fresh");
+        case 2: return std::string("Waste");
+        default: return std::string("Unassigned");
+      }
+    set_action:
+      - lambda: |-
+          int value = 0;
+          if (x == "Fresh") {
+            value = 1;
+          } else if (x == "Waste") {
+            value = 2;
+          }
+          id(tank_role) = value;
+
+      - globals.set:
+          id: tank_role
+          value: !lambda 'return (int) id(tank_role);'

@@ -1,0 +1,151 @@
+light:
+  - platform: esp32_rmt_led_strip
+    id: status_led
+    internal: true
+    pin: GPIO6
+    chipset: ws2812
+    num_leds: 1
+    rgb_order: grb
+    rmt_channel: 0
+    default_transition_length: 0s
+    restore_mode: ALWAYS_OFF
+  - platform: esp32_rmt_led_strip
+    id: status_led_2
+    internal: true
+    pin: GPIO7
+    chipset: ws2812
+    num_leds: 1
+    rgb_order: grb
+    rmt_channel: 1
+    default_transition_length: 0s
+    restore_mode: ALWAYS_OFF
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO10
+      mode: INPUT_PULLUP
+      inverted: true
+    id: pair_button
+    name: "Pair Button"
+    on_press:
+      - script.execute: pair_button_hold_monitor
+    on_release:
+      - script.stop: pair_button_hold_monitor
+      - globals.set:
+          id: reset_warning_active
+          value: 'false'
+      - lambda: |-
+          const uint32_t held = millis() - id(pair_button_press_ms);
+          if (!id(fault_active) && !id(reset_warning_active) && !id(pairing_active) && !id(pairing_cancel_press) && held < 1000) {
+            id(tank_valve_relay).toggle();
+          }
+      - globals.set:
+          id: pairing_cancel_press
+          value: 'false'
+      - if:
+          condition:
+            lambda: 'return id(fault_active);'
+          then:
+            - button.press: clear_faults_button
+
+  - platform: status
+    name: "Status"
+
+  - platform: gpio
+    pin:
+      number: GPIO3
+      mode: INPUT_PULLUP
+      inverted: true
+    id: leak_sensor
+    name: "Leak Sensor"
+    device_class: moisture
+    on_press:
+      - if:
+          condition:
+            lambda: 'return !id(safety_override);'
+          then:
+            - logger.log: "Leak detected: triggering critical fault and shutting down valve."
+            - globals.set:
+                id: fault_active
+                value: 'true'
+            - globals.set:
+                id: fault_code_int
+                value: '1'
+            - globals.set:
+                id: fill_in_progress
+                value: 'false'
+            - globals.set:
+                id: drain_in_progress
+                value: 'false'
+            - switch.turn_off: tank_valve_relay
+            - text_sensor.template.publish:
+                id: fault_description
+                state: "Leak detected"
+            - text_sensor.template.publish:
+                id: fault_code
+                state: "1"
+            - script.execute: status_led_flash_red
+
+switch:
+  - platform: gpio
+    id: tank_valve_relay
+    pin: GPIO5
+    name: "Valve Override"
+    icon: "mdi:valve"
+    restore_mode: ALWAYS_OFF
+
+  - platform: gpio
+    id: tank_buzzer
+    internal: true
+    pin: GPIO4
+    restore_mode: ALWAYS_OFF
+  - platform: template
+    id: freeze_protection_switch
+    name: "Freeze Protection"
+    icon: "mdi:snowflake-alert"
+    entity_category: config
+    optimistic: false
+    lambda: 'return id(freeze_protection_enabled);'
+    turn_on_action:
+      - logger.log: "Freeze protection enabled."
+      - globals.set:
+          id: freeze_protection_enabled
+          value: 'true'
+    turn_off_action:
+      - logger.log: "Freeze protection disabled."
+      - globals.set:
+          id: freeze_protection_enabled
+          value: 'false'
+  - platform: template
+    id: safety_override_switch
+    name: "Safety Override"
+    icon: "mdi:shield-off"
+    entity_category: config
+    optimistic: false
+    lambda: 'return id(safety_override);'
+    turn_on_action:
+      - logger.log: "Safety override enabled: fault triggers and automations disabled."
+      - globals.set:
+          id: safety_override
+          value: 'true'
+      - globals.set:
+          id: fault_active
+          value: 'false'
+      - globals.set:
+          id: fault_code_int
+          value: '0'
+      - text_sensor.template.publish:
+          id: fault_description
+          state: "Override active"
+      - text_sensor.template.publish:
+          id: fault_code
+          state: "0"
+    turn_off_action:
+      - logger.log: "Safety override disabled: normal monitoring resumed."
+      - globals.set:
+          id: safety_override
+          value: 'false'
+      - globals.set:
+          id: fault_active
+          value: 'false'
