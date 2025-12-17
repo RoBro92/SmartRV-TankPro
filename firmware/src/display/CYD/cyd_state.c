@@ -84,7 +84,7 @@ void cyd_state_init_defaults(void) {
     cyd_state.waste.diag_signal_dbm = 0;
     cyd_state.waste.diag_version[0] = '\0';
 
-    strncpy(cyd_state.firmware_version, "V 0.1.0", sizeof(cyd_state.firmware_version) - 1);
+    strncpy(cyd_state.firmware_version, "V 0.2.0", sizeof(cyd_state.firmware_version) - 1);
     cyd_state.setup_complete = false;
     cyd_state.wifi_connected = false;
     cyd_state.wifi_ssid[0] = '\0';

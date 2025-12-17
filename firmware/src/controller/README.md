@@ -1,28 +1,35 @@
-# Firmware – Controller (ESPHome)
+# Firmware – Controller (v0.2.0)
 
-This directory contains ESPHome-based firmware for SmartRV TankPro v3.0.
+ESPHome-based firmware for the TankPro controller (ESP32-C3). Runs in two user-facing modes:
+- **Wi‑Fi mode:** normal home network operation (provisioned via captive portal/Improv).
+- **Direct mode (ESP‑NOW):** controller ↔ CYD link without an access point (auto-selected when pairing and no Wi‑Fi creds; locked until factory reset).
 
-## Files
-- `esphome/tankpro.yaml`: Production ESPHome configuration for the ESP32-C3 board (factory AP provisioning, CYD pairing, on-device safety).
-- `esphome/tankpro_basic.yaml`: Barebones ESP32-S3 build that exposes only core I/O (no automations/safety) for users who prefer to create their own Home Assistant automations.
+## What it does
+- Reads tank level voltage and temperature, detects leak input, and reports faults.
+- Drives the valve relay/buzzer/LEDs; executes Fill/Drain/Restart/Clear Faults commands from CYD.
+- Publishes level/temp/fault/relay state continuously to CYD over Wi‑Fi or Direct.
 
-## Flashing (home use)
-1) Install [ESPHome](https://esphome.io/).  
-2) Connect the controller over USB-C.  
-3) From this directory run `esphome run esphome/tankpro.yaml` (or `tankpro_basic.yaml` if you intentionally want the S3 barebones build).  
-4) On first boot the device exposes an AP `SmartRV-TankPro-Setup` (password `changeme`). Connect to the captive portal at `192.168.4.1` or use Improv Serial to provide Wi‑Fi credentials.  
-5) The device will appear in Home Assistant via ESPHome discovery.
+## Pairing flow (with CYD display)
+1) Power controller. If unprovisioned + pairing enabled, it advertises for the CYD (Direct) instead of starting Wi‑Fi portal.
+2) On CYD, open Assign Roles overlay, select the controller, assign Fresh or Waste.
+3) CYD sends role + key; controller locks to Direct mode and stores peer MAC/key.
+4) After pairing, controller rejoins automatically after reboot and resumes telemetry.
 
-## TankPro ESP32-C3 (tankpro.yaml)
-- **Hardware pins**: Relay GPIO5, buzzer GPIO4, LEDs on GPIO6/7, pairing button GPIO10, leak GPIO3, tank level ADC GPIO0, tank temp DS18B20 GPIO1.
-- **States (LED2)**: boot warm-white pulse, healthy green (relay off), yellow solid when relay energised, orange slow flash on warnings, red fast flash on critical faults, purple fast flash during OTA, alternating red flash during fault or reset warning.
-- **Network (LED1)**: Off until boot completes; red solid when isolated, white slow flash for captive portal, blue solid when connected, yellow slow flash if link lost, blue fast flash while connecting, purple slow flash during OTA; brief double-yellow flash on connectivity state changes.
-- **Pair button**: short press toggles relay (only when not pairing/fault/reset), 3 s hold enters pairing (LED1/LED2 alternate blue/white), pressing again cancels pairing without toggling relay, 10–15 s hold shows red alternating reset warning, 15 s hold factory resets and exits pairing, release returns to normal LED state.
-- **Fault handling**: Both LEDs alternate red on critical faults; clear via CYD/HA or resolving condition plus clear-fault command.
+## Factory reset + direct-mode lock
+- Long-press pairing button (per on-screen prompt) to factory reset. This clears Wi‑Fi creds and Direct lock/keys.
+- While Direct lock is present, controller ignores new Wi‑Fi creds and never enters provisioning.
 
-## TankPro Basic ESP32-S3 (tankpro_basic.yaml)
-- Core I/O only: button, leak sensor, valve relay, buzzer, WS2812 status LED, tank level voltage, temperature, Wi‑Fi signal, uptime, device info.
-- No automations or on-device safety; intended for DIY automations in Home Assistant.
+## Basic troubleshooting
+- No telemetry in CYD: check LEDs, ensure Direct lock peer MAC matches; factory reset and re-pair if needed.
+- Valve won’t stop: Clear Faults; verify fill/drain states and thresholds in CYD config.
+- Wi‑Fi portal not appearing: Direct lock likely active—factory reset to return to Wi‑Fi provisioning.
+- Leak/fault latched: resolve sensor condition, then issue Clear Faults from CYD.
+- OTA issues: ensure USB-C power is stable; retry `esphome run` or OTA from ESPHome Dashboard.
 
-## Licensing
-SmartRV TankPro firmware is released under the MIT License; see `LICENSE-SOFTWARE` at the repo root. ESPHome itself remains under its own license; see the ESPHome project for details.
+## Build/flash
+- Install ESPHome, connect over USB-C, then run from this folder:
+  - `esphome run esphome/tankpro.yaml`
+- Version reported via `firmware_version` substitution: **v0.2.0**.
+
+## Changelog
+See `CHANGELOG.md` in this directory.

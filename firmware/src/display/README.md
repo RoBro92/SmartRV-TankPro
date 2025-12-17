@@ -1,26 +1,27 @@
-# Firmware – Display (Cheap Yellow Display LVGL)
+# Firmware – Display (CYD, v0.2.0)
 
-LVGL 9.x firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. The UI mirrors TankPro concepts (fresh/waste tanks, faults, display settings) and now drives live controller data plus commands (fill, drain, clear faults, restart, config).
+LVGL firmware for the Cheap Yellow Display (ESP32-2432S028). Acts as the primary node for up to two TankPro controllers.
 
-## Layout
-- `CYD/`: PlatformIO project targeting the ESP32-2432S028 with ILI9341 TFT + XPT2046 touch.
-  - `platformio.ini`: `env:cyd` build target; pulls LVGL and LovyanGFX.
-  - `main.cpp`: LVGL bring-up, touch + brightness handling, sleep timeout.
-  - `ui/`: SquareLine-generated LVGL UI (v0.1.0 label baked into boot/settings).
-  - Build outputs land in `.pio/build/cyd/` (firmware.bin, bootloader.bin, partitions.bin).
+## What it does
+- Discovers controllers, assigns Fresh/Waste roles, and stores peer MAC/keys.
+- Shows live level, temperature, leak/fault status, and relay state.
+- Issues commands: Fill, Drain, Clear Faults, Restart, and config updates.
+- Works over Wi‑Fi (UDP) or Direct (ESP‑NOW) depending on controller mode.
 
-## Flashing
-- Recommended: `pio run -e cyd` then `pio run -t upload -e cyd --upload-port <port>` from inside `CYD/`.
-- Or flash the built binaries with `esptool.py` (addresses: 0x1000 bootloader, 0x8000 partitions, 0x10000 firmware).
-- If the board does not auto-enter bootloader, hold `BOOT`, tap `RST`, then release `BOOT` after upload starts.
+## UI actions
+- **Pair/assign roles:** Open Assign Roles overlay, select a discovered controller, choose Fresh/Waste.
+- **Control:** Use Fill/Drain buttons per role; Clear Faults to reset alarms; Restart to reboot controller.
+- **View status:** Level %, temperature, leak/fault text, and connection state per role.
 
-## For users buying their own Cheap Yellow Display
-- The ready-to-flash binaries are in `.pio/build/cyd/` after a build (`firmware.bin`, `bootloader.bin`, `partitions.bin`).
-- Step-by-step install/update instructions (PlatformIO and esptool.py) are in `docs/display-firmware-installation.md`.
-- Display settings (brightness, sleep timeout, theme) are persisted locally on the display between reboots.
+## Connection modes
+- Wi‑Fi: CYD and controllers on same network; uses UDP for state/commands.
+- Direct: CYD uses ESP‑NOW on channel 6 to talk to paired controllers (max two).
 
-## Status / roadmap
-- Current build: live Wi‑Fi link to TankPro controllers, pairing/assignment, config sync, Clear Faults, Fill/Drain, and Restart commands.
-- Next: tighter direct-mode support without infrastructure Wi‑Fi plus richer on-screen diagnostics.
+## Build/flash
+- From `firmware/src/display/CYD`: `pio run -e cyd` (or `pio run -t upload -e cyd --upload-port <port>` to flash).
+- Binaries output to `.pio/build/cyd/` (bootloader, partitions, firmware).
+- If needed, hold BOOT and tap RST to enter bootloader before upload.
+- Version shown on UI labels: **v0.2.0**.
 
-See `docs/display-firmware.md` for project details and `docs/display-firmware-installation.md` for end-user flashing and update instructions.
+## Changelog
+See `CHANGELOG.md` in this directory.

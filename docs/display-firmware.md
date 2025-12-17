@@ -1,6 +1,6 @@
 # Display Firmware (Cheap Yellow Display)
 
-LVGL firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. This build targets the stock ILI9341 TFT + XPT2046 touch stack and shows live TankPro data (fresh/waste), lets you pair controllers, trigger fill/drain, clear faults, tweak thresholds, and restart controllers. Current build label: **v0.1.0**.
+LVGL firmware for the 2.8" **Cheap Yellow Display (ESP32-2432S028)**. This build targets the stock ILI9341 TFT + XPT2046 touch stack and shows live TankPro data (fresh/waste), lets you pair controllers, trigger fill/drain, clear faults, tweak thresholds, and restart controllers. Current build label: **v0.2.0**.
 
 For a step-by-step flashing guide (PlatformIO and esptool.py) aimed at users buying their own CYD, see `docs/display-firmware-installation.md`.
 
@@ -46,7 +46,7 @@ esptool.py --chip esp32 --baud 460800 --before default_reset --after no_reset wr
 - Boot screen offering **Wi‑Fi** or **Direct** (Wi‑Fi is primary; Direct is for controller AP fallback).
 - Home cards for **Fresh** and **Waste** tanks; once paired, they show live levels, temps, leak status, and connection health.
 - Buttons for **Fill**, **Drain**, **Clear Faults**, and **Restart** per tank. Clear Faults immediately clears the local UI and sends a clear command to the controller.
-- Settings screen with brightness, sleep timeout, theme toggle, and firmware label `v0.1.0`.
+- Settings screen with brightness, sleep timeout, theme toggle, and firmware label `v0.2.0`.
 
 ## Updating
 - Rebuild and re-flash using either method above. Brightness, sleep timeout, theme selections, and stored controller assignments persist on the display between updates.

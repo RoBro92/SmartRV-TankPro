@@ -10,6 +10,6 @@ substitutions:
   default_level_empty_volts: "0.5"
   default_level_full_volts: "2.5"
   default_safety_override: "false"
-  firmware_version: "v0.1.0"
+  firmware_version: "v0.2.0"
   cyd_udp_port: "60505"
   direct_channel: "6"
