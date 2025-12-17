@@ -1,33 +1,3 @@
-# Wiring and Installation
+# Wiring and installation (stub)
 
-Follow these guidelines to safely wire SmartRV TankPro v3.0 into a 12–24 V RV/boat system.
-
-## Power connections
-- **VIN (12–24 V DC):** Primary supply input from the RV electrical system. 
-- **GND:** System ground. Tie to the vehicle negative bus.
-- **USB-C:** Secondary/power for flashing and bench testing; can also power the board without VIN connected.
-
-## Connector pin-outs (ESP32-C3 mapping)
-- **Tank Level:** Sense line → GPIO0 (ADC). Other sensor leg to GND.
-- **Temperature (DS18B20):** Data → GPIO1 with 4.7 kΩ pull-up to 3V3.
-- **Leak sensor:** Digital input → GPIO3 (use internal pull-up).
-- **Buzzer:** Drive → GPIO4.
-- **Relay output:** Relay control transistor → GPIO5. Relay contacts (NO/COM) switch the external pump/valve on the 5 V rail.
-- **WS2812C LED 1:** Data in → GPIO6.
-- **WS2812C LED 2:** Data in → GPIO7.
-- **Pairing button:** Momentary → GPIO10 (active-low) to trigger provisioning/restart.
-- **UART header (future display/debug):** TX → GPIO21, RX → GPIO20 (3.3 V logic), plus 3V3 and GND.
-
-## Example wiring scenarios
-- **Single tank (0–190 Ω):**
-  - Connect sensor wiper to Sensor 1 input (GPIO0), sensor return to GND.
-- **Leak sensor:**
-  - Wire leak probe between GPIO3 and GND (internal pull-up enabled).
-- **Relay control:**
-  - Wire VIN (5–24 V) to relay COM, pump/valve lead to relay NO, and the other lead of the pump/valve to GND. Verify relay contact voltage/current limits.
-
-## Installation notes
-- Keep sensor cable runs short where possible; if long, consider shielded cable and tie shield to GND at the module end.
-- Route sensor wiring away from high-current lines (inverters, alternators) to reduce noise.
-- Ensure polarity protection/fusing on VIN. Confirm all connectors are tightened before powering up.
-- Use strain relief on USB-C and sensor/relay cables to avoid stressing the PCB connectors.
+See `hardware/controller/README.md` for current wiring/install overview. Legacy wiring notes have been consolidated there.

@@ -26,3 +26,5 @@ The TankPro controller is an ESP32-C3-based tank monitor/valve driver for RVs/bo
 ## Version
 - Hardware reference: rev v3 (unchanged in this release).
 - Release documentation: v0.2.0.
+
+Docs/index/roadmap: see `docs/README.md`. Images/assets live in `docs/assets/`.

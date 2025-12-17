@@ -26,6 +26,12 @@ Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers o
 - Hardware: see `hardware/controller/README.md` (parts, wiring, safety).
 - Controller firmware: `firmware/src/controller/README.md` (modes, pairing, flashing).
 - CYD firmware: `firmware/src/display/README.md` (UI actions, flashing).
+- Docs index: `docs/README.md`
+- Roadmap: `docs/roadmap.md`
+- Beta testing: `docs/beta-testing.md`
+
+## Demo videos
+- (placeholder links for quick demos)
 
 ## Release checklist (quick)
 - Build controller: `cd firmware/src/controller/esphome && esphome compile tankpro.yaml`

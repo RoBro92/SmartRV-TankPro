@@ -23,5 +23,8 @@ LVGL firmware for the Cheap Yellow Display (ESP32-2432S028). Acts as the primary
 - If needed, hold BOOT and tap RST to enter bootloader before upload.
 - Version shown on UI labels: **v0.2.0**.
 
+Docs/index/roadmap: see `docs/README.md`.
+Images/assets: see `docs/assets/` (for any shared UI images).
+
 ## Changelog
 See `CHANGELOG.md` in this directory.

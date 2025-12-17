@@ -1,0 +1,31 @@
+name: Beta feedback (5-board test)
+description: Share results from beta testing
+labels: ["status:beta-needed", "type:bug"]
+body:
+  - type: textarea
+    id: setup
+    attributes:
+      label: What you tested
+      description: Controller/Display versions, mode (Wi-Fi/Direct), tank setup
+  - type: textarea
+    id: worked
+    attributes:
+      label: What worked well
+  - type: textarea
+    id: issues
+    attributes:
+      label: Issues found
+      description: Include steps/logs/photos/videos if possible
+  - type: textarea
+    id: suggestions
+    attributes:
+      label: Suggestions / priorities
+  - type: dropdown
+    id: rating
+    attributes:
+      label: Overall experience
+      options:
+        - Excellent
+        - Good
+        - Fair
+        - Poor

@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a bug in controller or display firmware
+labels: ["type:bug", "status:triage"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened? What did you expect?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - controller-fw
+        - display-fw
+        - hardware
+        - docs
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Firmware version(s)
+      description: e.g. controller v0.2.0, display v0.2.0
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode
+      options:
+        - Wi-Fi
+        - Direct (ESP-NOW)
+        - Both / unsure
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+        3.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs/screenshots
+      description: Paste logs or attach images if possible
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context

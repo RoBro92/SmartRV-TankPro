@@ -31,5 +31,8 @@ ESPHome-based firmware for the TankPro controller (ESP32-C3). Runs in two user-f
   - `esphome run esphome/tankpro.yaml`
 - Version reported via `firmware_version` substitution: **v0.2.0**.
 
+Docs/index/roadmap: see `docs/README.md`.
+Images/assets: see `docs/assets/` (icons/diagrams if added later).
+
 ## Changelog
 See `CHANGELOG.md` in this directory.
