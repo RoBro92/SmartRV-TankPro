@@ -4,4 +4,5 @@ packages:
   10_state_globals: !include packages/10_state_globals.yaml
   20_hardware: !include packages/20_hardware.yaml
   30_sensors: !include packages/30_sensors.yaml
+  40_faults: !include packages/40_faults.yaml
   60_services_scripts: !include packages/60_services_scripts.yaml

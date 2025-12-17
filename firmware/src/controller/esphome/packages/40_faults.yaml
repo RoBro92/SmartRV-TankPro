@@ -1,0 +1,207 @@
+script:
+  - id: status_led_flash_red
+    then:
+      - repeat:
+          count: 3
+          then:
+            - light.turn_on:
+                id: status_led_2
+                brightness: 60%
+                red: 100%
+                green: 0%
+                blue: 0%
+            - delay: 300ms
+            - light.turn_off: status_led_2
+            - delay: 200ms
+
+interval:
+  # Safety guard: close valve if level meets/exceeds stop level regardless of state
+  - interval: 2s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              const float level = id(tank_level).state;
+              const bool above = !isnan(level) && level >= id(fill_stop_level);
+              if (id(drain_in_progress)) {
+                id(guard_over_stop_counter) = 0;
+                return false;
+              }
+              if (above) {
+                id(guard_over_stop_counter) += 1;
+              } else {
+                id(guard_over_stop_counter) = 0;
+              }
+              return !id(safety_override) && id(tank_valve_relay).state && above && id(guard_over_stop_counter) >= 2;
+          then:
+            - if:
+                condition:
+                  lambda: 'return id(fill_in_progress);'
+                then:
+                  - logger.log: "Safety guard: level at/above stop threshold during fill; closing valve (normal stop)."
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: guard_over_stop_counter
+                      value: '0'
+                else:
+                  - logger.log: "Safety guard: valve open without fill_in_progress and level at/above stop; closing valve and flagging fault."
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: fault_active
+                      value: 'true'
+                  - globals.set:
+                      id: fault_code_int
+                      value: '2'
+                  - globals.set:
+                      id: guard_over_stop_counter
+                      value: '0'
+                  - text_sensor.template.publish:
+                      id: fault_description
+                      state: "Valve open without active fill"
+                  - text_sensor.template.publish:
+                      id: fault_code
+                      state: "2"
+                  - script.execute: status_led_flash_red
+
+  # Fault annunciation: pulse buzzer and LED while in fault state
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(fault_active) && !id(safety_override);'
+          then:
+            - switch.turn_on: tank_buzzer
+            - delay: 300ms
+            - switch.turn_off: tank_buzzer
+
+  # Direct link watchdog / failsafe
+  - interval: 1s
+    then:
+      - lambda: |-
+          const uint32_t now = millis();
+          if (!id(direct_mode_active) || !id(paired_to_cyd) || id(direct_peer_key) == 0) {
+            id(direct_link_ok) = false;
+            return;
+          }
+          if (id(last_cyd_rx_ms) == 0) {
+            id(last_cyd_rx_ms) = now;
+          }
+          const uint32_t last = id(last_cyd_rx_ms);
+          const uint32_t age = (last == 0) ? UINT32_MAX : (now - last);
+          const uint32_t stale_ms = 10000;
+          const uint32_t fault_ms = 30000;
+          id(direct_link_ok) = age <= stale_ms;
+          const bool outputs_active = id(tank_valve_relay).state || id(fill_in_progress) || id(drain_in_progress);
+          static uint8_t fault_hits = 0;
+          if (age > fault_ms && outputs_active) {
+            fault_hits++;
+            if (fault_hits >= 3) {
+              id(failsafe_active) = true;
+              if (id(tank_valve_relay).state) id(tank_valve_relay).turn_off();
+              id(fill_in_progress) = false;
+              id(drain_in_progress) = false;
+              if (id(fault_code_int) == 0 || id(fault_code_int) == 9) {
+                id(fault_active) = true;
+                id(fault_code_int) = 9;
+                id(fault_description).publish_state("Lost connection to CYD");
+                id(fault_code).publish_state("9");
+              }
+            }
+          } else if (id(fault_code_int) == 9 && age <= stale_ms) {
+            id(fault_active) = false;
+            id(fault_code_int) = 0;
+            id(fault_description).publish_state("None");
+            id(fault_code).publish_state("0");
+            id(failsafe_active) = false;
+            fault_hits = 0;
+          } else {
+            fault_hits = 0;
+          }
+
+  # Freeze protection / temp sensor health check
+  - interval: 5s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(freeze_protection_enabled) && !id(safety_override);'
+          then:
+            - lambda: |-
+                const float t = id(tank_temperature).state;
+                const bool timed_out = id(last_temp_update_ms) > 0 && (millis() - id(last_temp_update_ms) > id(temp_timeout_ms));
+                if (id(fault_active) && id(fault_code_int) != 3 && id(fault_code_int) != 4) {
+                  return;
+                }
+                if (isnan(t) || timed_out) {
+                  if (id(fault_code_int) != 4 || !id(fault_active)) {
+                    ESP_LOGI("freeze_protect", "Temp sensor failure while freeze protection enabled; setting fault code 4 (nan=%d timed_out=%d).", isnan(t), timed_out);
+                    id(fault_active) = true;
+                    id(fault_code_int) = 4;
+                    id(fill_in_progress) = false;
+                    id(drain_in_progress) = false;
+                    id(tank_valve_relay).turn_off();
+                    id(fault_description).publish_state("Temp Sensor Failure");
+                    id(fault_code).publish_state("4");
+                    id(status_led_flash_red).execute();
+                  }
+                  return;
+                }
+                if (t <= id(freeze_protection_threshold_c)) {
+                  if (id(fault_code_int) != 3 || !id(fault_active)) {
+                    ESP_LOGI("freeze_protect", "Freeze protection active: temp %.2fC at/below threshold %.2fC.", t, id(freeze_protection_threshold_c));
+                    id(fault_active) = true;
+                    id(fault_code_int) = 3;
+                    id(fill_in_progress) = false;
+                    id(drain_in_progress) = false;
+                    id(fault_description).publish_state("Freeze protection");
+                    id(fault_code).publish_state("3");
+                    id(status_led_flash_red).execute();
+                  }
+                  id(tank_valve_relay).turn_on();
+                }
+                // If temp is healthy and above threshold, do nothing here; clearing fault handled elsewhere.
+
+button:
+  - platform: template
+    id: clear_faults_button
+    name: "Clear Faults"
+    icon: "mdi:alert-circle-check"
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(fault_code_int) == 0;'
+          then:
+            - logger.log: "Clear Faults pressed with no active fault; ignoring."
+          else:
+            - logger.log: "Clearing faults and resetting state."
+            - globals.set:
+                id: fault_active
+                value: 'false'
+            - globals.set:
+                id: fault_code_int
+                value: '0'
+            - globals.set:
+                id: fill_in_progress
+                value: 'false'
+            - globals.set:
+                id: drain_in_progress
+                value: 'false'
+            - switch.turn_off: tank_valve_relay
+            - switch.turn_off: tank_buzzer
+            - text_sensor.template.publish:
+                id: fault_description
+                state: "None"
+            - text_sensor.template.publish:
+                id: fault_code
+                state: "0"
