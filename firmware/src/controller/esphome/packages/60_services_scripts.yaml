@@ -1,0 +1,1737 @@
+script:
+  - id: status_led_flash_red
+    then:
+      - repeat:
+          count: 3
+          then:
+            - light.turn_on:
+                id: status_led_2
+                brightness: 60%
+                red: 100%
+                green: 0%
+                blue: 0%
+            - delay: 300ms
+            - light.turn_off: status_led_2
+            - delay: 200ms
+  - id: pair_button_hold_monitor
+    mode: restart
+    then:
+      - lambda: |-
+          id(pair_button_press_ms) = millis();
+          id(pairing_cancel_press) = false;
+      - if:
+          condition:
+            lambda: 'return id(pairing_active);'
+          then:
+            - logger.log: "Pairing button pressed: cancelling pairing mode."
+            - globals.set:
+                id: pairing_active
+                value: 'false'
+            - globals.set:
+                id: pairing_token
+                value: '0'
+            - globals.set:
+                id: pairing_cancel_press
+                value: 'true'
+          else:
+            - delay: 3s
+            - if:
+                condition:
+                  lambda: 'return id(pair_button).state;'
+                then:
+                  - script.execute: enter_pairing_mode
+            - while:
+                condition:
+                  lambda: |-
+                    if (!id(pair_button).state) return false;
+                    return (millis() - id(pair_button_press_ms)) < 15000;
+                then:
+                  - if:
+                      condition:
+                        lambda: 'return (millis() - id(pair_button_press_ms)) >= 10000;'
+                      then:
+                        - globals.set:
+                            id: pairing_active
+                            value: 'false'
+                        - globals.set:
+                            id: pairing_token
+                            value: '0'
+                        - globals.set:
+                            id: reset_warning_active
+                            value: 'true'
+                        - light.turn_on:
+                            id: status_led
+                            red: 100%
+                            green: 0%
+                            blue: 0%
+                            brightness: 70%
+                        - light.turn_off: status_led
+                        - light.turn_on:
+                            id: status_led_2
+                            red: 100%
+                            green: 0%
+                            blue: 0%
+                            brightness: 70%
+                        - light.turn_off: status_led_2
+                  - delay: 500ms
+            - lambda: |-
+                const uint32_t held = millis() - id(pair_button_press_ms);
+                if (held >= 15000 && id(pair_button).state) {
+                  id(factory_reset_script).execute();
+                }
+            - globals.set:
+                id: reset_warning_active
+                value: 'false'
+
+  - id: send_direct_state_once
+    then:
+      - lambda: |-
+          if (!id(direct_mode_active)) return;
+          #include "esp_direct_includes.h"
+          #include <esp_now.h>
+          if (id(direct_peer_mac).length() != 17 || id(direct_peer_key) == 0) {
+            ESP_LOGW("direct_tx", "skip state: missing peer/key");
+            return;
+          }
+          uint8_t peer_mac[6];
+          if (sscanf(id(direct_peer_mac).c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+                     &peer_mac[0], &peer_mac[1], &peer_mac[2], &peer_mac[3], &peer_mac[4], &peer_mac[5]) != 6) {
+            ESP_LOGW("direct_tx", "bad peer mac: %s", id(direct_peer_mac).c_str());
+            return;
+          }
+          esp_wifi_set_channel(id(direct_channel), WIFI_SECOND_CHAN_NONE);
+          esp_now_peer_info_t peer = {};
+          memcpy(peer.peer_addr, peer_mac, 6);
+          peer.channel = id(direct_channel);
+          peer.encrypt = false;
+          esp_now_add_peer(&peer);
+          const float level = id(tank_level).state;
+          const float temp = id(tank_temperature).state;
+          const bool leak = id(leak_sensor).state;
+          const std::string ident = id(tankpro_identifier).state;
+          const std::string version = id(firmware_version);
+          const char *role = "Unassigned";
+          switch (id(tank_role)) {
+            case 1: role = "Fresh"; break;
+            case 2: role = "Waste"; break;
+            default: role = "Unassigned"; break;
+          }
+          const char *status = "ok";
+          if (id(fault_active)) status = "fault";
+          else if (id(fill_in_progress)) status = "fill";
+          else if (id(drain_in_progress)) status = "drain";
+          else if (id(pairing_active)) status = "pairing";
+          const float level_out = isnan(level) ? -1.0f : level;
+          const float temp_out = isnan(temp) ? -300.0f : temp;
+          uint32_t seq = id(direct_seq)++;
+          uint32_t auth = 0;  // legacy JSON path unused in direct now; leave tag zero
+          // Compact payload for ESP-NOW (<200B)
+          char payload[192];
+          int written = snprintf(payload, sizeof(payload),
+                                 "{\"t\":\"tc\",\"e\":\"state\",\"id\":\"%s\",\"r\":\"%c\","
+                                 "\"st\":\"%s\",\"l\":%.1f,\"tp\":%.2f,\"lk\":%d,"
+                                 "\"fi\":%d,\"dr\":%d,\"fc\":%d,\"vo\":%d,"
+                                 "\"seq\":%lu,\"auth\":%u}",
+                                 ident.c_str(), role[0],
+                                 status, level_out, temp_out, leak ? 1 : 0,
+                                 id(fill_in_progress) ? 1 : 0, id(drain_in_progress) ? 1 : 0,
+                                 id(fault_code_int), id(tank_valve_relay).state ? 1 : 0,
+                                 (unsigned long) seq, (unsigned) auth);
+          if (written > 0 && written < static_cast<int>(sizeof(payload))) {
+            char macbuf[18];
+            snprintf(macbuf, sizeof(macbuf), "%02X:%02X:%02X:%02X:%02X:%02X", peer_mac[0], peer_mac[1], peer_mac[2], peer_mac[3], peer_mac[4], peer_mac[5]);
+            esp_err_t rc = esp_now_send(peer_mac, reinterpret_cast<const uint8_t *>(payload), static_cast<size_t>(written));
+            ESP_LOGI("direct_tx", "state seq=%lu len=%d mac=%s rc=%d", (unsigned long) seq, written, macbuf, (int) rc);
+          } else {
+            ESP_LOGW("direct_tx", "state payload too large (%d)", written);
+          }
+
+  # Main fill automation (self-contained on device)
+  - id: fill_tank_script
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return id(safety_override) || id(fault_active);'
+          then:
+            - logger.log: "Fill start ignored: safety override or fault active."
+          else:
+            - globals.set:
+                id: fill_in_progress
+                value: 'true'
+            - globals.set:
+                id: fill_above_stop_seen
+                value: 'false'
+            - switch.turn_on: tank_valve_relay
+            - while:
+                condition:
+                  lambda: |-
+                    const float level = id(tank_level).state;
+                    const float stop_level = id(fill_stop_level);
+                    if (!id(fill_in_progress)) return false;
+                    if (isnan(level)) return true;
+                    if (level >= stop_level) {
+                      if (id(fill_above_stop_seen)) {
+                        return false;
+                      } else {
+                        id(fill_above_stop_seen) = true;
+                        return true;
+                      }
+                    }
+                    id(fill_above_stop_seen) = false;
+                    return true;
+                then:
+                  - delay: 3s
+            - switch.turn_off: tank_valve_relay
+            - globals.set:
+                id: fill_in_progress
+                value: 'false'
+            - globals.set:
+                id: fill_above_stop_seen
+                value: 'false'
+
+  # Drain automation
+  - id: drain_tank_script
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: 'return id(safety_override) || id(fault_active);'
+          then:
+            - logger.log: "Drain start ignored: safety override or fault active."
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(fill_in_progress);'
+                then:
+                  - logger.log: "Drain start requested but fill is active; aborting drain."
+                else:
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'true'
+                  - lambda: |-
+                      id(drain_start_level) = id(tank_level).state;
+                      id(drain_last_level) = id(tank_level).state;
+                      id(drain_start_ms) = millis();
+                      id(drain_last_change_ms) = millis();
+                  - switch.turn_on: tank_valve_relay
+                  - while:
+                      condition:
+                        lambda: |-
+                          if (!id(drain_in_progress)) return false;
+                          const float level = id(tank_level).state;
+                          const float stop_level = id(drain_stop_level);
+                          const unsigned long now = millis();
+                          if (!isnan(level) && !isnan(id(drain_last_level)) && fabs(level - id(drain_last_level)) > 0.5f) {
+                            id(drain_last_change_ms) = now;
+                            id(drain_last_level) = level;
+                          }
+                          if (!isnan(level) && level <= stop_level) return false;
+                          if (now - id(drain_last_change_ms) >= id(drain_timeout_ms)) return false;
+                          return true;
+                      then:
+                        - delay: 3s
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+
+  - id: enter_pairing_mode
+    then:
+      - logger.log: "Entering pairing mode."
+      - globals.set:
+          id: pairing_active
+          value: 'true'
+      - lambda: |-
+          if (WiFi.SSID().length() == 0 && !id(direct_mode_locked)) {
+            id(direct_mode_active) = true;
+          }
+          uint32_t token = esp_random();
+          id(pairing_token) = token;
+          ESP_LOGI("pairing", "Pairing token generated: %u", token);
+      - lambda: 'id(pairing_start_ms) = millis();'
+      - if:
+          condition:
+            lambda: 'return id(direct_mode_active);'
+          then:
+            - script.execute: direct_mode_init
+
+  - id: factory_reset_script
+    then:
+      - logger.log: "Factory reset starting."
+      - lambda: |-
+          // Clear Wi-Fi credentials and all persisted state in NVS so the unit
+          // truly comes up empty after reset.
+          esp_wifi_stop();
+          esp_wifi_deinit();
+          nvs_flash_deinit();
+          esp_err_t err = nvs_flash_erase();
+          ESP_LOGI("reset", "nvs_flash_erase: %d", (int) err);
+          err = nvs_flash_init();
+          ESP_LOGI("reset", "nvs_flash_init: %d", (int) err);
+          auto wipe_ns = [](const char *ns) {
+            nvs_handle_t h;
+            if (nvs_open(ns, NVS_READWRITE, &h) == ESP_OK) {
+              nvs_erase_all(h);
+              nvs_commit(h);
+              nvs_close(h);
+              ESP_LOGI("reset", "NVS namespace '%s' wiped", ns);
+            } else {
+              ESP_LOGW("reset", "NVS namespace '%s' open failed", ns);
+            }
+          };
+          wipe_ns("wifi");
+          wipe_ns("net80211");
+          wipe_ns("improv");
+          WiFi.persistent(true);
+          WiFi.disconnect(true, true);
+          WiFi.begin("", "");
+          WiFi.persistent(false);
+          WiFi.mode(WIFI_OFF);
+          delay(100);
+      - globals.set:
+          id: level_empty_volts
+          value: '${default_level_empty_volts}'
+      - globals.set:
+          id: level_full_volts
+          value: '${default_level_full_volts}'
+      - globals.set:
+          id: fill_stop_level
+          value: '${default_fill_stop_level}'
+      - globals.set:
+          id: drain_stop_level
+          value: '${default_drain_stop_level}'
+      - globals.set:
+          id: safety_override
+          value: '${default_safety_override}'
+      - globals.set:
+          id: freeze_protection_enabled
+          value: '${default_freeze_protection_enabled}'
+      - globals.set:
+          id: tank_role
+          value: '0'
+      - globals.set:
+          id: paired_to_cyd
+          value: 'false'
+      - globals.set:
+          id: direct_mode_locked
+          value: 'false'
+      - globals.set:
+          id: direct_mode_active
+          value: 'false'
+      - globals.set:
+          id: direct_peer_key
+          value: '0'
+      - globals.set:
+          id: direct_peer_role
+          value: '0'
+      - globals.set:
+          id: pairing_active
+          value: 'false'
+      - lambda: 'id(cyd_identifier).clear();'
+      - lambda: 'id(direct_peer_mac).clear();'
+      - globals.set:
+          id: pairing_token
+          value: '0'
+      - globals.set:
+          id: fault_active
+          value: 'false'
+      - globals.set:
+          id: fault_code_int
+          value: '0'
+      - globals.set:
+          id: last_cyd_rx_ms
+          value: '0'
+      - globals.set:
+          id: direct_link_ok
+          value: 'false'
+      - globals.set:
+          id: failsafe_active
+          value: 'false'
+      - text_sensor.template.publish:
+          id: fault_description
+          state: "None"
+      - text_sensor.template.publish:
+          id: fault_code
+          state: "0"
+      - logger.log: "Factory reset complete; restarting."
+      - button.press: restart_device
+
+  - id: direct_mode_init
+    mode: restart
+    then:
+      - lambda: |-
+          if (!id(direct_mode_active)) {
+            return;
+          }
+          WiFi.disconnect(true, true);
+          WiFi.mode(WIFI_STA);
+          esp_wifi_set_channel(id(direct_channel), WIFI_SECOND_CHAN_NONE);
+          if (id(last_cyd_rx_ms) == 0) {
+            id(last_cyd_rx_ms) = millis();
+          }
+          static bool espnow_init = false;
+          auto ensure_peer = [&](const uint8_t *mac) {
+            esp_now_peer_info_t peer = {};
+            memcpy(peer.peer_addr, mac, 6);
+            peer.channel = id(direct_channel);
+            peer.encrypt = false;
+            esp_now_add_peer(&peer);
+          };
+          if (!espnow_init) {
+            if (esp_now_init() != ESP_OK) {
+              ESP_LOGE("direct", "esp_now_init failed");
+              return;
+            }
+            espnow_init = true;
+            const uint8_t broadcast[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+            ensure_peer(broadcast);
+            esp_now_register_recv_cb([](const uint8_t *mac, const uint8_t *data, int len) {
+              if (!data || len <= 0) return;
+              auto mark_rx = [&]() {
+                id(last_cyd_rx_ms) = millis();
+                id(direct_link_ok) = true;
+                id(failsafe_active) = false;
+                if (id(fault_code_int) == 9) {
+                  id(fault_active) = false;
+                  id(fault_code_int) = 0;
+                  id(fault_description).publish_state("None");
+                  id(fault_code).publish_state("0");
+                }
+              };
+              #include "ArduinoJson.h"
+              StaticJsonDocument<384> doc;
+              auto err = deserializeJson(doc, data, len);
+              if (err) return;
+              const char *type = doc["type"] | "";
+              const char *event = doc["event"] | "";
+              const std::string target_id = doc["id"] | "";
+              const std::string my_id = id(tankpro_identifier).state;
+              const uint32_t key = doc["direct_key"] | doc["key"] | 0;
+              if (id(direct_peer_key) != 0 && key != 0 && key != id(direct_peer_key)) {
+                ESP_LOGW("direct", "auth fail key=%u expected=%u", (unsigned) key, (unsigned) id(direct_peer_key));
+                return;
+              }
+              if (target_id != my_id) return;
+              char macbuf[18] = {0};
+              if (mac) snprintf(macbuf, sizeof(macbuf), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+              ESP_LOGI("direct_rx", "len=%d type=%s event=%s mac=%s", len, type, event, macbuf);
+              auto send_reply = [&](const StaticJsonDocument<384> &d) {
+                char out[384];
+                size_t w = serializeJson(d, out, sizeof(out));
+                if (w > 0 && w <= 200) {
+                  esp_now_send(mac, reinterpret_cast<const uint8_t *>(out), w);
+                }
+              };
+              if (strcmp(type, "cyd_pair") == 0 && strcmp(event, "request") == 0) {
+                const char *role_str = doc["role"] | "";
+                int role = 0;
+                if (strcasecmp(role_str, "Fresh") == 0) role = 1;
+                else if (strcasecmp(role_str, "Waste") == 0) role = 2;
+                if (role == 0) return;
+                id(tank_role) = role;
+                id(direct_peer_role) = role;
+                id(paired_to_cyd) = true;
+                id(pairing_active) = false;
+                id(pairing_token) = 0;
+                id(direct_mode_locked) = true;
+                id(direct_mode_active) = true;
+                id(last_cyd_rx_ms) = millis();
+                id(direct_link_ok) = true;
+                id(failsafe_active) = false;
+                uint32_t new_key = key != 0 ? key : esp_random();
+                id(direct_peer_key) = new_key;
+                if (mac) {
+                  snprintf(macbuf, sizeof(macbuf), "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+                  id(direct_peer_mac) = std::string(macbuf);
+                }
+                StaticJsonDocument<192> ack;
+                ack["type"] = "tank_controller";
+                ack["event"] = "pair_ack";
+                ack["id"] = target_id.c_str();
+                ack["role"] = role == 1 ? "Fresh" : "Waste";
+                ack["paired"] = true;
+                ack["direct_key"] = new_key;
+                send_reply(ack);
+                mark_rx();
+              } else if (strcmp(type, "cyd_pair") == 0 && strcmp(event, "unpair_request") == 0) {
+                id(tank_role) = 0;
+                id(direct_peer_role) = 0;
+                id(paired_to_cyd) = false;
+                id(direct_mode_locked) = false;
+                id(direct_mode_active) = false;
+                id(direct_peer_key) = 0;
+                id(direct_peer_mac).clear();
+                StaticJsonDocument<192> ack;
+                ack["type"] = "tank_controller";
+                ack["event"] = "unpair_ack";
+                ack["id"] = target_id.c_str();
+                ack["role"] = "Unassigned";
+                ack["paired"] = false;
+                ack["direct_key"] = id(direct_peer_key);
+                send_reply(ack);
+                mark_rx();
+                id(factory_reset_script).execute();
+              } else if (strcmp(type, "cyd_config") == 0 && strcmp(event, "config_update") == 0) {
+                const char *role_str = doc["role"] | "";
+                int desired_role = 0;
+                if (strcasecmp(role_str, "Fresh") == 0) desired_role = 1;
+                else if (strcasecmp(role_str, "Waste") == 0) desired_role = 2;
+                if (desired_role != 0 && desired_role != id(tank_role)) {
+                  ESP_LOGW("cfg", "direct role mismatch in config_update (got %s, current %d) ignoring", role_str, id(tank_role));
+                } else {
+                  if (doc.containsKey("params")) {
+                    JsonObject params = doc["params"].as<JsonObject>();
+                    if (params.containsKey("fill_stop_percent")) {
+                      float v = params["fill_stop_percent"];
+                      v = std::max(0.0f, std::min(100.0f, v));
+                      id(fill_stop_level) = v;
+                      id(fill_stop_level_number).publish_state(id(fill_stop_level));
+                    }
+                    if (params.containsKey("drain_stop_percent")) {
+                      float v = params["drain_stop_percent"];
+                      v = std::max(0.0f, std::min(100.0f, v));
+                      id(drain_stop_level) = v;
+                      id(drain_stop_level_number).publish_state(id(drain_stop_level));
+                    }
+                    if (params.containsKey("drain_timeout_ms")) {
+                      uint32_t v = params["drain_timeout_ms"];
+                      id(drain_timeout_ms) = v;
+                      id(drain_timeout_seconds).publish_state((float) id(drain_timeout_ms) / 1000.0f);
+                    }
+                    if (params.containsKey("freeze_enabled")) {
+                      bool en = params["freeze_enabled"];
+                      id(freeze_protection_enabled) = en;
+                      id(freeze_protection_switch).publish_state(id(freeze_protection_enabled));
+                    }
+                    if (params.containsKey("freeze_threshold_c")) {
+                      float thresh = params["freeze_threshold_c"];
+                      if (thresh < -40) thresh = -40;
+                      if (thresh > 40) thresh = 40;
+                      id(freeze_protection_threshold_c) = thresh;
+                      id(freeze_protection_threshold_number).publish_state(id(freeze_protection_threshold_c));
+                    }
+                    if (params.containsKey("level_empty_volts")) {
+                      float v = params["level_empty_volts"];
+                      v = std::max(0.0f, std::min(5.0f, v));
+                      id(level_empty_volts) = v;
+                    }
+                    if (params.containsKey("level_full_volts")) {
+                      float v = params["level_full_volts"];
+                      v = std::max(0.0f, std::min(5.0f, v));
+                      id(level_full_volts) = v;
+                    }
+                    if (params.containsKey("safety_override")) {
+                      bool en = params["safety_override"];
+                      id(safety_override) = en;
+                      id(safety_override_switch).publish_state(id(safety_override));
+                    }
+                    if (params.containsKey("valve_override")) {
+                      bool en = params["valve_override"];
+                      id(valve_override) = en;
+                      if (en) {
+                        id(tank_valve_relay).turn_on();
+                      } else {
+                        id(tank_valve_relay).turn_off();
+                      }
+                      id(tank_valve_relay).publish_state(en);
+                    }
+                  }
+                  StaticJsonDocument<256> ack;
+                  ack["type"] = "tank_controller";
+                  ack["event"] = "config_ack";
+                  ack["id"] = target_id.c_str();
+                  ack["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                  ack["applied"] = true;
+                  ack["direct_key"] = id(direct_peer_key);
+                  JsonObject params_out = ack.createNestedObject("params");
+                  params_out["fill_stop_percent"] = id(fill_stop_level);
+                  params_out["drain_stop_percent"] = id(drain_stop_level);
+                  params_out["drain_timeout_ms"] = id(drain_timeout_ms);
+                  params_out["freeze_enabled"] = id(freeze_protection_enabled);
+                  params_out["freeze_threshold_c"] = id(freeze_protection_threshold_c);
+                  params_out["level_empty_volts"] = id(level_empty_volts);
+                  params_out["level_full_volts"] = id(level_full_volts);
+                  params_out["safety_override"] = id(safety_override);
+                  params_out["valve_override"] = id(valve_override);
+                  mark_rx();
+                  send_reply(ack);
+                }
+              } else if (strcmp(type, "cyd_config") == 0 && strcmp(event, "config_dump_request") == 0) {
+                StaticJsonDocument<256> dump;
+                dump["type"] = "tank_controller";
+                dump["event"] = "config_dump";
+                dump["id"] = target_id.c_str();
+                dump["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                dump["direct_key"] = id(direct_peer_key);
+                JsonObject params = dump.createNestedObject("params");
+                params["fill_stop_percent"] = id(fill_stop_level);
+                params["drain_stop_percent"] = id(drain_stop_level);
+                params["drain_timeout_ms"] = id(drain_timeout_ms);
+                params["freeze_enabled"] = id(freeze_protection_enabled);
+                params["freeze_threshold_c"] = id(freeze_protection_threshold_c);
+                params["level_empty_volts"] = id(level_empty_volts);
+                params["level_full_volts"] = id(level_full_volts);
+                params["safety_override"] = id(safety_override);
+                params["valve_override"] = id(valve_override);
+                mark_rx();
+                send_reply(dump);
+              } else if (strcmp(type, "cyd_cmd") == 0) {
+                const char *role_str = doc["role"] | "";
+                int desired_role = 0;
+                if (strcasecmp(role_str, "Fresh") == 0) desired_role = 1;
+                else if (strcasecmp(role_str, "Waste") == 0) desired_role = 2;
+                if (desired_role != 0 && desired_role != id(tank_role)) {
+                  ESP_LOGW("cmd", "direct role mismatch in cmd (got %s, current %d) ignoring", role_str, id(tank_role));
+                } else {
+                  const char *cmd = event;
+                  bool started = false;
+                  if (strcmp(cmd, "fill") == 0) {
+                    if (id(fill_in_progress)) {
+                      id(fill_in_progress) = false;
+                      id(tank_valve_relay).turn_off();
+                    } else if (id(drain_in_progress)) {
+                      id(drain_in_progress) = false;
+                      id(tank_valve_relay).turn_off();
+                    } else {
+                      id(fill_tank_script).execute();
+                      started = true;
+                    }
+                  } else if (strcmp(cmd, "drain") == 0) {
+                    if (id(drain_in_progress)) {
+                      id(drain_in_progress) = false;
+                      id(tank_valve_relay).turn_off();
+                    } else if (id(fill_in_progress)) {
+                      id(fill_in_progress) = false;
+                      id(tank_valve_relay).turn_off();
+                    } else {
+                      id(drain_tank_script).execute();
+                      started = true;
+                    }
+                  } else if (strcmp(cmd, "calibrate_empty") == 0) {
+                    id(level_empty_volts) = id(tank_level_voltage).state;
+                  } else if (strcmp(cmd, "calibrate_full") == 0) {
+                    id(level_full_volts) = id(tank_level_voltage).state;
+                  } else if (strcmp(cmd, "restart") == 0) {
+                    delay(100);
+                    ESP.restart();
+                  } else if (strcmp(cmd, "clear_faults") == 0) {
+                    id(fault_active) = false;
+                    id(fault_code_int) = 0;
+                    id(fill_in_progress) = false;
+                    id(drain_in_progress) = false;
+                    id(tank_valve_relay).turn_off();
+                    id(tank_buzzer).turn_off();
+                    id(fault_description).publish_state("None");
+                    id(fault_code).publish_state("0");
+                  }
+                  mark_rx();
+                  StaticJsonDocument<192> ack;
+                  ack["type"] = "tank_controller";
+                  ack["event"] = "cmd_ack";
+                  ack["id"] = target_id.c_str();
+                  ack["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                  ack["action"] = cmd;
+                  ack["started"] = started;
+                  ack["direct_key"] = id(direct_peer_key);
+                  JsonObject params = ack.createNestedObject("params");
+                  params["level_empty_volts"] = id(level_empty_volts);
+                  params["level_full_volts"] = id(level_full_volts);
+                  params["fill_stop_percent"] = id(fill_stop_level);
+                  params["drain_stop_percent"] = id(drain_stop_level);
+                  params["drain_timeout_ms"] = id(drain_timeout_ms);
+                  params["freeze_enabled"] = id(freeze_protection_enabled);
+                  params["freeze_threshold_c"] = id(freeze_protection_threshold_c);
+                  params["safety_override"] = id(safety_override);
+                  params["valve_override"] = id(valve_override);
+                  send_reply(ack);
+                  id(send_direct_state_once).execute();
+                }
+              } else if (strcmp(type, "cyd_ping") == 0 && strcmp(event, "ping") == 0) {
+                StaticJsonDocument<96> pong;
+                pong["type"] = "tank_controller";
+                pong["event"] = "pong";
+                pong["id"] = target_id.c_str();
+                pong["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                pong["direct_key"] = id(direct_peer_key);
+                send_reply(pong);
+                mark_rx();
+              }
+            });
+          }
+          if (id(direct_peer_mac).length() == 17) {
+            uint8_t peer_mac[6];
+            if (sscanf(id(direct_peer_mac).c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+                       &peer_mac[0], &peer_mac[1], &peer_mac[2], &peer_mac[3], &peer_mac[4], &peer_mac[5]) == 6) {
+              ensure_peer(peer_mac);
+            }
+          }
+
+  - id: pairing_advert_script
+    then:
+      - lambda: |-
+          std::string ident = id(tankpro_identifier).state;
+          std::string mac = id(module_mac_address).state;
+          std::string role;
+          switch (id(tank_role)) {
+            case 1: role = "Fresh"; break;
+            case 2: role = "Waste"; break;
+            default: role = "Unassigned"; break;
+          }
+          char buf[256];
+          snprintf(buf, sizeof(buf), "{\"type\":\"tank_controller\",\"event\":\"pairing_advert\",\"identifier\":\"%s\",\"mac\":\"%s\",\"role\":\"%s\",\"token\":%u}", ident.c_str(), mac.c_str(), role.c_str(), id(pairing_token));
+          ESP_LOGI("pairing", "%s", buf);
+          if (id(direct_mode_active)) {
+            #include <esp_now.h>
+            const uint8_t broadcast[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+            esp_now_send(broadcast, reinterpret_cast<const uint8_t *>(buf), strlen(buf));
+            ESP_LOGI("pairing", "sent direct advert (%u bytes)", static_cast<unsigned>(strlen(buf)));
+          } else if (WiFi.status() == WL_CONNECTED) {
+            const uint16_t port = ${cyd_udp_port};
+            WiFiUDP udp;
+            udp.begin(0);
+            udp.beginPacket(IPAddress(255, 255, 255, 255), port);
+            udp.write(reinterpret_cast<const uint8_t *>(buf), strlen(buf));
+            udp.endPacket();
+            udp.stop();
+            ESP_LOGI("pairing", "sent advert (%u bytes)", static_cast<unsigned>(strlen(buf)));
+          } else {
+            ESP_LOGW("pairing", "WiFi not connected; advert not sent");
+          }
+
+  # Pairing accept shims for CYD testing
+  - id: pair_accept_fresh
+    then:
+      - logger.log: "CYD pair accept (Fresh) received."
+      - if:
+          condition:
+            lambda: 'return id(pairing_active);'
+          then:
+            - globals.set:
+                id: tank_role
+                value: '1'
+            - globals.set:
+                id: paired_to_cyd
+                value: 'true'
+            - globals.set:
+                id: pairing_active
+                value: 'false'
+            - logger.log: "Paired as Fresh. Pairing complete."
+          else:
+            - logger.log: "Pair accept ignored: pairing not active."
+
+  - id: pair_accept_waste
+    then:
+      - logger.log: "CYD pair accept (Waste) received."
+      - if:
+          condition:
+            lambda: 'return id(pairing_active);'
+          then:
+            - globals.set:
+                id: tank_role
+                value: '2'
+            - globals.set:
+                id: paired_to_cyd
+                value: 'true'
+            - globals.set:
+                id: pairing_active
+                value: 'false'
+            - logger.log: "Paired as Waste. Pairing complete."
+          else:
+            - logger.log: "Pair accept ignored: pairing not active."
+
+
+interval:
+  # Safety guard: close valve if level meets/exceeds stop level regardless of state
+  - interval: 2s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              const float level = id(tank_level).state;
+              const bool above = !isnan(level) && level >= id(fill_stop_level);
+              if (id(drain_in_progress)) {
+                id(guard_over_stop_counter) = 0;
+                return false;
+              }
+              if (above) {
+                id(guard_over_stop_counter) += 1;
+              } else {
+                id(guard_over_stop_counter) = 0;
+              }
+              return !id(safety_override) && id(tank_valve_relay).state && above && id(guard_over_stop_counter) >= 2;
+          then:
+            - if:
+                condition:
+                  lambda: 'return id(fill_in_progress);'
+                then:
+                  - logger.log: "Safety guard: level at/above stop threshold during fill; closing valve (normal stop)."
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: guard_over_stop_counter
+                      value: '0'
+                else:
+                  - logger.log: "Safety guard: valve open without fill_in_progress and level at/above stop; closing valve and flagging fault."
+                  - switch.turn_off: tank_valve_relay
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - globals.set:
+                      id: fault_active
+                      value: 'true'
+                  - globals.set:
+                      id: fault_code_int
+                      value: '2'
+                  - globals.set:
+                      id: guard_over_stop_counter
+                      value: '0'
+                  - text_sensor.template.publish:
+                      id: fault_description
+                      state: "Valve open without active fill"
+                  - text_sensor.template.publish:
+                      id: fault_code
+                      state: "2"
+                  - script.execute: status_led_flash_red
+  # Fault annunciation: pulse buzzer and LED while in fault state
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(fault_active) && !id(safety_override);'
+          then:
+            - switch.turn_on: tank_buzzer
+            - delay: 300ms
+            - switch.turn_off: tank_buzzer
+  # Direct link watchdog / failsafe
+  - interval: 1s
+    then:
+      - lambda: |-
+          const uint32_t now = millis();
+          if (!id(direct_mode_active) || !id(paired_to_cyd) || id(direct_peer_key) == 0) {
+            id(direct_link_ok) = false;
+            return;
+          }
+          if (id(last_cyd_rx_ms) == 0) {
+            id(last_cyd_rx_ms) = now;
+          }
+          const uint32_t last = id(last_cyd_rx_ms);
+          const uint32_t age = (last == 0) ? UINT32_MAX : (now - last);
+          const uint32_t stale_ms = 10000;
+          const uint32_t fault_ms = 30000;
+          id(direct_link_ok) = age <= stale_ms;
+          const bool outputs_active = id(tank_valve_relay).state || id(fill_in_progress) || id(drain_in_progress);
+          static uint8_t fault_hits = 0;
+          if (age > fault_ms && outputs_active) {
+            fault_hits++;
+            if (fault_hits >= 3) {
+              id(failsafe_active) = true;
+              if (id(tank_valve_relay).state) id(tank_valve_relay).turn_off();
+              id(fill_in_progress) = false;
+              id(drain_in_progress) = false;
+              if (id(fault_code_int) == 0 || id(fault_code_int) == 9) {
+                id(fault_active) = true;
+                id(fault_code_int) = 9;
+                id(fault_description).publish_state("Lost connection to CYD");
+                id(fault_code).publish_state("9");
+              }
+            }
+          } else if (id(fault_code_int) == 9 && age <= stale_ms) {
+            id(fault_active) = false;
+            id(fault_code_int) = 0;
+            id(fault_description).publish_state("None");
+            id(fault_code).publish_state("0");
+            id(failsafe_active) = false;
+            fault_hits = 0;
+          } else {
+            fault_hits = 0;
+          }
+  # Freeze protection / temp sensor health check
+  - interval: 5s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(freeze_protection_enabled) && !id(safety_override);'
+          then:
+            - lambda: |-
+                const float t = id(tank_temperature).state;
+                const bool timed_out = id(last_temp_update_ms) > 0 && (millis() - id(last_temp_update_ms) > id(temp_timeout_ms));
+                if (id(fault_active) && id(fault_code_int) != 3 && id(fault_code_int) != 4) {
+                  return;
+                }
+                if (isnan(t) || timed_out) {
+                  if (id(fault_code_int) != 4 || !id(fault_active)) {
+                    ESP_LOGI("freeze_protect", "Temp sensor failure while freeze protection enabled; setting fault code 4 (nan=%d timed_out=%d).", isnan(t), timed_out);
+                    id(fault_active) = true;
+                    id(fault_code_int) = 4;
+                    id(fill_in_progress) = false;
+                    id(drain_in_progress) = false;
+                    id(tank_valve_relay).turn_off();
+                    id(fault_description).publish_state("Temp Sensor Failure");
+                    id(fault_code).publish_state("4");
+                    id(status_led_flash_red).execute();
+                  }
+                  return;
+                }
+                if (t <= id(freeze_protection_threshold_c)) {
+                  if (id(fault_code_int) != 3 || !id(fault_active)) {
+                    ESP_LOGI("freeze_protect", "Freeze protection active: temp %.2fC at/below threshold %.2fC.", t, id(freeze_protection_threshold_c));
+                    id(fault_active) = true;
+                    id(fault_code_int) = 3;
+                    id(fill_in_progress) = false;
+                    id(drain_in_progress) = false;
+                    id(fault_description).publish_state("Freeze protection");
+                    id(fault_code).publish_state("3");
+                    id(status_led_flash_red).execute();
+                  }
+                  id(tank_valve_relay).turn_on();
+                }
+                // If temp is healthy and above threshold, do nothing here; clearing fault handled elsewhere.
+  # Pairing timeout
+  - interval: 1s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(pairing_active) && (millis() - id(pairing_start_ms) > 60000);'
+          then:
+            - logger.log: "Pairing timed out after 60s; deactivating."
+            - globals.set:
+                id: pairing_active
+                value: 'false'
+  # Pairing advert broadcast
+  - interval: 2s
+    then:
+      - if:
+          condition:
+            lambda: 'return id(pairing_active) && !id(paired_to_cyd);'
+          then:
+            - script.execute: pairing_advert_script
+  # Safety: if already paired, force pairing mode off so adverts stop
+  - interval: 3s
+    then:
+      - lambda: |-
+          if (id(paired_to_cyd) && id(pairing_active)) {
+            static bool logged = false;
+            if (!logged) {
+              ESP_LOGI("pairing", "Disabling pairing mode because controller is already paired.");
+              logged = true;
+            }
+            id(pairing_active) = false;
+            id(pairing_token) = 0;
+          }
+  # Listen for CYD pairing requests over UDP
+  - interval: 100ms
+    then:
+      - lambda: |-
+          if (WiFi.status() != WL_CONNECTED) return;
+          static WiFiUDP listener;
+          static bool udp_started = false;
+          if (!udp_started) {
+            if (listener.begin(${cyd_udp_port})) {
+              udp_started = true;
+            }
+          }
+          if (!udp_started) return;
+          int packet_size = listener.parsePacket();
+          while (packet_size > 0) {
+            char buf[384] = {0};
+            const int len = listener.read(buf, sizeof(buf) - 1);
+            if (len > 0) {
+              buf[len] = 0;
+              #include "ArduinoJson.h"
+              StaticJsonDocument<384> doc;
+              auto err = deserializeJson(doc, buf);
+              if (!err) {
+                const char *type = doc["type"] | "";
+                const char *event = doc["event"] | "";
+                const std::string target_id = doc["id"] | "";
+                const std::string my_id = id(tankpro_identifier).state;
+                if (strcmp(type, "cyd_pair") == 0 && strcmp(event, "request") == 0 && target_id == my_id) {
+                  const char *role_str = doc["role"] | "";
+                  const std::string cyd_id = doc["cyd_id"] | "";
+                  if (!cyd_id.empty()) {
+                    id(cyd_identifier) = cyd_id;
+                  }
+                  int role = 0;
+                  if (strcasecmp(role_str, "Fresh") == 0) role = 1;
+                  else if (strcasecmp(role_str, "Waste") == 0) role = 2;
+                  if (role == 1 || role == 2) {
+                    id(tank_role) = role;
+                    id(paired_to_cyd) = true;
+                    id(pairing_active) = false;
+                    id(pairing_token) = 0;
+                    // Ack back to sender
+                    StaticJsonDocument<256> ack;
+                    ack["type"] = "tank_controller";
+                    ack["event"] = "pair_ack";
+                    ack["id"] = target_id.c_str();
+                    ack["role"] = role == 1 ? "Fresh" : "Waste";
+                    ack["paired"] = true;
+                    if (!id(cyd_identifier).empty()) {
+                      ack["cyd_id"] = id(cyd_identifier).c_str();
+                    }
+                    char out[256];
+                    const size_t written = serializeJson(ack, out, sizeof(out));
+                    if (written > 0) {
+                      WiFiUDP reply;
+                      reply.begin(0);
+                      reply.beginPacket(listener.remoteIP(), ${cyd_udp_port});
+                      reply.write(reinterpret_cast<const uint8_t *>(out), written);
+                      reply.endPacket();
+                      reply.stop();
+                    }
+                  }
+                } else if (strcmp(type, "cyd_pair") == 0 && strcmp(event, "unpair_request") == 0 && target_id == my_id) {
+                  ESP_LOGI("unpair", "Unpair request from CYD");
+                  id(tank_role) = 0;
+                  id(paired_to_cyd) = false;
+                  id(direct_mode_locked) = false;
+                  id(direct_mode_active) = false;
+                  id(direct_peer_key) = 0;
+                  id(direct_peer_mac).clear();
+                  id(direct_peer_role) = 0;
+                  id(pairing_active) = false;
+                  id(cyd_identifier).clear();
+                  StaticJsonDocument<256> ack;
+                  ack["type"] = "tank_controller";
+                  ack["event"] = "unpair_ack";
+                  ack["id"] = target_id.c_str();
+                  ack["role"] = "Unassigned";
+                  ack["paired"] = false;
+                  char out[256];
+                  const size_t written = serializeJson(ack, out, sizeof(out));
+                  if (written > 0) {
+                    WiFiUDP reply;
+                    reply.begin(0);
+                    reply.beginPacket(listener.remoteIP(), ${cyd_udp_port});
+                    reply.write(reinterpret_cast<const uint8_t *>(out), written);
+                    reply.endPacket();
+                    reply.stop();
+                    ESP_LOGI("unpair", "sent unpair_ack");
+                  }
+                } else if (strcmp(type, "cyd_config") == 0 && strcmp(event, "config_update") == 0 && target_id == my_id) {
+                  const char *role_str = doc["role"] | "";
+                  int desired_role = 0;
+                  if (strcasecmp(role_str, "Fresh") == 0) desired_role = 1;
+                  else if (strcasecmp(role_str, "Waste") == 0) desired_role = 2;
+                  if (desired_role != 0 && desired_role != id(tank_role)) {
+                    ESP_LOGW("cfg", "role mismatch in config_update (got %s, current %d) ignoring", role_str, id(tank_role));
+                  } else {
+                    ESP_LOGI("cfg", "config_update received role=%s at t=%lums", role_str, (unsigned long) millis());
+                    bool applied = true;
+                    if (doc.containsKey("params")) {
+                      JsonObject params = doc["params"].as<JsonObject>();
+                      if (params.containsKey("fill_stop_percent")) {
+                        float v = params["fill_stop_percent"];
+                        if (v < 0) v = 0;
+                        if (v > 100) v = 100;
+                        id(fill_stop_level) = v;
+                        ESP_LOGI("cfg", "fill_stop_level updated to %.1f", v);
+                        id(fill_stop_level_number).publish_state(id(fill_stop_level));
+                      }
+                      if (params.containsKey("drain_stop_percent")) {
+                        float v = params["drain_stop_percent"];
+                        if (v < 0) v = 0;
+                        if (v > 100) v = 100;
+                        id(drain_stop_level) = v;
+                        ESP_LOGI("cfg", "drain_stop_level updated to %.1f", v);
+                        id(drain_stop_level_number).publish_state(id(drain_stop_level));
+                      }
+                      if (params.containsKey("drain_timeout_ms")) {
+                        uint32_t v = params["drain_timeout_ms"];
+                        id(drain_timeout_ms) = v;
+                        ESP_LOGI("cfg", "drain_timeout_ms updated to %u", (unsigned) v);
+                        id(drain_timeout_seconds).publish_state((float) id(drain_timeout_ms) / 1000.0f);
+                      }
+                      if (params.containsKey("freeze_enabled")) {
+                        bool en = params["freeze_enabled"];
+                        id(freeze_protection_enabled) = en;
+                        ESP_LOGI("cfg", "freeze_protection_enabled=%s", en ? "true" : "false");
+                        id(freeze_protection_switch).publish_state(id(freeze_protection_enabled));
+                      }
+                      if (params.containsKey("freeze_threshold_c")) {
+                        float thresh = params["freeze_threshold_c"];
+                        if (thresh < -40) thresh = -40;
+                        if (thresh > 40) thresh = 40;
+                        id(freeze_protection_threshold_c) = thresh;
+                        ESP_LOGI("cfg", "freeze_protection_threshold_c=%.2f", thresh);
+                        id(freeze_protection_threshold_number).publish_state(id(freeze_protection_threshold_c));
+                      }
+                      if (params.containsKey("level_empty_volts")) {
+                        float v = params["level_empty_volts"];
+                        if (v < 0) v = 0;
+                        if (v > 5) v = 5;
+                        id(level_empty_volts) = v;
+                        ESP_LOGI("cfg", "level_empty_volts=%.3f", v);
+                      }
+                      if (params.containsKey("level_full_volts")) {
+                        float v = params["level_full_volts"];
+                        if (v < 0) v = 0;
+                        if (v > 5) v = 5;
+                        id(level_full_volts) = v;
+                        ESP_LOGI("cfg", "level_full_volts=%.3f", v);
+                      }
+                      if (params.containsKey("safety_override")) {
+                        bool en = params["safety_override"];
+                        id(safety_override) = en;
+                        ESP_LOGI("cfg", "safety_override=%s", en ? "true" : "false");
+                        id(safety_override_switch).publish_state(id(safety_override));
+                      }
+                      if (params.containsKey("valve_override")) {
+                        bool en = params["valve_override"];
+                        id(valve_override) = en;
+                        if (en) {
+                          id(tank_valve_relay).turn_on();
+                        } else {
+                          id(tank_valve_relay).turn_off();
+                        }
+                        ESP_LOGI("cfg", "valve_override=%s", en ? "true" : "false");
+                        id(tank_valve_relay).publish_state(en);
+                      }
+                    }
+                    ESP_LOGI("cfg", "config applied role=%s at t=%lums", role_str, (unsigned long) millis());
+                    StaticJsonDocument<384> ack;
+                    ack["type"] = "tank_controller";
+                    ack["event"] = "config_ack";
+                    ack["id"] = target_id.c_str();
+                    ack["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                    ack["applied"] = applied;
+                    JsonObject params_out = ack.createNestedObject("params");
+                    params_out["fill_stop_percent"] = id(fill_stop_level);
+                    params_out["drain_stop_percent"] = id(drain_stop_level);
+                    params_out["drain_timeout_ms"] = id(drain_timeout_ms);
+                    params_out["freeze_enabled"] = id(freeze_protection_enabled);
+                    params_out["freeze_threshold_c"] = id(freeze_protection_threshold_c);
+                    params_out["level_empty_volts"] = id(level_empty_volts);
+                    params_out["level_full_volts"] = id(level_full_volts);
+                    params_out["safety_override"] = id(safety_override);
+                    params_out["valve_override"] = id(valve_override);
+                    char out[384];
+                    const size_t written = serializeJson(ack, out, sizeof(out));
+                    if (written > 0) {
+                      ESP_LOGI("cfg", "sending config_ack role=%s at t=%lums", role_str, (unsigned long) millis());
+                      WiFiUDP reply;
+                      reply.begin(0);
+                      reply.beginPacket(listener.remoteIP(), ${cyd_udp_port});
+                      reply.write(reinterpret_cast<const uint8_t *>(out), written);
+                      reply.endPacket();
+                      reply.stop();
+                      ESP_LOGI("cfg", "sent config_ack (applied=%s)", applied ? "true" : "false");
+                    }
+                  }
+                } else if (strcmp(type, "cyd_config") == 0 && strcmp(event, "config_dump_request") == 0 && target_id == my_id) {
+                  const char *role_str = doc["role"] | "";
+                  int desired_role = 0;
+                  if (strcasecmp(role_str, "Fresh") == 0) desired_role = 1;
+                  else if (strcasecmp(role_str, "Waste") == 0) desired_role = 2;
+                  if (desired_role != 0 && desired_role != id(tank_role)) {
+                    ESP_LOGW("cfg", "config_dump_request role mismatch (got %s, current %d)", role_str, id(tank_role));
+                  } else {
+                    StaticJsonDocument<384> dump;
+                    dump["type"] = "tank_controller";
+                    dump["event"] = "config_dump";
+                    dump["id"] = target_id.c_str();
+                    dump["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                    JsonObject params = dump.createNestedObject("params");
+                    params["fill_stop_percent"] = id(fill_stop_level);
+                    params["drain_stop_percent"] = id(drain_stop_level);
+                    params["drain_timeout_ms"] = id(drain_timeout_ms);
+                    params["freeze_enabled"] = id(freeze_protection_enabled);
+                    params["freeze_threshold_c"] = id(freeze_protection_threshold_c);
+                    params["level_empty_volts"] = id(level_empty_volts);
+                    params["level_full_volts"] = id(level_full_volts);
+                    params["safety_override"] = id(safety_override);
+                    params["valve_override"] = id(valve_override);
+                    char out[384];
+                    const size_t written = serializeJson(dump, out, sizeof(out));
+                    if (written > 0) {
+                      WiFiUDP reply;
+                      reply.begin(0);
+                      reply.beginPacket(listener.remoteIP(), ${cyd_udp_port});
+                      reply.write(reinterpret_cast<const uint8_t *>(out), written);
+                      reply.endPacket();
+                      reply.stop();
+                      ESP_LOGI("cfg", "sent config_dump");
+                    }
+                  }
+                } else if (strcmp(type, "cyd_cmd") == 0 && target_id == my_id) {
+                  const char *role_str = doc["role"] | "";
+                  int desired_role = 0;
+                  if (strcasecmp(role_str, "Fresh") == 0) desired_role = 1;
+                  else if (strcasecmp(role_str, "Waste") == 0) desired_role = 2;
+                  if (desired_role != 0 && desired_role != id(tank_role)) {
+                    ESP_LOGW("cmd", "role mismatch in cmd (got %s, current %d) ignoring", role_str, id(tank_role));
+                  } else {
+                    const char *cmd = event;
+                    bool started = false;
+                    if (strcmp(cmd, "fill") == 0) {
+                      if (id(fill_in_progress)) {
+                        ESP_LOGI("cmd", "Fill command while filling: stopping fill.");
+                        id(fill_in_progress) = false;
+                        id(tank_valve_relay).turn_off();
+                      } else if (id(drain_in_progress)) {
+                        ESP_LOGI("cmd", "Fill command while draining: stopping drain (no new fill start).");
+                        id(drain_in_progress) = false;
+                        id(tank_valve_relay).turn_off();
+                      } else {
+                        ESP_LOGI("cmd", "Starting fill_tank_script from CYD");
+                        id(fill_tank_script).execute();
+                        started = true;
+                      }
+                    } else if (strcmp(cmd, "drain") == 0) {
+                      if (id(drain_in_progress)) {
+                        ESP_LOGI("cmd", "Drain command while draining: stopping drain.");
+                        id(drain_in_progress) = false;
+                        id(tank_valve_relay).turn_off();
+                      } else if (id(fill_in_progress)) {
+                        ESP_LOGI("cmd", "Drain command while filling: stopping fill (no new drain start).");
+                        id(fill_in_progress) = false;
+                        id(tank_valve_relay).turn_off();
+                      } else {
+                        ESP_LOGI("cmd", "Starting drain_tank_script from CYD");
+                        id(drain_tank_script).execute();
+                        started = true;
+                      }
+                    } else if (strcmp(cmd, "calibrate_empty") == 0) {
+                      float v = id(tank_level_voltage).state;
+                      id(level_empty_volts) = v;
+                      ESP_LOGI("cmd", "Calibrate empty at %.3f V", v);
+                      StaticJsonDocument<192> ack;
+                      ack["type"] = "tank_controller";
+                      ack["event"] = "config_ack";
+                      ack["id"] = target_id.c_str();
+                      ack["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                      ack["applied"] = true;
+                      JsonObject params = ack.createNestedObject("params");
+                      params["level_empty_volts"] = id(level_empty_volts);
+                      params["level_full_volts"] = id(level_full_volts);
+                      params["fill_stop_percent"] = id(fill_stop_level);
+                      params["drain_stop_percent"] = id(drain_stop_level);
+                      params["drain_timeout_ms"] = id(drain_timeout_ms);
+                      params["freeze_enabled"] = id(freeze_protection_enabled);
+                      params["freeze_threshold_c"] = id(freeze_protection_threshold_c);
+                      params["safety_override"] = id(safety_override);
+                      params["valve_override"] = id(valve_override);
+                      char out[192];
+                      const size_t written = serializeJson(ack, out, sizeof(out));
+                      if (written > 0) {
+                        WiFiUDP reply;
+                        reply.begin(0);
+                        reply.beginPacket(listener.remoteIP(), 60505);
+                        reply.write(reinterpret_cast<const uint8_t *>(out), written);
+                        reply.endPacket();
+                        reply.stop();
+                      }
+                      started = false;
+                    } else if (strcmp(cmd, "calibrate_full") == 0) {
+                      float v = id(tank_level_voltage).state;
+                      id(level_full_volts) = v;
+                      ESP_LOGI("cmd", "Calibrate full at %.3f V", v);
+                      StaticJsonDocument<192> ack;
+                      ack["type"] = "tank_controller";
+                      ack["event"] = "config_ack";
+                      ack["id"] = target_id.c_str();
+                      ack["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                      ack["applied"] = true;
+                      JsonObject params = ack.createNestedObject("params");
+                      params["level_empty_volts"] = id(level_empty_volts);
+                      params["level_full_volts"] = id(level_full_volts);
+                      params["fill_stop_percent"] = id(fill_stop_level);
+                      params["drain_stop_percent"] = id(drain_stop_level);
+                      params["drain_timeout_ms"] = id(drain_timeout_ms);
+                      params["freeze_enabled"] = id(freeze_protection_enabled);
+                      params["freeze_threshold_c"] = id(freeze_protection_threshold_c);
+                      params["safety_override"] = id(safety_override);
+                      params["valve_override"] = id(valve_override);
+                      char out[192];
+                      const size_t written = serializeJson(ack, out, sizeof(out));
+                      if (written > 0) {
+                        WiFiUDP reply;
+                        reply.begin(0);
+                        reply.beginPacket(listener.remoteIP(), 60505);
+                        reply.write(reinterpret_cast<const uint8_t *>(out), written);
+                        reply.endPacket();
+                        reply.stop();
+                      }
+                      started = false;
+                    } else if (strcmp(cmd, "restart") == 0) {
+                      ESP_LOGI("cmd", "Restart command received from CYD");
+                      delay(100);
+                      ESP.restart();
+                    } else if (strcmp(cmd, "clear_faults") == 0) {
+                      ESP_LOGI("cmd", "Clear faults command received from CYD");
+                      id(fault_active) = false;
+                      id(fault_code_int) = 0;
+                      id(fill_in_progress) = false;
+                      id(drain_in_progress) = false;
+                      id(tank_valve_relay).turn_off();
+                      id(tank_buzzer).turn_off();
+                      id(fault_description).publish_state("None");
+                      id(fault_code).publish_state("0");
+                    }
+                    if (started) {
+                      StaticJsonDocument<192> ack;
+                      ack["type"] = "tank_controller";
+                      ack["event"] = "cmd_ack";
+                      ack["id"] = target_id.c_str();
+                      ack["role"] = id(tank_role) == 1 ? "Fresh" : (id(tank_role) == 2 ? "Waste" : "Unassigned");
+                      ack["action"] = cmd;
+                      ack["started"] = true;
+                      char out[192];
+                      const size_t written = serializeJson(ack, out, sizeof(out));
+                      if (written > 0) {
+                        WiFiUDP reply;
+                        reply.begin(0);
+                        reply.beginPacket(listener.remoteIP(), ${cyd_udp_port});
+                        reply.write(reinterpret_cast<const uint8_t *>(out), written);
+                        reply.endPacket();
+                        reply.stop();
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            packet_size = listener.parsePacket();
+          }
+  # LED state machine (boot, normal, relay, warning, critical fault, OTA)
+  - interval: 200ms
+    then:
+      - lambda: |-
+          auto set_led = [&](light::LightState *led, float r, float g, float b, float brightness) {
+            if (led == nullptr) return;
+            auto call = led->turn_on();
+            call.set_rgb(r, g, b);
+            call.set_brightness(brightness);
+            call.perform();
+          };
+          auto off_led = [&](light::LightState *led) {
+            if (led == nullptr) return;
+            led->turn_off().perform();
+          };
+
+          // Blink phases
+          static bool fast_phase = false;
+          static uint8_t fast_counter = 0;   // toggle every tick (5 Hz)
+          fast_phase = !fast_phase;
+          static bool slow_phase = false;
+          static uint8_t slow_counter = 0;   // toggle every 1s
+          slow_counter = (slow_counter + 1) % 5;
+          if (slow_counter == 0) slow_phase = !slow_phase;
+
+          // Breathing brightness
+          static float breath = 0.3f;
+          static bool breath_rising = true;
+          const float breath_step = 0.05f;
+          if (breath_rising) {
+            breath += breath_step;
+            if (breath >= 0.9f) breath_rising = false;
+          } else {
+            breath -= breath_step;
+            if (breath <= 0.2f) breath_rising = true;
+          }
+
+          const bool booting = !id(boot_complete);
+          const bool ota = id(ota_active);
+          const bool fault = id(fault_active);
+          const int fault_code = id(fault_code_int);
+          const bool warning = fault && fault_code == 4;  // temp sensor issue considered non-critical
+          const bool relay_on = id(tank_valve_relay).state;
+          const bool pairing_mode = id(pairing_active);
+          const bool reset_warn = id(reset_warning_active);
+          const bool link_wait = id(direct_mode_active) && id(paired_to_cyd) && !id(direct_link_ok);
+
+          // LED1 (network/link status)
+          const wl_status_t wifi_status = WiFi.status();
+          const bool wifi_up = wifi_status == WL_CONNECTED;
+          const bool wifi_connecting = wifi_status == WL_DISCONNECTED || wifi_status == WL_IDLE_STATUS;
+          const bool wifi_failed = wifi_status == WL_CONNECT_FAILED || wifi_status == WL_NO_SSID_AVAIL;
+          const bool ever_connected = id(wifi_ever_connected);
+          const bool connection_lost = ever_connected && !wifi_up;
+          const bool captive_wait = !ever_connected && !wifi_up;
+          const bool direct_connected = WiFi.getMode() == WIFI_AP || WiFi.softAPgetStationNum() > 0;
+
+          // Detect connectivity state changes to blink LED1 yellow twice
+          static bool prev_wifi = false;
+          static bool prev_cyd = false;
+          static bool prev_direct = false;
+          if (wifi_up != prev_wifi || id(paired_to_cyd) != prev_cyd || direct_connected != prev_direct) {
+            id(net_flash_steps) = 4;  // two flashes (on/off/on/off)
+          }
+          prev_wifi = wifi_up;
+          prev_cyd = id(paired_to_cyd);
+          prev_direct = direct_connected;
+
+          if (booting) {
+            off_led(id(status_led));
+          } else if (pairing_mode) {
+            if (fast_phase) set_led(id(status_led), 1.0f, 1.0f, 1.0f, 0.8f);  // white
+            else set_led(id(status_led), 0.0f, 0.0f, 1.0f, 0.8f);  // blue
+          } else if (ota) {
+            if (slow_phase) set_led(id(status_led), 1.0f, 0.0f, 1.0f, 0.7f); // purple slow flash
+            else off_led(id(status_led));
+          } else if (wifi_up || (id(paired_to_cyd) && (!id(direct_mode_active) || id(direct_link_ok)))) {
+            set_led(id(status_led), 0.0f, 0.0f, 1.0f, 0.7f);  // blue solid
+          } else if (link_wait) {
+            if (fast_phase) set_led(id(status_led), 1.0f, 0.0f, 0.0f, 0.8f); // red fast flash while waiting for link
+            else off_led(id(status_led));
+          } else if (captive_wait) {
+            if (slow_phase) set_led(id(status_led), 1.0f, 1.0f, 1.0f, 0.8f); // white slow flash
+            else off_led(id(status_led));
+          } else if (wifi_connecting) {
+            if (fast_phase) set_led(id(status_led), 0.0f, 0.0f, 1.0f, 0.7f); // blue fast flash
+            else off_led(id(status_led));
+          } else if (connection_lost || wifi_failed) {
+            if (slow_phase) set_led(id(status_led), 1.0f, 1.0f, 0.0f, 0.8f); // yellow slow flash
+            else off_led(id(status_led));
+          } else {
+            set_led(id(status_led), 1.0f, 0.0f, 0.0f, 0.7f); // red solid
+          }
+
+          if (ota) {
+            if (fast_phase) {
+              set_led(id(status_led_2), 1.0f, 0.0f, 1.0f, 0.8f);   // purple fast flash
+            } else {
+              off_led(id(status_led_2));
+            }
+            return;
+          }
+
+          if (booting) {
+            if (slow_phase) {
+              set_led(id(status_led_2), 1.0f, 0.8f, 0.6f, 0.8f);   // warm white pulse
+            } else {
+              off_led(id(status_led_2));
+            }
+            return;
+          }
+
+          if (reset_warn) {
+            if (fast_phase) {
+              set_led(id(status_led), 1.0f, 0.0f, 0.0f, 0.8f);
+              off_led(id(status_led_2));
+            } else {
+              off_led(id(status_led));
+              set_led(id(status_led_2), 1.0f, 0.0f, 0.0f, 0.8f);
+            }
+            return;
+          }
+
+          if (fault || link_wait) {
+            if (fast_phase) {
+              set_led(id(status_led), 1.0f, 0.0f, 0.0f, 0.8f);
+              off_led(id(status_led_2));
+            } else {
+              off_led(id(status_led));
+              set_led(id(status_led_2), 1.0f, 0.0f, 0.0f, 0.8f);
+            }
+            return;
+          }
+
+          if (booting) {
+            off_led(id(status_led));
+          } else if (id(net_flash_steps) > 0) {
+            const bool on_phase = (id(net_flash_steps) % 2) == 0;
+            if (on_phase) set_led(id(status_led), 1.0f, 1.0f, 0.0f, 0.8f); // yellow flash
+            else off_led(id(status_led));
+            id(net_flash_steps) -= 1;
+          }
+
+          if (relay_on) {
+            set_led(id(status_led_2), 1.0f, 1.0f, 0.0f, 0.6f);
+          } else {
+            set_led(id(status_led_2), 0.0f, 1.0f, 0.0f, 0.6f);
+          }
+  # Controller state broadcast for CYD
+  - interval: 1s
+    then:
+      - lambda: |-
+          if (id(direct_mode_active)) {
+            #include "esp_direct_includes.h"
+            #include <esp_now.h>
+            if (id(direct_peer_mac).length() != 17 || id(direct_peer_key) == 0) return;
+            uint8_t peer_mac[6];
+            if (sscanf(id(direct_peer_mac).c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
+                       &peer_mac[0], &peer_mac[1], &peer_mac[2], &peer_mac[3], &peer_mac[4], &peer_mac[5]) != 6) return;
+            esp_wifi_set_channel(id(direct_channel), WIFI_SECOND_CHAN_NONE);
+            esp_now_peer_info_t peer = {};
+            memcpy(peer.peer_addr, peer_mac, 6);
+            peer.channel = id(direct_channel);
+            peer.encrypt = false;
+            esp_now_add_peer(&peer);
+
+            // Treat outgoing traffic as proof-of-life to avoid false link faults while waiting for inbound.
+            id(last_cyd_rx_ms) = millis();
+            id(direct_link_ok) = true;
+            uint8_t buf[32];
+            const float level = id(tank_level).state;
+            const float temp = id(tank_temperature).state;
+            uint16_t flags = 0;
+            if (id(leak_sensor).state) flags |= DIRECT_FLAG_LEAK;
+            if (id(fault_active)) flags |= DIRECT_FLAG_FAULT;
+            if (id(paired_to_cyd)) flags |= DIRECT_FLAG_PAIRED;
+            if (id(fill_in_progress)) flags |= DIRECT_FLAG_FILL;
+            if (id(drain_in_progress)) flags |= DIRECT_FLAG_DRAIN;
+            const uint8_t role = id(tank_role) == 1 ? DIRECT_ROLE_FRESH : (id(tank_role) == 2 ? DIRECT_ROLE_WASTE : DIRECT_ROLE_NONE);
+            uint16_t seq = (uint16_t)(id(direct_seq)++);
+            uint8_t lvl = isnan(level) ? 255 : (uint8_t) fmaxf(0.0f, fminf(100.0f, level));
+            int16_t temp_x10 = isnan(temp) ? -32768 : (int16_t) lroundf(temp * 10.0f);
+            const uint8_t fault_code = (id(fault_active) ? (uint8_t) id(fault_code_int) : 0);
+            size_t plen = direct_build_state_fast(buf, seq, role, flags, fault_code,
+                                                  id(tank_valve_relay).state ? 1 : 0, lvl, temp_x10,
+                                                  (uint32_t) id(uptime_sensor).state);
+            uint32_t tag = direct_auth_tag(id(direct_peer_key), buf, plen);
+            enc_u32(&buf[plen], tag);
+            const size_t total = plen + 4;
+            char macbuf[18];
+            snprintf(macbuf, sizeof(macbuf), "%02X:%02X:%02X:%02X:%02X:%02X", peer_mac[0], peer_mac[1], peer_mac[2],
+                     peer_mac[3], peer_mac[4], peer_mac[5]);
+            esp_err_t rc = esp_now_send(peer_mac, buf, total);
+            ESP_LOGI("direct_tx", "STATE_FAST seq=%u role=%u len=%u dst=%s rc=%d", (unsigned) seq, (unsigned) role,
+                     (unsigned) total, macbuf, (int) rc);
+            return;
+          }
+          if (WiFi.status() != WL_CONNECTED) return;
+          // Wi-Fi mode unchanged
+          const uint16_t port = ${cyd_udp_port};
+          const float level = id(tank_level).state;
+          const float temp = id(tank_temperature).state;
+          const bool leak = id(leak_sensor).state;
+          const bool freeze_enabled = id(freeze_protection_enabled);
+          const float freeze_thresh = id(freeze_protection_threshold_c);
+          const bool safety_override_en = id(safety_override);
+          const bool valve_override = id(tank_valve_relay).state;
+          const int16_t signal_dbm = WiFi.RSSI();
+          const uint32_t uptime_s = static_cast<uint32_t>(id(uptime_sensor).state);
+          const std::string ident = id(tankpro_identifier).state;
+          const std::string mac = id(module_mac_address).state;
+          const std::string version = id(firmware_version);
+          std::string fault_desc = id(fault_description).state;
+          for (char &c : fault_desc) {
+            if (c == '\"') c = '\'';
+          }
+          const char *role = "Unassigned";
+          switch (id(tank_role)) {
+            case 1: role = "Fresh"; break;
+            case 2: role = "Waste"; break;
+            default: role = "Unassigned"; break;
+          }
+          const char *status = "ok";
+          if (id(fault_active)) status = "fault";
+          else if (id(fill_in_progress)) status = "fill";
+          else if (id(drain_in_progress)) status = "drain";
+          else if (id(pairing_active)) status = "pairing";
+          const float level_out = isnan(level) ? -1.0f : level;
+          const float temp_out = isnan(temp) ? -300.0f : temp;
+          char payload[768];
+          int written = snprintf(payload, sizeof(payload),
+                                 "{\"type\":\"tank_controller\",\"event\":\"state\",\"id\":\"%s\",\"mac\":\"%s\",\"role\":\"%s\","
+                                 "\"status\":\"%s\",\"level\":%.1f,\"temp_c\":%.2f,\"leak\":%s,\"freeze_enabled\":%s,"
+                                 "\"fill_in_progress\":%s,\"drain_in_progress\":%s,"
+                                 "\"fault_active\":%s,\"fault_code\":%d,\"fault_description\":\"%s\","
+                                 "\"valve_override\":%s,"
+                                 "\"paired\":%s,\"wifi_signal_dbm\":%d,\"uptime_s\":%lu,"
+                                 "\"version\":\"%s\",\"ip\":\"%s\"}",
+                                 ident.c_str(), mac.c_str(), role,
+                                 status, level_out, temp_out,
+                                 leak ? "true" : "false", freeze_enabled ? "true" : "false",
+                                 id(fill_in_progress) ? "true" : "false", id(drain_in_progress) ? "true" : "false",
+                                 id(fault_active) ? "true" : "false", id(fault_code_int), fault_desc.c_str(),
+                                 valve_override ? "true" : "false",
+                                 id(paired_to_cyd) ? "true" : "false", signal_dbm, (unsigned long) uptime_s,
+                                 version.c_str(),
+                                 WiFi.localIP().toString().c_str());
+          if (written < 0) {
+            ESP_LOGW("state", "Failed to format state payload");
+            return;
+          }
+          const size_t send_len = strnlen(payload, sizeof(payload));
+          WiFiUDP udp;
+          if (!udp.begin(0)) return;
+          if (udp.beginPacket(IPAddress(255, 255, 255, 255), port)) {
+            udp.write(reinterpret_cast<const uint8_t *>(payload), send_len);
+            udp.endPacket();
+          }
+          udp.stop();
+
+
+
+button:
+  - platform: restart
+    id: restart_device
+    name: "Restart Device"
+  - platform: template
+    name: "Set Level Empty"
+    icon: "mdi:water-minus"
+    entity_category: config
+    on_press:
+      - globals.set:
+          id: level_empty_volts
+          value: !lambda 'return (float) id(tank_level_voltage).state;'
+      - logger.log:
+          format: "Saved empty calibration: %.3f V"
+          args: ["id(tank_level_voltage).state"]
+  - platform: template
+    name: "Set Level Full"
+    icon: "mdi:water-plus"
+    entity_category: config
+    on_press:
+      - globals.set:
+          id: level_full_volts
+          value: !lambda 'return (float) id(tank_level_voltage).state;'
+      - logger.log:
+          format: "Saved full calibration: %.3f V"
+          args: ["id(tank_level_voltage).state"]
+  - platform: template
+    name: "Reset Configuration"
+    icon: "mdi:backup-restore"
+    entity_category: config
+    on_press:
+      - logger.log: "Resetting configuration to defaults."
+      - globals.set:
+          id: level_empty_volts
+          value: '${default_level_empty_volts}'
+      - globals.set:
+          id: level_full_volts
+          value: '${default_level_full_volts}'
+      - globals.set:
+          id: fill_stop_level
+          value: '${default_fill_stop_level}'
+      - globals.set:
+          id: drain_stop_level
+          value: '${default_drain_stop_level}'
+      - globals.set:
+          id: drain_timeout_ms
+          value: '${default_drain_timeout_ms}'
+      - globals.set:
+          id: freeze_protection_threshold_c
+          value: '${default_freeze_threshold_c}'
+      - globals.set:
+          id: freeze_protection_enabled
+          value: '${default_freeze_protection_enabled}'
+      - globals.set:
+          id: safety_override
+          value: '${default_safety_override}'
+      - globals.set:
+          id: fill_in_progress
+          value: 'false'
+      - globals.set:
+          id: drain_in_progress
+          value: 'false'
+      - globals.set:
+          id: fill_above_stop_seen
+          value: 'false'
+      - globals.set:
+          id: guard_over_stop_counter
+          value: '0'
+      - globals.set:
+          id: fault_active
+          value: 'false'
+      - globals.set:
+          id: fault_code_int
+          value: '0'
+      - switch.turn_off: tank_valve_relay
+      - switch.turn_off: tank_buzzer
+      - light.turn_off: status_led_2
+      - text_sensor.template.publish:
+          id: fault_description
+          state: "None"
+      - text_sensor.template.publish:
+          id: fault_code
+          state: "0"
+  - platform: template
+    name: "Start Pairing"
+    icon: "mdi:link"
+    entity_category: config
+    on_press:
+      - script.execute: enter_pairing_mode
+  - platform: template
+    name: "Fill Tank"
+    icon: "mdi:water-plus"
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(fault_active) || id(safety_override);'
+          then:
+            - logger.log: "Fill request ignored: fault or safety override active."
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(fill_in_progress);'
+                then:
+                  - logger.log: "Fill button pressed while running: stopping fill."
+                  - globals.set:
+                      id: fill_in_progress
+                      value: 'false'
+                  - switch.turn_off: tank_valve_relay
+                else:
+                  - if:
+                      condition:
+                        lambda: 'return !isnan(id(tank_level).state) && id(tank_level).state >= id(fill_stop_level);'
+                      then:
+                        - logger.log: "Fill button pressed: tank already at/above stop level."
+                      else:
+                        - logger.log: "Fill button pressed: starting fill."
+                        - script.execute: fill_tank_script
+  - platform: template
+    name: "Drain Tank"
+    icon: "mdi:water-remove"
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(fault_active) || id(safety_override);'
+          then:
+            - logger.log: "Drain request ignored: fault or safety override active."
+          else:
+            - if:
+                condition:
+                  lambda: 'return id(drain_in_progress);'
+                then:
+                  - logger.log: "Drain button pressed while draining: stopping drain."
+                  - globals.set:
+                      id: drain_in_progress
+                      value: 'false'
+                  - switch.turn_off: tank_valve_relay
+                else:
+                  - logger.log: "Drain button pressed: starting drain."
+                  - script.execute: drain_tank_script
+  - platform: template
+    id: clear_faults_button
+    name: "Clear Faults"
+    icon: "mdi:alert-circle-check"
+    on_press:
+      - if:
+          condition:
+            lambda: 'return id(fault_code_int) == 0;'
+          then:
+            - logger.log: "Clear Faults pressed with no active fault; ignoring."
+          else:
+            - logger.log: "Clearing faults and resetting state."
+            - globals.set:
+                id: fault_active
+                value: 'false'
+            - globals.set:
+                id: fault_code_int
+                value: '0'
+            - globals.set:
+                id: fill_in_progress
+                value: 'false'
+            - globals.set:
+                id: drain_in_progress
+                value: 'false'
+            - switch.turn_off: tank_valve_relay
+            - switch.turn_off: tank_buzzer
+            - text_sensor.template.publish:
+                id: fault_description
+                state: "None"
+            - text_sensor.template.publish:
+                id: fault_code
+                state: "0"
