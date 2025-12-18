@@ -26,7 +26,7 @@ Single-page setup guide for TankPro v0.2.0: controller + CYD + Home Assistant.
 - Minimal HA-only config: `firmware/src/controller/esphome/tankpro_basic.yaml` (no CYD logic).
 
 ## Install: CYD firmware (display)
-- Prebuilt: use release binaries in `releases/v0.2.0/` (`cyd-v0.2.0-bootloader.bin`, `...-partitions.bin`, `...-firmware.bin`) with esptool or PlatformIO upload.
+- Prebuilt: use release binaries in `releases/v0.2.0/` (`cyd-bootloader-0.2.0.bin`, `cyd-partitions-0.2.0.bin`, `cyd-firmware-0.2.0.bin`) with esptool or PlatformIO upload.
 - Build/flash from `firmware/src/display/CYD`: `pio run -e cyd_s3` (or `pio run -t upload -e cyd_s3 --upload-port <port>`).
 - Binaries: `.pio/build/cyd_s3/` (bootloader, partitions, firmware) if you build locally.
 
