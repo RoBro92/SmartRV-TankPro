@@ -6,6 +6,7 @@ Single-page setup guide for TankPro v0.2.0: controller + CYD + Home Assistant.
 - Wi‑Fi mode: controller on your LAN, visible to HA via ESPHome.
 - Direct mode (ESP‑NOW): controller ↔ CYD without an AP; auto-selected when pairing and no Wi‑Fi creds.
 - Standalone with Home Assistant: run controller alone in Wi‑Fi mode (no CYD) and adopt via ESPHome.
+> Note: Direct mode can occasionally drop after power loss; Wi‑Fi pairing is recommended when available. If Direct drops, factory reset and re-pair.
 
 ## Error codes (controller)
 - 1: Leak detected → resolve leak, Clear Faults.
@@ -29,6 +30,7 @@ Single-page setup guide for TankPro v0.2.0: controller + CYD + Home Assistant.
 - Prebuilt: use release binaries in `releases/v0.2.0/` (`cyd-bootloader-0.2.0.bin`, `cyd-partitions-0.2.0.bin`, `cyd-firmware-0.2.0.bin`) with esptool or PlatformIO upload.
 - Build/flash from `firmware/src/display/CYD`: `pio run -e cyd_s3` (or `pio run -t upload -e cyd_s3 --upload-port <port>`).
 - Binaries: `.pio/build/cyd_s3/` (bootloader, partitions, firmware) if you build locally.
+> Why three CYD files? PlatformIO/esptool flashing needs bootloader + partitions + firmware. If you use `pio run -t upload` you only need the firmware.bin; esptool users flash all three.
 
 ## Pairing with CYD (Direct or Wi‑Fi)
 1) Controller: enable pairing (button hold per LED prompt) or power up with no creds + pairing on.
@@ -43,3 +45,4 @@ Single-page setup guide for TankPro v0.2.0: controller + CYD + Home Assistant.
 - Valve stuck: Clear Faults; verify thresholds; power cycle if relay latched.
 - Portal not showing: Direct lock active; factory reset.
 - OTA fails: power via USB-C, retry `esphome run` or ESPHome Dashboard.
+- Direct link drops after reboot: re-pair or use Wi‑Fi mode; check LEDs for lock state.

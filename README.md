@@ -22,6 +22,7 @@ Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers o
 - `firmware/src/controller/` – ESPHome controller firmware (README + changelog).
 - `firmware/src/display/` – CYD firmware (PlatformIO LVGL) with README + changelog.
 - `docs/` – reference guides/assets (see `docs/README.md`).
+- `hardware/media/images/` – product photo, PCB renders, and CYD UI snapshots.
 - `CHANGELOG.md` – project-wide changes.
 
 ## Getting started
@@ -34,6 +35,17 @@ Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers o
 - Getting started guide: `docs/getting-started.md`
 - Roadmap: `docs/roadmap.md`
 - Beta testing: `docs/beta-testing.md`
+
+## Current limitations
+- Direct mode (ESP‑NOW) may not recover cleanly after a controller power-cycle; prefer Wi‑Fi pairing where possible. If Direct link drops, factory reset the controller and re-pair.
+- 0.2.0 focuses on core functionality; UI polish and Direct-link robustness are on the roadmap.
+
+## Troubleshooting (quick)
+- Portal not showing: Direct lock active; factory reset (long-press pairing) to enable Wi‑Fi provisioning.
+- No telemetry: verify LEDs, ensure roles are assigned; re-pair or switch to Wi‑Fi mode.
+- Relay stuck: issue Clear Faults, then Fill/Drain again; power-cycle if still latched.
+- Direct link drops: re-pair or temporarily use Wi‑Fi; note the limitation above.
+- Need help? Open a GitHub Issue (labels: `type:bug`, `type:feature`, `area:controller-fw`, `area:display-fw`).
 
 ## Demo videos
 - (placeholder links for quick demos)
