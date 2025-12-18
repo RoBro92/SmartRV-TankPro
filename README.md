@@ -11,6 +11,7 @@ Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers o
 - On-device safety (fault detection, failsafe valve shutoff on comms loss).
 - Factory reset + direct-mode lock for secure pairing.
 - ESPHome-based controller firmware; LVGL-based CYD firmware.
+- Controller can also run standalone with Home Assistant (ESPHome integration).
 
 ## How it works
 - Controller reads tank sensors, drives relay/buzzer/LEDs, and reports state.
@@ -29,6 +30,7 @@ Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers o
 - Controller firmware: `firmware/src/controller/README.md` (modes, pairing, flashing).
 - CYD firmware: `firmware/src/display/README.md` (UI actions, flashing).
 - Docs index: `docs/README.md`
+- Getting started guide: `docs/getting-started.md`
 - Roadmap: `docs/roadmap.md`
 - Beta testing: `docs/beta-testing.md`
 

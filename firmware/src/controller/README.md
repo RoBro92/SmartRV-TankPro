@@ -3,6 +3,7 @@
 ESPHome-based firmware for the TankPro controller (ESP32-C3). Runs in two user-facing modes:
 - **Wi‑Fi mode:** normal home network operation (provisioned via captive portal/Improv).
 - **Direct mode (ESP‑NOW):** controller ↔ CYD link without an access point (auto-selected when pairing and no Wi‑Fi creds; locked until factory reset).
+- **Standalone with Home Assistant:** you can run the controller alone (Wi‑Fi mode) and add it to Home Assistant via ESPHome; no CYD required.
 
 ## What it does
 - Reads tank level voltage and temperature, detects leak input, and reports faults.
@@ -31,7 +32,7 @@ ESPHome-based firmware for the TankPro controller (ESP32-C3). Runs in two user-f
   - `esphome run esphome/tankpro.yaml`
 - Version reported via `firmware_version` substitution: **v0.2.0**.
 
-Docs/index/roadmap: see `docs/README.md`.
+Docs/index/roadmap: see `docs/README.md` (includes getting-started).
 Images/assets: see `docs/assets/` (icons/diagrams if added later).
 
 ## Changelog

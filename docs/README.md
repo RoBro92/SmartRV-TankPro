@@ -14,3 +14,4 @@ Reference/background retained here:
 Roadmap and beta testing:
 - `docs/roadmap.md`
 - `docs/beta-testing.md`
+- Quick start: `docs/getting-started.md`
