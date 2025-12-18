@@ -13,10 +13,18 @@ LVGL firmware for the Cheap Yellow Display (ESP32-2432S028). Acts as the primary
 - **Control:** Use Fill/Drain buttons per role; Clear Faults to reset alarms; Restart to reboot controller.
 - **View status:** Level %, temperature, leak/fault text, and connection state per role.
 
-- UI snapshots (examples):
-  - Home/status: `../../hardware/media/images/cydhome.JPG`
-  - Assign/Add screen: `../../hardware/media/images/cydhomepair.JPG` and `../../hardware/media/images/cydadd.JPG`
-  - Tank overlay/details: `../../hardware/media/images/cydtankdetails.JPG`
+## UI snapshots
+
+<table>
+  <tr>
+    <td><img src="../../hardware/media/images/cydhome.JPG" alt="CYD home" width="320"/></td>
+    <td><img src="../../hardware/media/images/cydhomepair.JPG" alt="CYD home pairing prompt" width="320"/></td>
+  </tr>
+  <tr>
+    <td><img src="../../hardware/media/images/cydadd.JPG" alt="Assign/Add screen" width="320"/></td>
+    <td><img src="../../hardware/media/images/cydtankdetails.JPG" alt="Tank overlay/details" width="320"/></td>
+  </tr>
+</table>
 
 ## Connection modes
 - Wi‑Fi: CYD and controllers on same network; uses UDP for state/commands.
