@@ -38,12 +38,6 @@ Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers o
 ## Demo videos
 - (placeholder links for quick demos)
 
-## Release checklist (quick)
-- Build controller: `cd firmware/src/controller/esphome && esphome compile tankpro.yaml`
-- Build display: `cd firmware/src/display/CYD && pio run -e cyd`
-- Update changelogs: root + subsystem files.
-- Place prebuilt binaries under `releases/<version>/` (controller factory + CYD bootloader/partitions/firmware).
-- Tag: `git tag -a v0.2.0 -m "SmartRV TankPro v0.2.0"`
 
 ## Licensing
 - Hardware: CERN OHL-W v2 (`LICENSE-HARDWARE`).
