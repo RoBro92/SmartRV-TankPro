@@ -18,8 +18,9 @@ LVGL firmware for the Cheap Yellow Display (ESP32-2432S028). Acts as the primary
 - Direct: CYD uses ESP‑NOW on channel 6 to talk to paired controllers (max two).
 
 ## Build/flash
-- From `firmware/src/display/CYD`: `pio run -e cyd` (or `pio run -t upload -e cyd --upload-port <port>` to flash).
-- Binaries output to `.pio/build/cyd/` (bootloader, partitions, firmware).
+- Option A (prebuilt, v0.2.0): flash the release binaries in `releases/v0.2.0/` (`cyd-v0.2.0-bootloader.bin`, `...-partitions.bin`, `...-firmware.bin`) with esptool/PlatformIO upload.
+- Option B (build): from `firmware/src/display/CYD` run `pio run -e cyd` (or `pio run -t upload -e cyd --upload-port <port>` to flash).
+- Binaries output to `.pio/build/cyd/` (bootloader, partitions, firmware) if you build locally.
 - If needed, hold BOOT and tap RST to enter bootloader before upload.
 - Version shown on UI labels: **v0.2.0**.
 

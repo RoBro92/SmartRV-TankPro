@@ -28,8 +28,9 @@ ESPHome-based firmware for the TankPro controller (ESP32-C3). Runs in two user-f
 - OTA issues: ensure USB-C power is stable; retry `esphome run` or OTA from ESPHome Dashboard.
 
 ## Build/flash
-- Install ESPHome, connect over USB-C, then run from this folder:
-  - `esphome run esphome/tankpro.yaml`
+- Option A (prebuilt, v0.2.0): flash `releases/v0.2.0/controller-v0.2.0-esp32c3-factory.bin` with `esphome run` (`--device <port>`) or `esptool.py` if needed.
+- Option B (build): install ESPHome, connect over USB-C, then run from this folder:
+  - `esphome run esphome/tankpro.yaml --device <port>`
 - Version reported via `firmware_version` substitution: **v0.2.0**.
 
 Docs/index/roadmap: see `docs/README.md` (includes getting-started).
