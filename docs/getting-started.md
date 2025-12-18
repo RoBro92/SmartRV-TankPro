@@ -19,7 +19,7 @@ Single-page setup guide for TankPro v0.2.0: controller + CYD + Home Assistant.
 - Status LED: green (idle), yellow solid (valve on), orange flash (warning), red fast flash (fault), alternating red for reset/fault alert.
 
 ## Install: controller firmware
-- Prebuilt (recommended for most users): flash `releases/v0.2.0/controller-v0.2.0-esp32c3-factory.bin` via ESPHome (`esphome run ... --device <port>`) or esptool.
+- Prebuilt (recommended for most users): flash `releases/v0.2.0/controller-v0.2.0.bin` via ESPHome (`esphome run ... --device <port>`) or esptool.
 - Build yourself: `cd firmware/src/controller/esphome && esphome run tankpro.yaml --device <port>`
 - On first boot with no creds + pairing off: captive portal AP `TankPro-Setup` (`changeme`).
 - Standalone HA: keep in Wi‑Fi mode and add via ESPHome integration in Home Assistant.

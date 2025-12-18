@@ -26,7 +26,7 @@ Open-source tank monitoring/control system for RVs/boats: ESP32-C3 controllers o
 - `CHANGELOG.md` – project-wide changes.
 
 ## Getting started
-- Prebuilt binaries (v0.2.0): controller `releases/v0.2.0/controller-v0.2.0-esp32c3-factory.bin`, CYD `releases/v0.2.0/cyd-v0.2.0-*.bin`.
+- Prebuilt binaries (v0.2.0): controller `releases/v0.2.0/controller-v0.2.0.bin`, CYD `releases/v0.2.0/cyd-v0.2.0-*.bin`.
 - You can also build from source if you prefer (commands below).
 - Hardware: see `hardware/controller/README.md` (parts, wiring, safety).
 - Controller firmware: `firmware/src/controller/README.md` (modes, pairing, flashing).
