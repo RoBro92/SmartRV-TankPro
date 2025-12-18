@@ -17,12 +17,12 @@ LVGL firmware for the Cheap Yellow Display (ESP32-2432S028). Acts as the primary
 
 <table>
   <tr>
-    <td><img src="../../hardware/media/images/cydhome.JPG" alt="CYD home" width="320"/></td>
-    <td><img src="../../hardware/media/images/cydhomepair.JPG" alt="CYD home pairing prompt" width="320"/></td>
+    <td><img src="../../hardware/media/images/cydhome.JPG?raw=1" alt="CYD home" width="320"/></td>
+    <td><img src="../../hardware/media/images/cydhomepair.JPG?raw=1" alt="CYD home pairing prompt" width="320"/></td>
   </tr>
   <tr>
-    <td><img src="../../hardware/media/images/cydadd.JPG" alt="Assign/Add screen" width="320"/></td>
-    <td><img src="../../hardware/media/images/cydtankdetails.JPG" alt="Tank overlay/details" width="320"/></td>
+    <td><img src="../../hardware/media/images/cydadd.JPG?raw=1" alt="Assign/Add screen" width="320"/></td>
+    <td><img src="../../hardware/media/images/cydtankdetails.JPG?raw=1" alt="Tank overlay/details" width="320"/></td>
   </tr>
 </table>
 
